@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>Taxi Addis</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@500;600;700&display=swap');
+    :root{
+      --page:#eff4f1;--ink:#12251f;--muted:#52645e;--panel:#fff;--line:#c9d5cf;
+      --blue:#0878c9;--blue2:#065d9b;--gold:#ffca3a;--red:#ef493f;--green:#1e9b64;
+      --shadow:0 18px 60px rgba(23,53,43,.16);--key:#f3f7f5;
+    }
+    @media(prefers-color-scheme:dark){:root{
+      --page:#101815;--ink:#edf6f1;--muted:#a7b8b1;--panel:#19231f;--line:#34443d;
+      --blue:#2ba6f2;--blue2:#1378b8;--gold:#ffd35c;--red:#ff6c61;--green:#39bf80;
+      --shadow:0 18px 60px rgba(0,0,0,.4);--key:#202d28;
+    }}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--page);color:var(--ink);font-family:"DM Sans",sans-serif}
+    body{min-height:100svh;overflow-x:hidden}
+    button{font:inherit}
+    .shell{min-height:100svh;display:grid;grid-template-columns:minmax(270px,360px) minmax(320px,520px);gap:clamp(22px,5vw,76px);align-items:center;justify-content:center;padding:clamp(18px,3vw,42px)}
+    .intro{max-width:360px}
+    .route-chip{display:inline-flex;align-items:center;gap:9px;color:var(--blue);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:15px}
+    .route-chip:before{content:"";width:28px;height:4px;border-radius:4px;background:linear-gradient(90deg,#20a15f 0 33%,#ffd13f 33% 66%,#e4473e 66%)}
+    h1{font-family:"Archivo Black",sans-serif;font-size:clamp(2.25rem,5vw,4.35rem);line-height:.96;letter-spacing:-.045em;margin:0 0 18px;max-width:430px}
+    .intro>p{font-size:1.05rem;line-height:1.6;color:var(--muted);margin:0 0 26px}
+    .how{display:grid;gap:11px;border-top:1px solid var(--line);padding-top:20px}
+    .how-row{display:flex;align-items:center;gap:12px;font-size:.92rem;color:var(--muted)}
+    .key{min-width:42px;height:34px;display:grid;place-items:center;background:var(--key);border:1px solid var(--line);border-bottom-width:3px;border-radius:9px;color:var(--ink);font-weight:800;font-size:.78rem}
+    .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:21px;font-size:.79rem;font-weight:700;color:var(--muted)}
+    .legend span{display:inline-flex;align-items:center;gap:7px}.dot{width:10px;height:10px;border-radius:50%}.dot.fare{background:var(--gold)}.dot.bean{background:#8b4d23}.dot.road{background:var(--red)}
+    .game-wrap{position:relative;width:min(100%,450px);justify-self:center;background:#202b29;border:clamp(5px,1.2vw,10px) solid #263733;border-radius:28px;box-shadow:var(--shadow);overflow:hidden;touch-action:none;user-select:none}
+    canvas{display:block;width:100%;aspect-ratio:2/3;background:#8cc9e7}
+    .hud{position:absolute;top:0;left:0;right:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;padding:15px 15px 0;color:white;pointer-events:none;text-shadow:0 2px 5px rgba(0,0,0,.45)}
+    .stat{display:flex;flex-direction:column;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;font-weight:800}.stat strong{font-family:"Archivo Black";font-size:1.32rem;letter-spacing:-.04em}.stat.right{text-align:right}.lives{display:flex;gap:3px;padding-top:3px}.heart{color:#ff625a;font-size:1.12rem;filter:drop-shadow(0 1px 1px #5b1818)}.heart.off{color:#d0d6d3;opacity:.4}
+    .location{position:absolute;top:61px;left:50%;transform:translateX(-50%);z-index:2;display:flex;align-items:center;gap:7px;max-width:74%;padding:7px 12px;border-radius:999px;background:rgba(9,29,27,.78);border:1px solid rgba(255,255,255,.35);color:#fff;font-size:.72rem;font-weight:900;letter-spacing:.02em;white-space:nowrap;pointer-events:none;backdrop-filter:blur(5px);box-shadow:0 5px 16px rgba(0,0,0,.18)}
+    .location b{color:#ffd34c}.route-arrow{opacity:.65}
+    .pause{position:absolute;top:105px;right:13px;width:39px;height:39px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(20,35,32,.66);color:#fff;display:grid;place-items:center;cursor:pointer;z-index:3;font-weight:900;backdrop-filter:blur(5px)}
+    .pause:focus-visible,.control:focus-visible,.primary:focus-visible,.secondary:focus-visible{outline:3px solid #fff;outline-offset:2px}
+    .controls{position:absolute;left:0;right:0;bottom:max(10px,env(safe-area-inset-bottom));display:flex;justify-content:space-between;padding:0 15px;pointer-events:none}
+    .control{width:67px;height:58px;border:1px solid rgba(255,255,255,.42);border-bottom-width:4px;border-radius:17px;background:rgba(20,35,32,.72);color:white;font-size:1.7rem;font-weight:900;pointer-events:auto;cursor:pointer;backdrop-filter:blur(5px)}
+    .control:active{transform:translateY(2px);border-bottom-width:2px}
+    .toast{position:absolute;top:110px;left:50%;transform:translateX(-50%) scale(.9);padding:8px 14px;border-radius:999px;background:#fff;color:#16382f;font-weight:900;font-size:.86rem;opacity:0;pointer-events:none;white-space:nowrap;transition:.18s ease;box-shadow:0 7px 25px rgba(0,0,0,.25)}
+    .toast.show{opacity:1;transform:translateX(-50%) scale(1)}
+    .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:28px;background:linear-gradient(180deg,rgba(8,30,30,.25),rgba(6,21,18,.86));z-index:5;text-align:center;color:white}
+    .overlay[hidden]{display:none}
+    .card{width:min(100%,340px);background:rgba(15,37,33,.92);border:1px solid rgba(255,255,255,.22);border-radius:23px;padding:26px 23px;box-shadow:0 20px 50px rgba(0,0,0,.32);backdrop-filter:blur(8px)}
+    .taxi-mark{width:76px;height:76px;margin:0 auto 17px;display:grid;place-items:center;background:var(--blue);border:5px solid white;border-radius:21px;font-size:2.5rem;transform:rotate(-3deg);box-shadow:0 8px 0 #064d80}
+    .card h2{font-family:"Archivo Black";font-size:1.9rem;line-height:1.05;margin:0 0 9px}.card p{color:#d1ded9;line-height:1.45;font-size:.93rem;margin:0 auto 19px;max-width:275px}.destination{display:inline-flex;gap:7px;align-items:center;color:#ffe584;font-weight:800;font-size:.82rem;margin-bottom:18px}
+    .primary,.secondary{width:100%;border:0;border-radius:13px;min-height:50px;font-weight:900;cursor:pointer}.primary{background:var(--gold);color:#2c2505;box-shadow:0 5px 0 #bd8a00}.primary:active{transform:translateY(3px);box-shadow:0 2px 0 #bd8a00}.secondary{margin-top:10px;background:rgba(255,255,255,.1);color:white;border:1px solid rgba(255,255,255,.22)}
+    .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:17px 0}.result{background:rgba(255,255,255,.08);border-radius:12px;padding:10px}.result b{display:block;font-family:"Archivo Black";font-size:1.4rem}.result span{font-size:.69rem;color:#b9cac4;text-transform:uppercase;letter-spacing:.08em}
+    .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:760px){
+      .shell{display:block;padding:0;background:#202b29}.intro{display:none}.game-wrap{width:100%;max-width:500px;min-height:100svh;margin:auto;border:0;border-radius:0;box-shadow:none}.game-wrap canvas{width:100%;height:100svh;aspect-ratio:auto}.pause{top:105px}.control{width:72px;height:61px}
+    }
+    @media(max-height:650px) and (min-width:761px){.shell{padding:12px}.game-wrap{width:375px}.intro>p{margin-bottom:14px}.how{padding-top:14px}}
+    @media(prefers-reduced-motion:reduce){.toast{transition:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="intro" aria-labelledby="game-heading">
+      <div class="route-chip">Addis Ababa • Arcade run</div>
+      <h1 id="game-heading">Beat traffic.<br>Build your fare.</h1>
+      <p>Drive Addis in the city’s classic blue taxi. Pass minibuses and Bajaj, pick up riders, and race from Bole to Piassa.</p>
+      <div class="how" aria-label="How to play">
+        <div class="how-row"><span class="key">← →</span><span>Change lanes with arrow keys or A / D</span></div>
+        <div class="how-row"><span class="key">Tap</span><span>Use the road buttons or swipe left and right</span></div>
+        <div class="how-row"><span class="key">P</span><span>Pause when you need a break</span></div>
+      </div>
+      <div class="legend"><span><i class="dot fare"></i>Rider +150</span><span><i class="dot bean"></i>Coffee +50</span><span><i class="dot road"></i>Avoid hazards</span></div>
+    </section>
+
+    <section class="game-wrap" id="game" aria-label="Taxi driving game">
+      <canvas id="canvas" width="450" height="675" aria-label="Addis Ababa street with a blue taxi, minibuses, Bajaj, landmarks, riders and coffee pickups"></canvas>
+      <div class="hud" aria-hidden="true">
+        <div class="stat"><span>Fare</span><strong id="score">0</strong></div>
+        <div class="lives" id="lives"><span class="heart">♥</span><span class="heart">♥</span><span class="heart">♥</span></div>
+        <div class="stat right"><span>Distance</span><strong><span id="distance">0</span>m</strong></div>
+      </div>
+      <div class="location" id="location" aria-live="polite"><span id="place">Bole</span><span class="route-arrow">→</span><b id="landmark">Bole Airport</b></div>
+      <button class="pause" id="pause" aria-label="Pause game" hidden>Ⅱ</button>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <div class="controls" id="controls" hidden>
+        <button class="control" id="left" aria-label="Move taxi left">←</button>
+        <button class="control" id="right" aria-label="Move taxi right">→</button>
+      </div>
+
+      <div class="overlay" id="startOverlay">
+        <div class="card">
+          <div class="taxi-mark" aria-hidden="true">🚕</div>
+          <h2>The streets are calling.</h2>
+          <p>Share the road with blue minibuses, Bajaj and city taxis as Addis landmarks pass by.</p>
+          <div class="destination">● Route: Bole → Meskel Square → Kazanchis → Sidist Kilo → Piassa</div>
+          <button class="primary" id="start">Start driving</button>
+        </div>
+      </div>
+
+      <div class="overlay" id="pauseOverlay" hidden>
+        <div class="card"><h2>Meter paused</h2><p>Traffic will wait. Take a breath.</p><button class="primary" id="resume">Back to the road</button><button class="secondary" id="restartPause">Restart run</button></div>
+      </div>
+
+      <div class="overlay" id="endOverlay" hidden>
+        <div class="card"><div class="taxi-mark" aria-hidden="true">🏁</div><h2 id="endTitle">Shift complete!</h2><p id="endCopy">Nice driving.</p><div class="result-grid"><div class="result"><b id="finalScore">0</b><span>Birr earned</span></div><div class="result"><b id="finalDistance">0m</b><span>Distance</span></div></div><button class="primary" id="again">Drive again</button></div>
+      </div>
+      <div class="sr-only" id="announcer" aria-live="assertive"></div>
+    </section>
+  </main>
+<script>
+(function(){
+  'use strict';
+  var canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
+  var scoreEl=document.getElementById('score'),distanceEl=document.getElementById('distance'),livesEl=document.getElementById('lives');
+  var startOverlay=document.getElementById('startOverlay'),pauseOverlay=document.getElementById('pauseOverlay'),endOverlay=document.getElementById('endOverlay');
+  var controls=document.getElementById('controls'),pauseBtn=document.getElementById('pause'),toast=document.getElementById('toast'),announcer=document.getElementById('announcer');
+  var placeEl=document.getElementById('place'),landmarkEl=document.getElementById('landmark');
+  var W=450,H=675,roadL=57,roadR=393,lanes=[99,183,267,351];
+  var state='ready',lane=1,targetX=lanes[1],playerX=lanes[1],score=0,distance=0,lives=3,speed=250,last=0,spawnTimer=0,pickTimer=1.7,objects=[],particles=[],roadOffset=0,shake=0,invincible=0,streak=0,dayT=0;
+  var routes=[
+    {place:'Bole',landmark:'Bole Airport',sky:'#90cce5',accent:'#277ca4'},
+    {place:'Meskel Square',landmark:'Meskel Square',sky:'#9ccfe2',accent:'#bc9a59'},
+    {place:'Kazanchis',landmark:'Africa Hall',sky:'#92c3d6',accent:'#3d7d66'},
+    {place:'Sidist Kilo',landmark:'Yekatit 12 Monument',sky:'#a8cad8',accent:'#8e7351'},
+    {place:'Piassa',landmark:'St. George Cathedral',sky:'#a9c9d6',accent:'#b38a4c'}
+  ];
+  var destinationIndex=0,routeIndex=0,audio=null,touchX=null;
+  function resize(){var dpr=Math.min(2,window.devicePixelRatio||1);var r=canvas.getBoundingClientRect();canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0)}
+  window.addEventListener('resize',resize);resize();
+  function tone(freq,dur,type,vol,delay){if(!audio)return;var o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime+(delay||0);o.type=type||'sine';o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(vol||.08,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+dur)}
+  function sound(kind){if(kind==='move')tone(180,.05,'square',.025);if(kind==='hit'){tone(90,.22,'sawtooth',.1);tone(65,.3,'square',.05)}if(kind==='fare'){tone(520,.09,'sine',.09);tone(700,.14,'sine',.08,.08);tone(880,.18,'sine',.07,.17)}if(kind==='coffee'){tone(430,.08,'triangle',.06);tone(620,.12,'triangle',.05,.07)}}
+  function rounded(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
+  function reset(){lane=1;targetX=lanes[1];playerX=targetX;score=0;distance=0;lives=3;speed=250;objects=[];particles=[];roadOffset=0;shake=0;invincible=0;streak=0;destinationIndex=1;routeIndex=-1;spawnTimer=.8;pickTimer=1.9;dayT=0;updateHud()}
+  function startGame(){if(!audio){audio=new(window.AudioContext||window.webkitAudioContext)()}if(audio.state==='suspended')audio.resume();reset();state='playing';startOverlay.hidden=true;pauseOverlay.hidden=true;endOverlay.hidden=true;controls.hidden=false;pauseBtn.hidden=false;last=performance.now();requestAnimationFrame(loop)}
+  function updateHud(){scoreEl.textContent=score.toLocaleString();distanceEl.textContent=Math.floor(distance);var nextRoute=Math.floor(distance/420)%routes.length;if(nextRoute!==routeIndex){routeIndex=nextRoute;placeEl.textContent=routes[routeIndex].place;landmarkEl.textContent=routes[routeIndex].landmark;if(state==='playing'){showToast('Now entering '+routes[routeIndex].place);announcer.textContent='Now entering '+routes[routeIndex].place}}var hs=livesEl.children;for(var i=0;i<hs.length;i++)hs[i].classList.toggle('off',i>=lives)}
+  function move(dir){if(state!=='playing')return;var n=Math.max(0,Math.min(3,lane+dir));if(n!==lane){lane=n;targetX=lanes[lane];sound('move')}}
+  function togglePause(){if(state==='playing'){state='paused';pauseOverlay.hidden=false;pauseBtn.hidden=true;controls.hidden=true}else if(state==='paused'){state='playing';pauseOverlay.hidden=true;pauseBtn.hidden=false;controls.hidden=false;last=performance.now();requestAnimationFrame(loop)}}
+  function showToast(text){toast.textContent=text;toast.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(function(){toast.classList.remove('show')},850)}
+  function spawnObstacle(){var used=[];var count=(speed>390&&Math.random()<.28)?2:1;for(var i=0;i<count;i++){var l;do{l=Math.floor(Math.random()*4)}while(used.indexOf(l)>-1);used.push(l);var roll=Math.random(),kind=roll<.14?'pothole':(roll<.39?'minibus':(roll<.58?'bajaj':(roll<.77?'blueTaxi':'car')));var dims=kind==='pothole'?[48,25]:(kind==='minibus'?[58,96]:(kind==='bajaj'?[47,62]:[50,78]));objects.push({kind:kind,lane:l,x:lanes[l],y:-90,w:dims[0],h:dims[1],color:['#d84b40','#e9bd35','#338d66','#c35c35'][Math.floor(Math.random()*4)],passed:false})}}
+  function spawnPickup(){var l=Math.floor(Math.random()*4);var fare=Math.random()<.62;objects.push({kind:fare?'rider':'coffee',lane:l,x:lanes[l],y:-45,w:fare?37:34,h:fare?49:35,phase:Math.random()*6.28})}
+  function collide(a){var px=playerX-25,py=H-130,pw=50,ph=82;return Math.abs(a.x-playerX)<(a.w/2+21)&&a.y+a.h/2>py&&a.y-a.h/2<py+ph}
+  function burst(x,y,color){for(var i=0;i<13;i++)particles.push({x:x,y:y,vx:(Math.random()-.5)*150,vy:(Math.random()-.7)*180,life:.7,color:color,size:3+Math.random()*4})}
+  function hitObject(o){if(o.kind==='rider'){score+=150+streak*15;streak++;destinationIndex=(destinationIndex+1)%routes.length;sound('fare');burst(o.x,o.y,'#ffcf38');showToast('Fare to '+routes[destinationIndex].place+'  +'+(150+(streak-1)*15));announcer.textContent='Passenger picked up for '+routes[destinationIndex].place+'. Fare earned.';return}
+    if(o.kind==='coffee'){score+=50;speed=Math.max(250,speed-12);sound('coffee');burst(o.x,o.y,'#c98342');showToast('Buna boost  +50');announcer.textContent='Coffee collected.';return}
+    if(invincible<=0){lives--;streak=0;invincible=1.25;shake=13;sound('hit');burst(o.x,o.y,'#ff625a');showToast(lives?'Watch the road!':'Taxi out of service');updateHud();if(lives<=0)setTimeout(endGame,300)}
+  }
+  function endGame(){if(state==='ended')return;state='ended';controls.hidden=true;pauseBtn.hidden=true;endOverlay.hidden=false;document.getElementById('finalScore').textContent=score.toLocaleString();document.getElementById('finalDistance').textContent=Math.floor(distance)+'m';var good=distance>1600;document.getElementById('endTitle').textContent=good?'Addis road legend!':'Shift complete!';document.getElementById('endCopy').textContent=good?'That taxi owned the road. Another fare?':'The next fare is waiting. Ready for another run?'}
+  function update(dt){
+    speed=Math.min(505,250+distance*.07);distance+=speed*dt*.065;dayT+=dt;roadOffset=(roadOffset+speed*dt)%100;invincible=Math.max(0,invincible-dt);playerX+=(targetX-playerX)*Math.min(1,dt*13);spawnTimer-=dt;pickTimer-=dt;
+    if(spawnTimer<=0){spawnObstacle();spawnTimer=Math.max(.52,1.08-(speed-250)/550)+Math.random()*.42}
+    if(pickTimer<=0){spawnPickup();pickTimer=2.1+Math.random()*2.1}
+    for(var i=objects.length-1;i>=0;i--){var o=objects[i];o.y+=speed*dt*(o.kind==='rider'||o.kind==='coffee'?.92:1);if(collide(o)){hitObject(o);objects.splice(i,1);continue}if(o.y>H+100){if(!o.passed&&(o.kind!=='rider'&&o.kind!=='coffee')){score+=10;o.passed=true}objects.splice(i,1)}}
+    for(var p=particles.length-1;p>=0;p--){var q=particles[p];q.life-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=220*dt;if(q.life<=0)particles.splice(p,1)}
+    shake*=Math.pow(.05,dt);updateHud()
+  }
+  function drawBackground(){
+    var r=routes[routeIndex],dusk=Math.min(.24,dayT/210);ctx.fillStyle=r.sky;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(29,70,64,'+(dusk*.55)+')';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#dce9e8';ctx.beginPath();ctx.moveTo(0,127);ctx.lineTo(52,82);ctx.lineTo(105,122);ctx.lineTo(158,68);ctx.lineTo(215,128);ctx.lineTo(275,82);ctx.lineTo(342,132);ctx.lineTo(400,94);ctx.lineTo(450,128);ctx.lineTo(450,208);ctx.lineTo(0,208);ctx.fill();
+    ctx.fillStyle='#708b80';ctx.beginPath();ctx.moveTo(0,157);ctx.lineTo(78,111);ctx.lineTo(145,157);ctx.lineTo(226,103);ctx.lineTo(315,160);ctx.lineTo(388,120);ctx.lineTo(450,155);ctx.lineTo(450,231);ctx.lineTo(0,231);ctx.fill();
+    ctx.fillStyle='#688579';ctx.fillRect(0,170,W,70);drawLandmark(routeIndex,r.accent);
+    ctx.fillStyle='#87a874';ctx.fillRect(0,205,W,H-205);ctx.fillStyle='#e5d09d';ctx.fillRect(35,205,22,H-205);ctx.fillRect(393,205,22,H-205);
+  }
+  function windowRows(x,y,w,h,cols,rows){ctx.fillStyle='#ffe078';for(var yy=0;yy<rows;yy++)for(var xx=0;xx<cols;xx++)ctx.fillRect(x+7+xx*((w-14)/cols),y+7+yy*((h-14)/rows),4,4)}
+  function drawLandmark(i,accent){ctx.save();ctx.fillStyle=accent;
+    if(i===0){ctx.fillRect(35,145,306,54);ctx.fillStyle='#e9eeee';ctx.fillRect(38,150,300,14);ctx.fillStyle='#327f9f';for(var w=0;w<10;w++)ctx.fillRect(48+w*28,169,18,13);ctx.fillStyle='#dfddd3';ctx.fillRect(350,116,20,84);ctx.fillStyle='#416d7b';ctx.beginPath();ctx.moveTo(342,119);ctx.lineTo(378,119);ctx.lineTo(371,103);ctx.lineTo(349,103);ctx.closePath();ctx.fill();ctx.fillStyle='#fff';ctx.font='800 9px DM Sans';ctx.fillText('BOLE',174,160)}
+    else if(i===1){ctx.fillStyle='#c8b07c';for(var s=0;s<6;s++)ctx.fillRect(16+s*8,188-s*10,180-s*16,8);ctx.fillStyle='#596f67';ctx.fillRect(246,140,154,60);windowRows(246,140,154,60,6,3);ctx.fillStyle='#e9db9c';ctx.fillRect(207,118,8,82);ctx.fillStyle='#26804d';ctx.fillRect(204,116,4,44);ctx.fillStyle='#f5d442';ctx.fillRect(208,116,4,44);ctx.fillStyle='#d9443d';ctx.fillRect(212,116,4,44)}
+    else if(i===2){ctx.fillStyle='#557d70';ctx.fillRect(55,125,340,75);ctx.fillStyle='#dce8e3';ctx.fillRect(66,134,317,13);ctx.fillStyle='#2e6659';for(var a=0;a<9;a++)ctx.fillRect(73+a*34,155,20,31);ctx.fillStyle='#e5cb67';ctx.fillRect(194,103,62,22);ctx.fillStyle='#fff';ctx.font='800 9px DM Sans';ctx.textAlign='center';ctx.fillText('AFRICA HALL',225,118)}
+    else if(i===3){ctx.fillStyle='#c9b58f';ctx.fillRect(55,164,340,36);ctx.fillStyle='#efe4cf';ctx.beginPath();ctx.moveTo(215,85);ctx.lineTo(235,85);ctx.lineTo(243,184);ctx.lineTo(207,184);ctx.closePath();ctx.fill();ctx.fillStyle='#a68050';ctx.fillRect(219,101,12,74);ctx.beginPath();ctx.arc(225,82,8,0,6.3);ctx.fill();ctx.fillStyle='#52786d';ctx.fillRect(83,137,89,27);ctx.fillRect(278,139,91,25)}
+    else{ctx.fillStyle='#b39458';ctx.fillRect(100,151,250,49);ctx.fillStyle='#e5d4a5';ctx.beginPath();ctx.arc(225,144,43,Math.PI,0);ctx.fill();ctx.fillRect(184,144,82,50);ctx.fillStyle='#b39458';ctx.beginPath();ctx.arc(225,139,29,Math.PI,0);ctx.fill();for(var t=0;t<2;t++){var tx=t?312:124;ctx.fillStyle='#e5d4a5';ctx.fillRect(tx,124,27,73);ctx.beginPath();ctx.arc(tx+13.5,122,15,Math.PI,0);ctx.fill();ctx.fillStyle='#6d5740';ctx.fillRect(tx+11,96,5,24);ctx.fillRect(tx+5,103,17,4)}ctx.fillStyle='#4d6e65';ctx.fillRect(197,161,15,33);ctx.fillRect(238,161,15,33)}ctx.restore()}
+
+  function drawRoad(){ctx.fillStyle='#343c3e';ctx.fillRect(roadL,188,roadR-roadL,H-188);ctx.fillStyle='#eef4ee';ctx.fillRect(roadL,188,5,H-188);ctx.fillRect(roadR-5,188,5,H-188);ctx.fillStyle='#f4d543';ctx.fillRect(roadL-3,188,3,H-188);ctx.fillRect(roadR,188,3,H-188);
+    ctx.fillStyle='rgba(255,255,255,.64)';for(var l=1;l<4;l++){var x=roadL+l*84;for(var y=185+(roadOffset%92);y<H;y+=92){ctx.fillRect(x-2,y,4,43)}}
+    for(var i=0;i<8;i++){var yy=218+i*72-(roadOffset*.55%72);drawTree(25,yy,1);drawTree(425,yy+31,1)}
+  }
+  function drawTree(x,y,s){ctx.fillStyle='#5f4932';ctx.fillRect(x-3*s,y,6*s,15*s);ctx.fillStyle='#287047';ctx.beginPath();ctx.arc(x,y-7*s,12*s,0,6.3);ctx.fill();ctx.fillStyle='#3d9563';ctx.beginPath();ctx.arc(x-6*s,y-11*s,7*s,0,6.3);ctx.fill()}
+  function drawObject(o){ctx.save();ctx.translate(o.x,o.y);if(o.kind==='pothole'){ctx.fillStyle='#171d1e';ctx.beginPath();ctx.ellipse(0,0,25,12,0,0,6.3);ctx.fill();ctx.fillStyle='#4b5353';ctx.beginPath();ctx.ellipse(-5,-2,10,4,0,0,6.3);ctx.fill()}else if(o.kind==='rider'){var bob=Math.sin(dayT*5+o.phase)*3;ctx.translate(0,bob);ctx.fillStyle='#ffcc3d';ctx.beginPath();ctx.arc(0,-10,17,0,6.3);ctx.fill();ctx.fillStyle='#203a35';ctx.beginPath();ctx.arc(0,-15,6,0,6.3);ctx.fill();ctx.fillRect(-8,-7,16,21);ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-8,1);ctx.lineTo(-16,10);ctx.moveTo(8,1);ctx.lineTo(16,10);ctx.stroke();ctx.fillStyle='#fff';ctx.font='900 10px DM Sans';ctx.textAlign='center';ctx.fillText('RIDE',0,27)}else if(o.kind==='coffee'){ctx.fillStyle='#fff6dc';rounded(-15,-13,27,25,7,'#fff6dc');ctx.strokeStyle='#fff6dc';ctx.lineWidth=4;ctx.beginPath();ctx.arc(13,-2,7,-1.5,1.5);ctx.stroke();ctx.fillStyle='#70411f';ctx.fillRect(-12,-11,21,7);ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=2;for(var s=-7;s<8;s+=7){ctx.beginPath();ctx.moveTo(s,-17);ctx.quadraticCurveTo(s-4,-22,s,-27);ctx.stroke()}}else{drawVehicle(o)}ctx.restore()}
+  function drawVehicle(o){var w=o.w,h=o.h;ctx.fillStyle='rgba(0,0,0,.24)';ctx.beginPath();ctx.ellipse(3,h/2-2,w*.54,9,0,0,6.3);ctx.fill();
+    if(o.kind==='minibus'){rounded(-w/2,-h/2,w,h,9,'#f3f0e6');ctx.fillStyle='#1478b7';ctx.fillRect(-w/2,-2,w,h*.46);ctx.fillStyle='#9fd1df';rounded(-w*.36,-h*.37,w*.72,h*.25,4,'#9fd1df');ctx.fillStyle='#20302e';for(var mw=-20;mw<21;mw+=13)ctx.fillRect(mw,-10,9,15);ctx.fillStyle='#f5dc73';ctx.fillRect(-20,h*.35,10,6);ctx.fillRect(10,h*.35,10,6);ctx.fillStyle='#fff';ctx.font='800 7px DM Sans';ctx.textAlign='center';ctx.fillText('MINIBUS',0,16)}
+    else if(o.kind==='bajaj'){rounded(-w/2+4,-h/2,w-8,h,13,'#157dbb');ctx.fillStyle='#f1ead7';rounded(-w/2+2,-h/2,w-4,28,9,'#f1ead7');ctx.fillStyle='#91cbdc';rounded(-w*.31,-h*.37,w*.62,18,5,'#91cbdc');ctx.fillStyle='#222c2b';ctx.beginPath();ctx.arc(0,h*.4,8,0,6.3);ctx.fill();ctx.fillStyle='#ffdd5b';ctx.fillRect(-11,h*.28,22,5)}
+    else if(o.kind==='blueTaxi'){rounded(-w/2,-h/2,w,h,9,'#1683c4');ctx.fillStyle='#eee9df';rounded(-w*.37,-h*.36,w*.74,27,5,'#eee9df');ctx.fillStyle='#9dccda';rounded(-w*.28,-h*.3,w*.56,16,3,'#9dccda');ctx.fillStyle='#22302e';ctx.fillRect(-w*.4,h*.22,w*.8,5);ctx.fillStyle='#ffdf61';ctx.fillRect(-18,h*.34,9,5);ctx.fillRect(9,h*.34,9,5)}
+    else{rounded(-w/2,-h/2,w,h,10,o.color);ctx.fillStyle='#b8d8df';rounded(-w*.35,-h*.35,w*.7,h*.25,5,'#b8d8df');ctx.fillStyle='#25312f';ctx.fillRect(-w*.4,h*.22,w*.8,5);ctx.fillStyle='#ffe88a';ctx.fillRect(-w*.35,h*.34,8,5);ctx.fillRect(w*.35-8,h*.34,8,5)}}
+  function drawTaxi(){ctx.save();ctx.translate(playerX,H-89);if(invincible>0&&Math.floor(invincible*10)%2===0)ctx.globalAlpha=.35;ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(3,35,31,11,0,0,6.3);ctx.fill();rounded(-28,-43,56,84,10,'#137fc0');ctx.fillStyle='#f1eee4';rounded(-21,-34,42,30,5,'#f1eee4');ctx.fillStyle='#9bd5e4';rounded(-16,-29,32,18,3,'#9bd5e4');ctx.fillStyle='#0f659d';ctx.fillRect(-28,-1,56,19);ctx.fillStyle='#273330';ctx.fillRect(-21,22,42,6);ctx.fillStyle='#ffdc4b';ctx.fillRect(-19,31,10,6);ctx.fillRect(9,31,10,6);ctx.fillStyle='#272f2f';rounded(-13,-49,26,9,3,'#272f2f');ctx.fillStyle='#ffd44d';ctx.font='900 7px DM Sans';ctx.textAlign='center';ctx.fillText('TAXI',0,-42);ctx.restore()}
+  function draw(){ctx.save();if(shake>1)ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);drawBackground();drawRoad();for(var i=0;i<objects.length;i++)drawObject(objects[i]);drawTaxi();for(var p=0;p<particles.length;p++){var q=particles[p];ctx.globalAlpha=Math.max(0,q.life/.7);ctx.fillStyle=q.color;ctx.beginPath();ctx.arc(q.x,q.y,q.size,0,6.3);ctx.fill()}ctx.restore();ctx.globalAlpha=1}
+  function loop(t){if(state!=='playing')return;var dt=Math.min(.035,(t-last)/1000);last=t;update(dt);draw();if(state==='playing')requestAnimationFrame(loop)}
+  document.getElementById('start').addEventListener('click',startGame);document.getElementById('again').addEventListener('click',startGame);document.getElementById('pause').addEventListener('click',togglePause);document.getElementById('resume').addEventListener('click',togglePause);document.getElementById('restartPause').addEventListener('click',startGame);
+  document.getElementById('left').addEventListener('pointerdown',function(e){e.preventDefault();move(-1)});document.getElementById('right').addEventListener('pointerdown',function(e){e.preventDefault();move(1)});
+  window.addEventListener('keydown',function(e){if(['ArrowLeft','a','A'].indexOf(e.key)>-1){e.preventDefault();move(-1)}if(['ArrowRight','d','D'].indexOf(e.key)>-1){e.preventDefault();move(1)}if(e.key==='p'||e.key==='P'||e.key==='Escape')togglePause()});
+  canvas.addEventListener('pointerdown',function(e){touchX=e.clientX});canvas.addEventListener('pointerup',function(e){if(touchX===null)return;var dx=e.clientX-touchX;if(Math.abs(dx)>18)move(dx>0?1:-1);touchX=null});
+  document.addEventListener('visibilitychange',function(){if(document.hidden&&state==='playing')togglePause()});
+  draw();
+})();
+</script>
+</body>
+</html>
