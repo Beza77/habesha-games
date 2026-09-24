@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>Memory Match</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Noto+Sans+Ethiopic:wght@500;600;700&display=swap');
+
+    :root {
+      color-scheme: light dark;
+      --bg: #f4c95d;
+      --bg-deep: #e9ad39;
+      --panel: #fff9e9;
+      --panel-2: #fff2c5;
+      --ink: #2b2017;
+      --muted: #68523d;
+      --green: #176b4a;
+      --green-hi: #218c63;
+      --red: #b63228;
+      --gold: #f2b944;
+      --line: #472d1f;
+      --card-back: #7b261f;
+      --card-face: #fffdf5;
+      --shadow: rgba(74, 42, 20, .25);
+      --focus: #126eab;
+      --success: #277f53;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #251b17;
+        --bg-deep: #17110f;
+        --panel: #352720;
+        --panel-2: #493528;
+        --ink: #fff5dd;
+        --muted: #e5cfae;
+        --green: #4eb487;
+        --green-hi: #69c79b;
+        --red: #e66d5f;
+        --gold: #f3c653;
+        --line: #f1d19a;
+        --card-back: #8f3028;
+        --card-face: #423027;
+        --shadow: rgba(0, 0, 0, .4);
+        --focus: #80c9ff;
+        --success: #66c692;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Baloo 2", "Noto Sans Ethiopic", sans-serif;
+      background:
+        linear-gradient(135deg, transparent 24%, rgba(255,255,255,.11) 25%, rgba(255,255,255,.11) 26%, transparent 27%) 0 0/34px 34px,
+        linear-gradient(45deg, transparent 24%, rgba(97,45,25,.08) 25%, rgba(97,45,25,.08) 26%, transparent 27%) 0 0/34px 34px,
+        linear-gradient(180deg, var(--bg), var(--bg-deep));
+      overscroll-behavior: none;
+    }
+    button { font: inherit; }
+    button:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+
+    .shell {
+      width: min(980px, 100%);
+      margin: 0 auto;
+      padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(22px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+      min-height: 100dvh;
+      display: grid;
+      align-content: start;
+      gap: 13px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      min-height: 50px;
+    }
+    .icon-button, .small-button {
+      border: 2px solid var(--line);
+      color: var(--ink);
+      background: var(--panel);
+      box-shadow: 0 4px 0 var(--line);
+      cursor: pointer;
+      transition: transform .12s, box-shadow .12s;
+    }
+    .icon-button:active, .small-button:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 var(--line);
+    }
+    .icon-button {
+      width: 44px;
+      height: 40px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+    }
+    .icon-button svg { width: 23px; height: 23px; }
+    .sound { justify-self: start; }
+    .restart { justify-self: end; }
+    .score-pill {
+      justify-self: center;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 14px;
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      box-shadow: 0 4px 0 var(--line);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .score-pill b { color: var(--red); font-size: 1.08rem; }
+
+    .game-panel {
+      background: var(--panel);
+      border: 3px solid var(--line);
+      box-shadow: 0 9px 0 var(--line), 0 18px 35px var(--shadow);
+      border-radius: 28px 28px 20px 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .woven-strip {
+      height: 14px;
+      background:
+        linear-gradient(45deg, transparent 36%, var(--gold) 37% 62%, transparent 63%) 0 0/26px 14px,
+        linear-gradient(-45deg, transparent 36%, var(--green) 37% 62%, transparent 63%) 13px 0/26px 14px,
+        var(--red);
+      border-bottom: 2px solid var(--line);
+    }
+
+    .setup {
+      padding: clamp(18px, 4vw, 34px);
+      display: grid;
+      gap: 22px;
+    }
+    .intro {
+      display: grid;
+      grid-template-columns: 1fr 190px;
+      gap: 24px;
+      align-items: center;
+    }
+    .intro h1 {
+      font-family: "Noto Sans Ethiopic", "Baloo 2", sans-serif;
+      margin: 0;
+      font-size: clamp(1.85rem, 5.5vw, 3.3rem);
+      line-height: 1.04;
+      letter-spacing: -.04em;
+    }
+    .intro h1 span { display: block; color: var(--red); }
+    .intro p { margin: 9px 0 0; color: var(--muted); font-size: 1.06rem; line-height: 1.35; max-width: 560px; }
+    .preview-stack { position: relative; height: 142px; }
+    .preview-card {
+      position: absolute;
+      width: 92px;
+      height: 118px;
+      border: 3px solid var(--line);
+      border-radius: 17px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 7px 0 var(--line);
+    }
+    .preview-card:first-child { left: 16px; top: 13px; background: var(--card-back); transform: rotate(-8deg); }
+    .preview-card:last-child { right: 12px; top: 2px; background: var(--card-face); transform: rotate(8deg); }
+    .preview-card svg { width: 66px; height: 66px; }
+    .back-mark { width: 44px; height: 44px; border: 5px double var(--gold); transform: rotate(45deg); position: relative; }
+    .back-mark::after { content: ""; position: absolute; inset: 9px; background: var(--gold); }
+
+    .section-title { margin: 0 0 9px; font-size: 1rem; color: var(--muted); font-weight: 700; }
+    .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+    .category {
+      border: 2px solid var(--line);
+      background: var(--panel-2);
+      color: var(--ink);
+      border-radius: 16px;
+      padding: 13px 11px;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      align-items: center;
+      text-align: left;
+      gap: 10px;
+      min-height: 76px;
+    }
+    .category.selected { background: var(--green); color: #fff; box-shadow: inset 0 0 0 3px var(--gold); }
+    .category svg { width: 45px; height: 45px; }
+    .category strong { display: block; line-height: 1.05; font-size: 1.02rem; }
+    .category small { display: block; margin-top: 4px; opacity: .82; line-height: 1; }
+
+    .mode-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mode {
+      border: 2px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      text-align: left;
+      line-height: 1.2;
+    }
+    .mode.selected { background: var(--red); color: white; }
+    .mode strong { display: block; }
+    .mode span { font-size: .86rem; opacity: .85; }
+
+    .play-button {
+      width: 100%;
+      border: 3px solid var(--line);
+      border-radius: 17px;
+      padding: 14px 18px;
+      color: white;
+      background: var(--green);
+      box-shadow: 0 6px 0 var(--line);
+      font-weight: 700;
+      font-size: 1.22rem;
+      cursor: pointer;
+      transition: transform .12s, box-shadow .12s, background .12s;
+    }
+    .play-button:hover { background: var(--green-hi); }
+    .play-button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--line); }
+
+    .play-area { display: none; padding: clamp(12px, 2.8vw, 24px); }
+    .play-area.active { display: block; }
+    .setup.hidden { display: none; }
+    .status-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 13px; }
+    .round-label { font-weight: 700; line-height: 1.05; }
+    .round-label span { display: block; color: var(--muted); font-size: .86rem; font-weight: 600; margin-top: 3px; }
+    .progress { display: flex; gap: 5px; }
+    .progress i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); background: transparent; }
+    .progress i.done { background: var(--gold); }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: clamp(7px, 1.7vw, 13px);
+      max-width: 720px;
+      margin: 0 auto;
+      perspective: 900px;
+    }
+    .memory-card {
+      appearance: none;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      aspect-ratio: .82;
+      min-width: 0;
+      cursor: pointer;
+      perspective: 700px;
+    }
+    .card-inner {
+      display: block;
+      position: relative;
+      width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transition: transform .42s cubic-bezier(.2,.72,.3,1.15);
+    }
+    .memory-card.flipped .card-inner, .memory-card.matched .card-inner { transform: rotateY(180deg); }
+    .card-side {
+      position: absolute;
+      inset: 0;
+      border: 2.5px solid var(--line);
+      border-radius: clamp(11px, 2.2vw, 18px);
+      backface-visibility: hidden;
+      overflow: hidden;
+      box-shadow: 0 5px 0 var(--line);
+    }
+    .card-back {
+      display: grid;
+      place-items: center;
+      background-color: var(--card-back);
+      background-image:
+        linear-gradient(45deg, transparent 42%, rgba(255,255,255,.1) 43% 57%, transparent 58%),
+        linear-gradient(-45deg, transparent 42%, rgba(242,185,68,.18) 43% 57%, transparent 58%);
+      background-size: 28px 28px;
+    }
+    .card-back .back-mark { width: clamp(26px, 5vw, 45px); height: clamp(26px, 5vw, 45px); border-width: 4px; }
+    .card-front {
+      transform: rotateY(180deg);
+      background: var(--card-face);
+      display: grid;
+      place-items: center;
+      padding: 8px;
+    }
+    .memory-card.matched .card-front { background: color-mix(in srgb, var(--success) 18%, var(--card-face)); }
+    .memory-card.matched { animation: found .42s ease; }
+    .card-front svg { width: min(78%, 84px); height: min(70%, 84px); }
+    .word-card { text-align: center; line-height: 1.05; }
+    .word-card b { font-family: "Noto Sans Ethiopic", sans-serif; display: block; font-size: clamp(1rem, 3.6vw, 1.55rem); }
+    .word-card small { display: block; color: var(--muted); font-size: clamp(.62rem, 1.9vw, .83rem); margin-top: 7px; }
+    @keyframes found { 50% { transform: translateY(-7px) rotate(2deg); } }
+    @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+    .memory-card.wrong { animation: shake .22s 2; }
+
+    .tip { text-align: center; margin: 15px 0 0; color: var(--muted); font-size: .9rem; min-height: 1.2em; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(35, 21, 14, .72);
+    }
+    .overlay.show { display: grid; }
+    .win-box {
+      width: min(430px, 100%);
+      background: var(--panel);
+      color: var(--ink);
+      border: 3px solid var(--line);
+      border-radius: 26px;
+      box-shadow: 0 9px 0 var(--line);
+      padding: 25px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .win-box::before { content: ""; position: absolute; height: 12px; inset: 0 0 auto; background: linear-gradient(90deg,var(--green) 0 33%,var(--gold) 33% 66%,var(--red) 66%); }
+    .win-icon { width: 110px; height: 110px; margin: 2px auto 5px; }
+    .win-box h2 { margin: 0; font-family: "Noto Sans Ethiopic", sans-serif; font-size: 2rem; }
+    .win-box p { margin: 5px 0 17px; color: var(--muted); }
+    .win-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 18px; }
+    .win-stats div { background: var(--panel-2); border-radius: 12px; padding: 9px 5px; }
+    .win-stats b { display: block; font-size: 1.2rem; color: var(--red); }
+    .win-stats span { font-size: .75rem; color: var(--muted); }
+    .win-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .small-button { border-radius: 13px; padding: 10px; font-weight: 700; }
+    .small-button.primary { background: var(--green); color: #fff; }
+
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+    @media (max-width: 640px) {
+      .shell { gap: 9px; }
+      .game-panel { border-radius: 21px 21px 15px 15px; box-shadow: 0 6px 0 var(--line), 0 12px 25px var(--shadow); }
+      .intro { grid-template-columns: 1fr 105px; gap: 8px; }
+      .preview-stack { height: 108px; }
+      .preview-card { width: 65px; height: 85px; border-width: 2px; border-radius: 12px; box-shadow: 0 4px 0 var(--line); }
+      .preview-card:first-child { left: 0; top: 15px; }
+      .preview-card:last-child { right: 1px; }
+      .preview-card svg { width: 48px; height: 48px; }
+      .category-grid { grid-template-columns: 1fr; gap: 8px; }
+      .category { min-height: 64px; padding: 8px 11px; grid-template-columns: 42px 1fr; }
+      .category svg { width: 39px; height: 39px; }
+      .mode-row { gap: 7px; }
+      .mode { padding: 10px; }
+      .mode span { display: none; }
+      .board { gap: 7px; }
+      .card-side { box-shadow: 0 3px 0 var(--line); }
+      .play-area { padding: 10px 9px 15px; }
+      .topbar { min-height: 44px; }
+      .score-pill { padding: 5px 11px; box-shadow: 0 3px 0 var(--line); }
+    }
+    @media (max-width: 360px) {
+      .setup { padding: 15px 12px 18px; }
+      .intro h1 { font-size: 1.72rem; }
+      .intro p { font-size: .9rem; }
+      .board { grid-template-columns: repeat(3, 1fr); }
+      .memory-card { aspect-ratio: .9; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <svg class="icon-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-jebena" viewBox="0 0 100 100"><path d="M23 68c2-24 11-38 28-43 19 7 25 22 23 45-5 12-15 18-28 18-12 0-20-7-23-20Z" fill="#4b2b24" stroke="currentColor" stroke-width="5"/><path d="M45 25c-2-11 2-17 9-19 8 4 10 10 7 20" fill="#733b2d" stroke="currentColor" stroke-width="5"/><path d="M70 38c14-5 21-1 24 9-9-4-15-1-20 7" fill="#733b2d" stroke="currentColor" stroke-width="5"/><path d="M28 60c18 7 32 7 45 0" fill="none" stroke="#f2b944" stroke-width="6"/><circle cx="49" cy="72" r="6" fill="#b63228"/></symbol>
+    <symbol id="i-sini" viewBox="0 0 100 100"><path d="M19 34h58v34c-1 13-12 20-29 20-18 0-28-7-29-20V34Z" fill="#f8f0d5" stroke="currentColor" stroke-width="5"/><path d="M78 43c21-2 21 24-1 24" fill="none" stroke="currentColor" stroke-width="7"/><path d="M26 49h44M29 61h38" stroke="#b63228" stroke-width="5"/><path d="M36 35c0-9 8-9 8-18M54 35c0-9 8-9 8-18" fill="none" stroke="#68523d" stroke-width="4" stroke-linecap="round"/></symbol>
+    <symbol id="i-beans" viewBox="0 0 100 100"><ellipse cx="36" cy="49" rx="20" ry="29" fill="#7a3f27" stroke="currentColor" stroke-width="5" transform="rotate(25 36 49)"/><path d="M28 24c11 16 14 30 8 50" fill="none" stroke="#f2b944" stroke-width="4"/><ellipse cx="67" cy="57" rx="18" ry="27" fill="#4d6f3a" stroke="currentColor" stroke-width="5" transform="rotate(-20 67 57)"/><path d="M75 34c-11 14-15 28-10 47" fill="none" stroke="#f2b944" stroke-width="4"/></symbol>
+    <symbol id="i-incense" viewBox="0 0 100 100"><path d="M31 72h38l9 17H22l9-17Z" fill="#b76b35" stroke="currentColor" stroke-width="5"/><path d="M40 72 36 48h28l-4 24" fill="#783c2c" stroke="currentColor" stroke-width="5"/><circle cx="43" cy="58" r="4" fill="#f2b944"/><circle cx="57" cy="58" r="4" fill="#f2b944"/><path d="M45 43c-13-10 10-13-2-27M58 43c-12-11 10-14 1-31" fill="none" stroke="#7f8d7d" stroke-width="5" stroke-linecap="round"/></symbol>
+    <symbol id="i-rekebot" viewBox="0 0 100 100"><path d="M16 66h68l-5 18H21l-5-18Z" fill="#c98935" stroke="currentColor" stroke-width="5"/><path d="M23 66 31 25h38l8 41" fill="#e2a647" stroke="currentColor" stroke-width="5"/><path d="M33 36h34M29 50h42" stroke="#176b4a" stroke-width="5"/><circle cx="39" cy="59" r="4" fill="#b63228"/><circle cx="61" cy="59" r="4" fill="#b63228"/></symbol>
+    <symbol id="i-kolo" viewBox="0 0 100 100"><path d="M15 43h70c-1 28-12 42-35 42S16 71 15 43Z" fill="#c65931" stroke="currentColor" stroke-width="5"/><path d="M20 43c9-17 52-17 60 0" fill="#e9ad39" stroke="currentColor" stroke-width="5"/><g fill="#7a3f27"><circle cx="34" cy="37" r="5"/><circle cx="51" cy="33" r="5"/><circle cx="66" cy="38" r="5"/><circle cx="48" cy="44" r="5"/></g></symbol>
+    <symbol id="i-injera" viewBox="0 0 100 100"><ellipse cx="50" cy="66" rx="40" ry="20" fill="#be9270" stroke="currentColor" stroke-width="5"/><ellipse cx="50" cy="57" rx="40" ry="20" fill="#d7b28d" stroke="currentColor" stroke-width="5"/><g fill="#91694f"><circle cx="29" cy="53" r="2.5"/><circle cx="42" cy="48" r="2.5"/><circle cx="57" cy="52" r="2.5"/><circle cx="69" cy="47" r="2.5"/><circle cx="36" cy="61" r="2.5"/><circle cx="54" cy="63" r="2.5"/><circle cx="72" cy="59" r="2.5"/></g></symbol>
+    <symbol id="i-sefed" viewBox="0 0 100 100"><ellipse cx="50" cy="56" rx="42" ry="31" fill="#d89f3d" stroke="currentColor" stroke-width="5"/><ellipse cx="50" cy="56" rx="31" ry="22" fill="none" stroke="#176b4a" stroke-width="6"/><ellipse cx="50" cy="56" rx="18" ry="12" fill="none" stroke="#b63228" stroke-width="6"/><path d="M10 56h80M50 25v62M20 37l60 38M80 37 20 75" fill="none" stroke="#4e3322" stroke-width="2" opacity=".55"/></symbol>
+    <symbol id="i-mesob" viewBox="0 0 100 100"><path d="M34 18h32l5 16H29l5-16ZM27 37h46L86 82H14l13-45Z" fill="#d99835" stroke="currentColor" stroke-width="5"/><path d="M25 44h50M22 55h56M19 68h62" stroke="#176b4a" stroke-width="5"/><path d="M35 38 24 80M50 38v44M65 38l11 42" stroke="#b63228" stroke-width="4"/></symbol>
+    <symbol id="i-shiro" viewBox="0 0 100 100"><path d="M19 44h62l-5 32c-2 9-12 13-26 13s-24-4-26-13l-5-32Z" fill="#9b4c28" stroke="currentColor" stroke-width="5"/><ellipse cx="50" cy="44" rx="31" ry="13" fill="#c66a32" stroke="currentColor" stroke-width="5"/><path d="M37 37c0-10 7-10 7-21M54 38c0-10 8-10 8-22" fill="none" stroke="#7b7567" stroke-width="4" stroke-linecap="round"/></symbol>
+    <symbol id="i-berbere" viewBox="0 0 100 100"><path d="M44 18c-7 22-6 48 12 67 9-12 14-25 12-39-2-15-9-23-24-28Z" fill="#c63d2f" stroke="currentColor" stroke-width="5"/><path d="M44 19c9-6 16-5 23 1" fill="none" stroke="#176b4a" stroke-width="7" stroke-linecap="round"/><path d="M36 36c-12 17-13 33-2 47 9-10 13-21 11-32" fill="#e35d36" stroke="currentColor" stroke-width="5"/></symbol>
+    <symbol id="i-kibe" viewBox="0 0 100 100"><path d="M19 42 51 23l31 18-32 20-31-19Z" fill="#ffe16a" stroke="currentColor" stroke-width="5"/><path d="M19 42v28l31 18V61L19 42Zm63-1v29L50 88V61l32-20Z" fill="#e6b63e" stroke="currentColor" stroke-width="5"/><circle cx="53" cy="42" r="5" fill="#fff4ad"/></symbol>
+    <symbol id="i-taxi" viewBox="0 0 100 100"><path d="M14 52 26 31h45l15 21 5 4v20H9V56l5-4Z" fill="#3e9ad3" stroke="currentColor" stroke-width="5"/><path d="m32 35-8 17h51L65 35H32Z" fill="#d5eff8" stroke="currentColor" stroke-width="4"/><path d="M47 35v17" stroke="currentColor" stroke-width="4"/><circle cx="27" cy="78" r="9" fill="#2b2017"/><circle cx="73" cy="78" r="9" fill="#2b2017"/><path d="M13 61h14M73 61h14" stroke="#fff6cf" stroke-width="5"/></symbol>
+    <symbol id="i-minibus" viewBox="0 0 100 100"><path d="M14 24h72v55H14V24Z" fill="#f2eee1" stroke="currentColor" stroke-width="5"/><path d="M14 60h72v19H14z" fill="#3b91c7"/><path d="M23 33h18v19H23zM48 33h16v19H48zM70 33h9v19h-9z" fill="#9ed0e4" stroke="currentColor" stroke-width="3"/><circle cx="29" cy="81" r="8" fill="#2b2017"/><circle cx="73" cy="81" r="8" fill="#2b2017"/></symbol>
+    <symbol id="i-bajaj" viewBox="0 0 100 100"><path d="M32 27h35l13 25v26H28V52l4-25Z" fill="#479fd0" stroke="currentColor" stroke-width="5"/><path d="M38 34h24l8 18H34l4-18Z" fill="#d8f2f5" stroke="currentColor" stroke-width="4"/><path d="M28 53h-9l-8 12h17M80 57h10" fill="none" stroke="currentColor" stroke-width="5"/><circle cx="24" cy="80" r="9" fill="#2b2017"/><circle cx="72" cy="80" r="9" fill="#2b2017"/></symbol>
+    <symbol id="i-meskel" viewBox="0 0 100 100"><path d="M38 17h24l-4 54H42l-4-54Z" fill="#d5a65a" stroke="currentColor" stroke-width="5"/><path d="M31 71h38l10 15H21l10-15Z" fill="#b8743b" stroke="currentColor" stroke-width="5"/><path d="M50 12v25M39 23h22" stroke="#176b4a" stroke-width="6"/><circle cx="50" cy="49" r="5" fill="#b63228"/></symbol>
+    <symbol id="i-lion" viewBox="0 0 100 100"><path d="M25 45c-2-23 16-33 29-22 17-8 29 8 23 24 10 15-1 34-18 31-13 13-34 3-32-14-13-4-14-16-2-19Z" fill="#d39b39" stroke="currentColor" stroke-width="5"/><path d="M34 42c7-13 26-14 34 1l-3 23c-8 12-23 13-31 0V42Z" fill="#edc262" stroke="currentColor" stroke-width="4"/><circle cx="42" cy="50" r="3"/><circle cx="59" cy="50" r="3"/><path d="m47 59 4 3 4-3M51 62v7" fill="none" stroke="currentColor" stroke-width="3"/></symbol>
+    <symbol id="i-train" viewBox="0 0 100 100"><path d="M18 19h64v57H18V19Z" fill="#4d9d65" stroke="currentColor" stroke-width="5"/><path d="M27 29h46v24H27z" fill="#cce9ef" stroke="currentColor" stroke-width="4"/><path d="M22 63h56" stroke="#f2b944" stroke-width="6"/><circle cx="34" cy="77" r="8" fill="#2b2017"/><circle cx="66" cy="77" r="8" fill="#2b2017"/><path d="m32 90 7-13M68 90l-7-13" stroke="currentColor" stroke-width="5"/></symbol>
+  </svg>
+
+  <main class="shell">
+    <div class="topbar">
+      <button class="icon-button sound" id="soundBtn" aria-label="Turn sound off" title="Sound">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path class="sound-wave" d="M16 9c1 1 1 5 0 6M19 6c3 3 3 9 0 12"/></svg>
+      </button>
+      <div class="score-pill" aria-live="polite"><span>Moves</span><b id="moves">0</b><span>Time</span><b id="time">0:00</b></div>
+      <button class="icon-button restart" id="homeBtn" aria-label="Choose another deck" title="Decks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+      </button>
+    </div>
+
+    <section class="game-panel">
+      <div class="woven-strip"></div>
+      <div class="setup" id="setup">
+        <div class="intro">
+          <div>
+            <h1>Remember the card.<span>Find its match.</span></h1>
+            <p>Turn over a picture, then find its Amharic name — or play with matching twins.</p>
+          </div>
+          <div class="preview-stack" aria-hidden="true">
+            <div class="preview-card"><span class="back-mark"></span></div>
+            <div class="preview-card"><svg viewBox="0 0 100 100"><use href="#i-jebena"></use></svg></div>
+          </div>
+        </div>
+
+        <div>
+          <p class="section-title">Choose a deck</p>
+          <div class="category-grid" id="categoryGrid">
+            <button class="category selected" data-deck="buna"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-jebena"></use></svg><span><strong>Buna ceremony</strong><small>የቡና ሥነ ሥርዓት</small></span></button>
+            <button class="category" data-deck="table"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-mesob"></use></svg><span><strong>Habesha table</strong><small>የሀበሻ ማዕድ</small></span></button>
+            <button class="category" data-deck="addis"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-taxi"></use></svg><span><strong>Addis streets</strong><small>አዲስ አበባ</small></span></button>
+          </div>
+        </div>
+
+        <div>
+          <p class="section-title">Choose how pairs work</p>
+          <div class="mode-row" id="modeRow">
+            <button class="mode selected" data-mode="word"><strong>Picture + Amharic</strong><span>Match each object to its name</span></button>
+            <button class="mode" data-mode="twin"><strong>Matching twins</strong><span>Find two identical pictures</span></button>
+          </div>
+        </div>
+
+        <button class="play-button" id="playBtn">Shuffle &amp; play</button>
+      </div>
+
+      <div class="play-area" id="playArea">
+        <div class="status-row">
+          <div class="round-label" id="roundLabel">Buna ceremony<span>Picture + Amharic</span></div>
+          <div class="progress" id="progress" aria-label="Matched pairs"></div>
+        </div>
+        <div class="board" id="board" aria-label="Memory cards"></div>
+        <p class="tip" id="tip" aria-live="polite">Choose a card to begin.</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="overlay" id="winOverlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="win-box">
+      <svg class="win-icon" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-jebena"></use></svg>
+      <h2 id="winTitle">ጎበዝ!</h2>
+      <p>You found every pair.</p>
+      <div class="win-stats"><div><b id="finalMoves">0</b><span>moves</span></div><div><b id="finalTime">0:00</b><span>time</span></div><div><b id="finalScore">0</b><span>score</span></div></div>
+      <div class="win-actions"><button class="small-button" id="changeBtn">Change deck</button><button class="small-button primary" id="againBtn">Play again</button></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var decks = {
+        buna: {
+          title: 'Buna ceremony', am: 'የቡና ሥነ ሥርዓት', winIcon: 'i-jebena',
+          items: [
+            {id:'jebena', icon:'i-jebena', am:'ጀበና', en:'Jebena'},
+            {id:'sini', icon:'i-sini', am:'ሲኒ', en:'Sini'},
+            {id:'beans', icon:'i-beans', am:'ቡና', en:'Buna'},
+            {id:'incense', icon:'i-incense', am:'ዕጣን', en:'Etan'},
+            {id:'rekebot', icon:'i-rekebot', am:'ረከቦት', en:'Rekebot'},
+            {id:'kolo', icon:'i-kolo', am:'ቆሎ', en:'Kolo'}
+          ]
+        },
+        table: {
+          title: 'Habesha table', am: 'የሀበሻ ማዕድ', winIcon: 'i-mesob',
+          items: [
+            {id:'injera', icon:'i-injera', am:'እንጀራ', en:'Injera'},
+            {id:'sefed', icon:'i-sefed', am:'ሰፌድ', en:'Sefed'},
+            {id:'mesob', icon:'i-mesob', am:'መሶብ', en:'Mesob'},
+            {id:'shiro', icon:'i-shiro', am:'ሽሮ', en:'Shiro'},
+            {id:'berbere', icon:'i-berbere', am:'በርበሬ', en:'Berbere'},
+            {id:'kibe', icon:'i-kibe', am:'ቅቤ', en:'Kibe'}
+          ]
+        },
+        addis: {
+          title: 'Addis streets', am: 'አዲስ አበባ', winIcon: 'i-taxi',
+          items: [
+            {id:'taxi', icon:'i-taxi', am:'ሰማያዊ ታክሲ', en:'Blue taxi'},
+            {id:'minibus', icon:'i-minibus', am:'ሚኒባስ', en:'Minibus'},
+            {id:'bajaj', icon:'i-bajaj', am:'ባጃጅ', en:'Bajaj'},
+            {id:'meskel', icon:'i-meskel', am:'መስቀል አደባባይ', en:'Meskel Square'},
+            {id:'lion', icon:'i-lion', am:'የይሁዳ አንበሳ', en:'Lion of Judah'},
+            {id:'train', icon:'i-train', am:'ቀላል ባቡር', en:'Light rail'}
+          ]
+        }
+      };
+
+      var selectedDeck = 'buna';
+      var selectedMode = 'word';
+      var first = null;
+      var second = null;
+      var locked = false;
+      var moves = 0;
+      var matches = 0;
+      var startTime = 0;
+      var timer = null;
+      var elapsed = 0;
+      var soundOn = true;
+      var audioCtx = null;
+
+      var setup = document.getElementById('setup');
+      var playArea = document.getElementById('playArea');
+      var board = document.getElementById('board');
+      var movesEl = document.getElementById('moves');
+      var timeEl = document.getElementById('time');
+      var tip = document.getElementById('tip');
+      var progress = document.getElementById('progress');
+      var overlay = document.getElementById('winOverlay');
+
+      function shuffle(arr) {
+        for (var i = arr.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+        }
+        return arr;
+      }
+
+      function formatTime(seconds) {
+        return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+      }
+
+      function tone(freq, duration, type, delay) {
+        if (!soundOn) return;
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          var osc = audioCtx.createOscillator();
+          var gain = audioCtx.createGain();
+          osc.type = type || 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.0001, audioCtx.currentTime + (delay || 0));
+          gain.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + (delay || 0) + .01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (delay || 0) + duration);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(audioCtx.currentTime + (delay || 0));
+          osc.stop(audioCtx.currentTime + (delay || 0) + duration + .02);
+        } catch (e) {}
+      }
+
+      function flipSound() { tone(330, .08, 'triangle', 0); }
+      function matchSound() { tone(523, .12, 'sine', 0); tone(659, .16, 'sine', .09); }
+      function missSound() { tone(190, .16, 'sawtooth', 0); }
+      function winSound() { [523,659,784,1047].forEach(function(f,i){ tone(f,.22,'sine',i*.11); }); }
+
+      function choose(selector, current) {
+        document.querySelectorAll(selector).forEach(function(btn){ btn.classList.toggle('selected', btn === current); });
+      }
+
+      document.getElementById('categoryGrid').addEventListener('click', function(e) {
+        var btn = e.target.closest('.category');
+        if (!btn) return;
+        selectedDeck = btn.dataset.deck;
+        choose('.category', btn);
+        tone(420,.07,'triangle',0);
+      });
+      document.getElementById('modeRow').addEventListener('click', function(e) {
+        var btn = e.target.closest('.mode');
+        if (!btn) return;
+        selectedMode = btn.dataset.mode;
+        choose('.mode', btn);
+        tone(420,.07,'triangle',0);
+      });
+
+      function createCard(item, kind, index) {
+        var button = document.createElement('button');
+        button.className = 'memory-card';
+        button.dataset.pair = item.id;
+        button.dataset.kind = kind;
+        button.setAttribute('aria-label', 'Hidden card ' + (index + 1));
+        var inner = document.createElement('span'); inner.className = 'card-inner'; inner.setAttribute('aria-hidden', 'true');
+        var back = document.createElement('span'); back.className = 'card-side card-back'; back.innerHTML = '<span class="back-mark"></span>';
+        var front = document.createElement('span'); front.className = 'card-side card-front';
+        if (kind === 'word') {
+          front.innerHTML = '<span class="word-card"><b>' + item.am + '</b><small>' + item.en + '</small></span>';
+        } else {
+          front.innerHTML = '<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#' + item.icon + '"></use></svg><span class="sr-only">' + item.en + '</span>';
+        }
+        inner.appendChild(back); inner.appendChild(front); button.appendChild(inner);
+        button.addEventListener('click', function(){ reveal(button, item); });
+        return button;
+      }
+
+      function startGame() {
+        clearInterval(timer);
+        overlay.classList.remove('show');
+        setup.classList.add('hidden');
+        playArea.classList.add('active');
+        board.innerHTML = '';
+        first = null; second = null; locked = false; moves = 0; matches = 0; elapsed = 0; startTime = Date.now();
+        movesEl.textContent = '0'; timeEl.textContent = '0:00';
+        var deck = decks[selectedDeck];
+        document.getElementById('roundLabel').innerHTML = deck.title + '<span>' + (selectedMode === 'word' ? 'Picture + Amharic' : 'Matching twins') + '</span>';
+        tip.textContent = selectedMode === 'word' ? 'Find the picture that belongs with each Amharic name.' : 'Find two identical pictures.';
+        progress.innerHTML = '';
+        deck.items.forEach(function(){ var dot = document.createElement('i'); progress.appendChild(dot); });
+        var cards = [];
+        deck.items.forEach(function(item){
+          cards.push({item:item, kind:'icon'});
+          cards.push({item:item, kind:selectedMode === 'word' ? 'word' : 'icon'});
+        });
+        shuffle(cards).forEach(function(c, i){ board.appendChild(createCard(c.item, c.kind, i)); });
+        timer = setInterval(function(){ elapsed = Math.floor((Date.now() - startTime)/1000); timeEl.textContent = formatTime(elapsed); }, 1000);
+        tone(440,.08,'triangle',0);
+      }
+
+      function reveal(card, item) {
+        if (locked || card === first || card.classList.contains('matched')) return;
+        card.classList.add('flipped');
+        card.setAttribute('aria-label', item.am + ', ' + item.en);
+        flipSound();
+        if (!first) { first = card; return; }
+        second = card; locked = true; moves++; movesEl.textContent = String(moves);
+        if (first.dataset.pair === second.dataset.pair) {
+          window.setTimeout(function(){
+            first.classList.add('matched'); second.classList.add('matched');
+            first.disabled = true; second.disabled = true;
+            matches++;
+            var dots = progress.querySelectorAll('i'); if (dots[matches-1]) dots[matches-1].classList.add('done');
+            tip.textContent = decks[selectedDeck].items.find(function(x){ return x.id === item.id; }).am + ' — ' + item.en;
+            matchSound();
+            first = null; second = null; locked = false;
+            if (matches === decks[selectedDeck].items.length) finishGame();
+          }, 380);
+        } else {
+          first.classList.add('wrong'); second.classList.add('wrong'); missSound();
+          window.setTimeout(function(){
+            first.classList.remove('flipped','wrong'); second.classList.remove('flipped','wrong');
+            first.setAttribute('aria-label','Hidden card'); second.setAttribute('aria-label','Hidden card');
+            first = null; second = null; locked = false; tip.textContent = 'Not this pair — remember where they are.';
+          }, 850);
+        }
+      }
+
+      function finishGame() {
+        clearInterval(timer);
+        elapsed = Math.floor((Date.now() - startTime)/1000);
+        timeEl.textContent = formatTime(elapsed);
+        var score = Math.max(100, 1800 - moves * 55 - elapsed * 4);
+        document.getElementById('finalMoves').textContent = String(moves);
+        document.getElementById('finalTime').textContent = formatTime(elapsed);
+        document.getElementById('finalScore').textContent = String(score);
+        document.querySelector('.win-icon use').setAttribute('href','#' + decks[selectedDeck].winIcon);
+        window.setTimeout(function(){ overlay.classList.add('show'); document.getElementById('againBtn').focus(); winSound(); }, 450);
+      }
+
+      function goHome() {
+        clearInterval(timer); overlay.classList.remove('show'); playArea.classList.remove('active'); setup.classList.remove('hidden'); movesEl.textContent='0'; timeEl.textContent='0:00';
+      }
+
+      document.getElementById('playBtn').addEventListener('click', startGame);
+      document.getElementById('againBtn').addEventListener('click', startGame);
+      document.getElementById('changeBtn').addEventListener('click', goHome);
+      document.getElementById('homeBtn').addEventListener('click', function(){ if (playArea.classList.contains('active')) goHome(); });
+      document.getElementById('soundBtn').addEventListener('click', function(){
+        soundOn = !soundOn;
+        document.querySelector('.sound-wave').style.display = soundOn ? '' : 'none';
+        this.setAttribute('aria-label', soundOn ? 'Turn sound off' : 'Turn sound on');
+        if (soundOn) tone(520,.09,'sine',0);
+      });
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape' && overlay.classList.contains('show')) goHome();
+      });
+    })();
+  </script>
+</body>
+</html>
