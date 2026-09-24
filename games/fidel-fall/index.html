@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="am" translate="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="google" content="notranslate" />
+  <link rel="icon" href="data:," />
+  <title>Fidel Fall</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans+Ethiopic:wght@500;700;800&display=swap');
+
+    :root {
+      color-scheme: light dark;
+      --ink: #17312f;
+      --muted: #5d706d;
+      --paper: #fffaf0;
+      --panel: #ffffff;
+      --line: #d9e2d8;
+      --sky-1: #d9f3ed;
+      --sky-2: #f9e7af;
+      --ground: #2c6656;
+      --green: #1e7d5a;
+      --green-dark: #125540;
+      --gold: #f1b83a;
+      --gold-dark: #b27012;
+      --red: #d34f3e;
+      --shadow: 0 12px 32px rgba(31, 65, 57, .16);
+      --font-ui: "Baloo 2", system-ui, sans-serif;
+      --font-am: "Noto Sans Ethiopic", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #f7f3e8;
+        --muted: #b9c8c3;
+        --paper: #102421;
+        --panel: #18312d;
+        --line: #36524c;
+        --sky-1: #183f3a;
+        --sky-2: #4d3e20;
+        --ground: #123c31;
+        --green: #62c797;
+        --green-dark: #a5e4c2;
+        --gold: #efbc4e;
+        --gold-dark: #ffd67a;
+        --red: #ff8572;
+        --shadow: 0 16px 38px rgba(0, 0, 0, .35);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; overscroll-behavior: none; }
+    body {
+      min-height: 100dvh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-ui);
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button { font: inherit; }
+
+    .app {
+      height: 100dvh;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      padding: 14px clamp(12px, 3vw, 30px) max(12px, env(safe-area-inset-bottom));
+      gap: 10px;
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) auto auto auto;
+      align-items: center;
+      gap: 10px;
+    }
+    .target-panel {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 8px 12px;
+      box-shadow: 0 4px 16px rgba(31, 65, 57, .08);
+    }
+    .target-copy { min-width: 0; line-height: 1.05; }
+    .target-copy small { display: block; color: var(--muted); font-weight: 700; font-size: 12px; }
+    .target-copy strong { display: block; font-size: 18px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .target-letter {
+      flex: 0 0 auto;
+      width: 52px; height: 52px;
+      border-radius: 15px;
+      display: grid; place-items: center;
+      background: var(--gold);
+      color: #342100;
+      font: 800 32px/1 var(--font-am);
+      box-shadow: inset 0 -4px 0 rgba(119, 70, 0, .18);
+    }
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      min-width: 72px;
+      padding: 8px 12px;
+      text-align: center;
+      line-height: 1;
+    }
+    .stat small { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
+    .stat strong { display: block; font-size: 22px; margin-top: 5px; }
+    .hearts { color: var(--red); letter-spacing: 1px; font-family: sans-serif; }
+
+    .game-shell {
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid var(--ink);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      background:
+        radial-gradient(circle at 15% 15%, rgba(255,255,255,.62) 0 36px, transparent 37px),
+        radial-gradient(circle at 82% 26%, rgba(255,255,255,.46) 0 24px, transparent 25px),
+        linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 82%);
+      touch-action: none;
+      isolation: isolate;
+    }
+    .game-shell::before {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 15%;
+      background: var(--ground);
+      clip-path: polygon(0 32%, 9% 18%, 17% 33%, 28% 10%, 40% 34%, 53% 12%, 66% 29%, 78% 8%, 89% 28%, 100% 12%, 100% 100%, 0 100%);
+      z-index: 0;
+    }
+    .progress-track {
+      position: absolute;
+      top: 10px; left: 12px; right: 12px;
+      height: 7px;
+      background: rgba(255,255,255,.6);
+      border: 1px solid rgba(23,49,47,.15);
+      border-radius: 999px;
+      overflow: hidden;
+      z-index: 3;
+    }
+    .progress-fill { height: 100%; width: 0; background: var(--green); transition: width .25s ease; }
+    .sequence {
+      position: absolute;
+      top: 26px; left: 50%; transform: translateX(-50%);
+      z-index: 3;
+      display: flex; align-items: center; gap: 8px;
+      color: var(--muted);
+      font: 700 15px/1 var(--font-am);
+      background: color-mix(in srgb, var(--panel) 84%, transparent);
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+      white-space: nowrap;
+    }
+    .sequence .now { color: var(--ink); font-size: 22px; }
+    .sequence .later { opacity: .65; }
+
+    .falling {
+      position: absolute;
+      top: 0;
+      width: 58px; height: 58px;
+      border-radius: 17px 17px 20px 20px;
+      display: grid; place-items: center;
+      font: 800 31px/1 var(--font-am);
+      color: #18332d;
+      background: #fffdf4;
+      border: 2px solid rgba(25, 53, 48, .62);
+      box-shadow: 0 6px 0 rgba(23,49,47,.22), 0 10px 18px rgba(28,60,53,.15);
+      z-index: 2;
+      will-change: transform;
+      user-select: none;
+    }
+    .falling.target { background: #ffdc76; border-color: #80570b; }
+    .falling::after {
+      content: "";
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      top: 8px; right: 9px;
+      background: rgba(255,255,255,.75);
+    }
+    .basket {
+      position: absolute;
+      left: 50%; bottom: 8%;
+      width: 100px; height: 54px;
+      transform: translateX(-50%);
+      z-index: 4;
+      will-change: left;
+    }
+    .basket .rim {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 15px;
+      border-radius: 10px;
+      background: #e4a73c;
+      border: 3px solid #5e3a12;
+      box-shadow: inset 0 4px 0 rgba(255,255,255,.28);
+    }
+    .basket .body {
+      position: absolute;
+      top: 10px; left: 8px; right: 8px; bottom: 0;
+      background: repeating-linear-gradient(45deg, #c77c22 0 8px, #efb752 8px 16px);
+      border: 3px solid #5e3a12;
+      border-top: 0;
+      clip-path: polygon(0 0, 100% 0, 86% 100%, 14% 100%);
+    }
+    .hint {
+      position: absolute;
+      left: 50%; bottom: 20%; transform: translateX(-50%);
+      color: color-mix(in srgb, var(--ink) 72%, transparent);
+      background: color-mix(in srgb, var(--panel) 70%, transparent);
+      padding: 6px 11px;
+      border-radius: 999px;
+      font-size: 13px; font-weight: 700;
+      white-space: nowrap;
+      z-index: 1;
+      transition: opacity .35s;
+    }
+    .hint.hidden { opacity: 0; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .move-btn, .icon-btn {
+      min-height: 48px;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: var(--panel);
+      border-radius: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 3px 0 var(--line);
+      touch-action: manipulation;
+    }
+    .move-btn { font-size: 24px; }
+    .icon-btn { width: 50px; font-size: 18px; }
+    .move-btn:active, .icon-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(11, 35, 31, .5);
+      backdrop-filter: blur(4px);
+    }
+    .overlay.hidden { display: none; }
+    .card {
+      width: min(480px, 100%);
+      background: var(--panel);
+      color: var(--ink);
+      border: 2px solid var(--ink);
+      border-radius: 24px;
+      box-shadow: 0 14px 0 rgba(17, 43, 38, .28);
+      padding: clamp(20px, 5vw, 34px);
+      text-align: center;
+    }
+    .letter-cloud {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font: 800 30px/1 var(--font-am);
+      color: var(--green);
+      margin-bottom: 3px;
+    }
+    .letter-cloud span:nth-child(2) { transform: translateY(-14px); color: var(--gold-dark); font-size: 42px; }
+    .letter-cloud span:nth-child(3) { transform: translateY(8px); color: var(--red); }
+    .card h1, .card h2 { margin: 0; font-size: clamp(30px, 7vw, 44px); line-height: 1; }
+    .card p { color: var(--muted); font-size: 17px; line-height: 1.35; margin: 12px auto 18px; max-width: 34ch; }
+    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0; }
+    .mode {
+      border: 2px solid var(--line);
+      border-radius: 15px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 10px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    .mode small { display: block; color: var(--muted); font-weight: 600; }
+    .mode.selected { border-color: var(--green); background: color-mix(in srgb, var(--green) 12%, var(--panel)); }
+    .primary {
+      width: 100%;
+      border: 0;
+      border-radius: 15px;
+      padding: 13px 18px;
+      color: #fff;
+      background: var(--green);
+      box-shadow: 0 5px 0 var(--green-dark);
+      font-size: 19px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .primary:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--green-dark); }
+    .keys { margin-top: 14px; color: var(--muted); font-size: 13px; }
+    .result-score { font-size: 64px; line-height: 1; color: var(--green); font-weight: 800; margin: 12px 0 0; }
+    .result-label { color: var(--muted); font-weight: 700; }
+    .result-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+    .secondary { border: 2px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 15px; font-weight: 800; cursor: pointer; }
+    .toast {
+      position: absolute; top: 78px; left: 50%; transform: translate(-50%, -12px);
+      z-index: 7; padding: 8px 14px; border-radius: 999px;
+      background: var(--ink); color: var(--paper); font-weight: 800;
+      opacity: 0; transition: .2s ease; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .combo-meter {
+      position: absolute; top: 76px; right: 12px; z-index: 6;
+      min-width: 82px; padding: 7px 11px; border-radius: 14px;
+      color: #342100; background: var(--gold); border: 2px solid var(--gold-dark);
+      font-weight: 800; text-align: center; box-shadow: 0 4px 0 rgba(119,70,0,.18);
+      opacity: 0; transform: translateY(-8px); transition: .2s ease; pointer-events: none;
+    }
+    .combo-meter.show { opacity: 1; transform: translateY(0); }
+    .combo-meter strong { font-size: 21px; }
+    .level-banner {
+      position: absolute; inset: 0; z-index: 9; display: grid; place-items: center;
+      pointer-events: none; opacity: 0; transition: opacity .2s ease;
+    }
+    .level-banner.show { opacity: 1; }
+    .level-banner div {
+      padding: 16px 22px; border-radius: 20px; background: var(--ink); color: var(--paper);
+      text-align: center; box-shadow: var(--shadow); font-weight: 800; font-size: 17px;
+    }
+    .level-banner strong { display: block; color: var(--gold); font-size: 32px; line-height: 1; margin-bottom: 5px; }
+    .spark { position: absolute; z-index: 8; width: 9px; height: 9px; border-radius: 2px; pointer-events: none; animation: burst .6s ease-out forwards; }
+    @keyframes burst { to { transform: translate(var(--dx), var(--dy)) rotate(160deg); opacity: 0; } }
+    @keyframes wobble { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+    .wobble { animation: wobble .18s linear 2; }
+
+    @media (min-width: 760px) {
+      .app { padding-top: 20px; padding-bottom: 20px; gap: 14px; }
+      .controls { display: none; }
+      .game-shell { min-height: 500px; }
+      .target-letter { width: 58px; height: 58px; font-size: 36px; }
+      .target-copy strong { font-size: 21px; }
+    }
+    @media (max-width: 520px) {
+      .app { padding-top: 8px; gap: 7px; }
+      .hud { grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; }
+      .hud .stat.score-stat { display: none; }
+      .hud .level-stat { min-width: 54px; }
+      .target-panel { border-radius: 15px; padding: 6px 8px; gap: 8px; }
+      .target-letter { width: 45px; height: 45px; font-size: 28px; border-radius: 12px; }
+      .target-copy strong { font-size: 15px; }
+      .stat { min-width: 68px; padding: 7px 8px; }
+      .game-shell { border-radius: 20px; }
+      .sequence { top: 22px; }
+      .falling { width: 52px; height: 52px; font-size: 28px; border-radius: 15px; }
+      .basket { width: 90px; height: 50px; }
+      .hint { font-size: 12px; bottom: 19%; }
+    }
+    @media (max-height: 600px) {
+      .app { grid-template-rows: auto minmax(0, 1fr); }
+      .controls { display: none; }
+      .target-letter { width: 42px; height: 42px; font-size: 27px; }
+      .target-copy small { display: none; }
+      .target-copy strong { font-size: 15px; }
+      .stat { padding-block: 5px; }
+      .stat strong { font-size: 18px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hud" aria-label="Game status">
+      <div class="target-panel">
+        <div class="target-letter" id="targetLetter">ሀ</div>
+        <div class="target-copy"><small>የምትይዘው · CATCH NEXT</small><strong id="targetName">ሀ — hä</strong></div>
+      </div>
+      <div class="stat level-stat"><small>LEVEL</small><strong id="level">1</strong></div>
+      <div class="stat score-stat"><small>SCORE</small><strong id="score">0</strong></div>
+      <div class="stat"><small>LIVES</small><strong class="hearts" id="lives" aria-label="3 lives">♥♥♥</strong></div>
+    </section>
+
+    <section class="game-shell" id="arena" aria-label="Falling letter game area">
+      <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+      <div class="sequence" id="sequence" aria-label="Letter sequence"></div>
+      <div class="hint" id="hint">Drag the basket or use ◀ ▶</div>
+      <div class="basket" id="basket" aria-label="Letter basket"><div class="rim"></div><div class="body"></div></div>
+      <div class="toast" id="toast" role="status"></div>
+      <div class="combo-meter" id="comboMeter" aria-live="polite"><strong id="comboCount">2×</strong> combo</div>
+      <div class="level-banner" id="levelBanner" aria-live="polite"><div><strong id="levelBannerTitle">Level 2</strong><span id="levelBannerCopy">Faster fall · more decoys</span></div></div>
+
+      <div class="overlay" id="startOverlay">
+        <div class="card">
+          <div class="letter-cloud" aria-hidden="true"><span>ሀ</span><span>ለ</span><span>ሐ</span><span>መ</span></div>
+          <h1>Catch them in order!</h1>
+          <p>Catch each highlighted fidel, hear it aloud, and build a combo. Every level brings a longer sequence, faster falls, and more decoys.</p>
+          <div class="modes" role="group" aria-label="Round length">
+            <button class="mode selected" data-count="18">Adventure<small>18 letters · 3 levels</small></button>
+            <button class="mode" data-count="33">Fidel master<small>All 33 · 4 levels</small></button>
+          </div>
+          <button class="primary" id="startBtn">Start catching</button>
+          <div class="keys">On a keyboard: use ← → or A D</div>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="pauseOverlay">
+        <div class="card">
+          <h2>Paused</h2>
+          <p>Your letters are waiting.</p>
+          <button class="primary" id="resumeBtn">Keep playing</button>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="resultOverlay">
+        <div class="card">
+          <div class="letter-cloud" aria-hidden="true"><span>ጸ</span><span>ፀ</span><span>ፈ</span><span>ፐ</span></div>
+          <h2 id="resultTitle">Great catching!</h2>
+          <div class="result-score" id="finalScore">0</div>
+          <div class="result-label">points</div>
+          <p id="resultCopy">You caught the whole sequence in order.</p>
+          <div class="result-actions">
+            <button class="secondary" id="changeBtn">Change round</button>
+            <button class="primary" id="againBtn">Play again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="controls" aria-label="Move basket controls">
+      <button class="move-btn" id="leftBtn" aria-label="Move left">←</button>
+      <button class="icon-btn" id="pauseBtn" aria-label="Pause game">Ⅱ</button>
+      <button class="move-btn" id="rightBtn" aria-label="Move right">→</button>
+    </nav>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+      var alphabet = [
+        ["ሀ","hä"],["ለ","lä"],["ሐ","ḥä"],["መ","mä"],["ሠ","śä"],["ረ","rä"],["ሰ","sä"],["ሸ","šä"],
+        ["ቀ","qä"],["በ","bä"],["ተ","tä"],["ቸ","čä"],["ኀ","ḫä"],["ነ","nä"],["ኘ","ñä"],["አ","ʾä"],
+        ["ከ","kä"],["ኸ","khä"],["ወ","wä"],["ዐ","ʿä"],["ዘ","zä"],["ዠ","žä"],["የ","yä"],["ደ","dä"],
+        ["ጀ","ǧä"],["ገ","gä"],["ጠ","ṭä"],["ጨ","č̣ä"],["ጰ","p̣ä"],["ጸ","ṣä"],["ፀ","ṣ́ä"],["ፈ","fä"],["ፐ","pä"]
+      ];
+      var arena = document.getElementById("arena");
+      var basket = document.getElementById("basket");
+      var targetLetter = document.getElementById("targetLetter");
+      var targetName = document.getElementById("targetName");
+      var levelEl = document.getElementById("level");
+      var scoreEl = document.getElementById("score");
+      var livesEl = document.getElementById("lives");
+      var progress = document.getElementById("progress");
+      var sequence = document.getElementById("sequence");
+      var hint = document.getElementById("hint");
+      var toast = document.getElementById("toast");
+      var comboMeter = document.getElementById("comboMeter");
+      var comboCount = document.getElementById("comboCount");
+      var levelBanner = document.getElementById("levelBanner");
+      var levelBannerTitle = document.getElementById("levelBannerTitle");
+      var levelBannerCopy = document.getElementById("levelBannerCopy");
+      var startOverlay = document.getElementById("startOverlay");
+      var pauseOverlay = document.getElementById("pauseOverlay");
+      var resultOverlay = document.getElementById("resultOverlay");
+      var state = {
+        running: false, paused: false, count: 18, index: 0, score: 0, lives: 3,
+        level: 1, combo: 0, bestCombo: 0, decoysSinceTarget: 0,
+        basketX: .5, items: [], lastTime: 0, spawnClock: 0, spawnEvery: 1300,
+        targetOnScreen: false, raf: 0, dragging: false, keyDir: 0, startedAt: 0,
+        feedbackUntil: 0
+      };
+      var levelSettings = [
+        { speed: 58, spread: 20, spawn: 1300, targetChance: .66, maxDecoys: 2 },
+        { speed: 74, spread: 25, spawn: 1060, targetChance: .53, maxDecoys: 3 },
+        { speed: 92, spread: 30, spawn: 850, targetChance: .42, maxDecoys: 4 },
+        { speed: 110, spread: 35, spawn: 680, targetChance: .34, maxDecoys: 5 }
+      ];
+      var audioCtx = null;
+      var fidelPlayer = new Audio();
+      var fidelAudioPrimed = false;
+      fidelPlayer.preload = "auto";
+      fidelPlayer.volume = 1;
+
+      function fidelAudioPath(index) {
+        return "assets/fidel-audio/fidel-" + String(index + 1).padStart(2, "0") + ".mp3";
+      }
+
+      function primeFidelAudio() {
+        if (fidelAudioPrimed) return;
+        fidelPlayer.src = fidelAudioPath(0);
+        fidelPlayer.muted = true;
+        var ready = fidelPlayer.play();
+        if (ready && ready.then) {
+          ready.then(function () {
+            fidelPlayer.pause();
+            fidelPlayer.currentTime = 0;
+            fidelPlayer.muted = false;
+            fidelAudioPrimed = true;
+          }).catch(function () { fidelPlayer.muted = false; });
+        }
+      }
+
+      function beep(type) {
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === "suspended") audioCtx.resume();
+          var o = audioCtx.createOscillator();
+          var g = audioCtx.createGain();
+          o.connect(g); g.connect(audioCtx.destination);
+          var now = audioCtx.currentTime;
+          o.type = type === "good" ? "sine" : "square";
+          o.frequency.setValueAtTime(type === "good" ? 520 : 150, now);
+          if (type === "good") o.frequency.exponentialRampToValueAtTime(720, now + .08);
+          g.gain.setValueAtTime(type === "good" ? .035 : .08, now);
+          g.gain.exponentialRampToValueAtTime(.001, now + .12);
+          o.start(now); o.stop(now + .13);
+        } catch (e) {}
+      }
+
+      function speakFidel(index) {
+        try {
+          fidelPlayer.pause();
+          fidelPlayer.muted = false;
+          fidelPlayer.volume = 1;
+          fidelPlayer.src = fidelAudioPath(index);
+          fidelPlayer.currentTime = 0;
+          var playing = fidelPlayer.play();
+          if (playing && playing.catch) playing.catch(function () {});
+        } catch (e) {}
+      }
+
+      function getLevel(index) {
+        if (state.count === 33) return Math.min(4, Math.floor(index / 8) + 1);
+        return Math.min(3, Math.floor(index / 6) + 1);
+      }
+
+      function applyLevel(level, announce) {
+        state.level = level;
+        state.spawnEvery = levelSettings[level - 1].spawn;
+        levelEl.textContent = level;
+        if (announce) {
+          state.score += level * 150;
+          levelBannerTitle.textContent = "Level " + level + " · +" + (level * 150);
+          levelBannerCopy.textContent = level === 2 ? "Faster fall · more decoys" : level === 3 ? "Longer streaks · sharper reflexes" : "Master speed · maximum decoys";
+          levelBanner.classList.add("show");
+          state.feedbackUntil = performance.now() + 1750;
+          setTimeout(function () { levelBanner.classList.remove("show"); }, 1500);
+        }
+      }
+
+      function updateCombo() {
+        comboCount.textContent = state.combo + "×";
+        comboMeter.classList.toggle("show", state.combo >= 2);
+      }
+
+      function resetCombo() {
+        state.combo = 0;
+        updateCombo();
+      }
+
+      function updateHud() {
+        var current = alphabet[Math.min(state.index, state.count - 1)];
+        targetLetter.textContent = current[0];
+        targetName.textContent = current[0] + " — " + current[1];
+        scoreEl.textContent = state.score;
+        livesEl.textContent = "♥".repeat(state.lives) + "♡".repeat(3 - state.lives);
+        livesEl.setAttribute("aria-label", state.lives + " lives");
+        progress.style.width = (state.index / state.count * 100) + "%";
+        var parts = [];
+        for (var i = state.index; i < Math.min(state.index + 3, state.count); i++) {
+          parts.push('<span class="' + (i === state.index ? "now" : "later") + '">' + alphabet[i][0] + '</span>');
+          if (i < Math.min(state.index + 2, state.count - 1)) parts.push('<span aria-hidden="true">›</span>');
+        }
+        sequence.innerHTML = parts.join("");
+      }
+
+      function setBasket(x) {
+        state.basketX = Math.max(.06, Math.min(.94, x));
+        basket.style.left = (state.basketX * 100) + "%";
+      }
+
+      function spawn() {
+        var settings = levelSettings[state.level - 1];
+        var isTarget = !state.targetOnScreen && (Math.random() < settings.targetChance || state.decoysSinceTarget >= settings.maxDecoys);
+        var idx;
+        if (isTarget) {
+          idx = state.index;
+          state.targetOnScreen = true;
+          state.decoysSinceTarget = 0;
+        } else {
+          state.decoysSinceTarget++;
+          var spread = [];
+          for (var d = -3; d <= 4; d++) {
+            var candidate = state.index + d;
+            if (candidate >= 0 && candidate < state.count && candidate !== state.index) spread.push(candidate);
+          }
+          if (!spread.length) spread = [Math.min(alphabet.length - 1, state.index + 1)];
+          idx = spread[Math.floor(Math.random() * spread.length)];
+        }
+        var el = document.createElement("div");
+        el.className = "falling" + (isTarget ? " target" : "");
+        el.textContent = alphabet[idx][0];
+        el.setAttribute("aria-label", "Falling letter " + alphabet[idx][0]);
+        arena.appendChild(el);
+        var width = arena.clientWidth;
+        var size = window.innerWidth <= 520 ? 52 : 58;
+        var x = 10 + Math.random() * Math.max(10, width - size - 20);
+        state.items.push({ el: el, x: x, y: -65, speed: settings.speed + Math.random() * settings.spread, idx: idx, target: isTarget, size: size });
+      }
+
+      function removeItem(item) {
+        var at = state.items.indexOf(item);
+        if (at !== -1) state.items.splice(at, 1);
+        if (item.target) state.targetOnScreen = false;
+        if (item.el.parentNode) item.el.parentNode.removeChild(item.el);
+      }
+
+      function showToast(text, duration) {
+        toast.textContent = text;
+        toast.classList.add("show");
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(function () { toast.classList.remove("show"); }, duration || 900);
+      }
+
+      function spark(x, y) {
+        var colors = ["#f1b83a", "#1e7d5a", "#d34f3e", "#fffdf4"];
+        for (var i = 0; i < 12; i++) {
+          var s = document.createElement("i");
+          s.className = "spark";
+          s.style.left = x + "px"; s.style.top = y + "px";
+          s.style.background = colors[i % colors.length];
+          s.style.setProperty("--dx", ((Math.random() - .5) * 150) + "px");
+          s.style.setProperty("--dy", ((Math.random() - .7) * 130) + "px");
+          arena.appendChild(s);
+          setTimeout((function (node) { return function () { node.remove(); }; })(s), 650);
+        }
+      }
+
+      function loseLife(message) {
+        state.lives--;
+        resetCombo();
+        beep("bad");
+        showToast(message);
+        arena.classList.remove("wobble");
+        void arena.offsetWidth;
+        arena.classList.add("wobble");
+        updateHud();
+        if (state.lives <= 0) endGame(false);
+      }
+
+      function caught(item) {
+        if (item.idx === state.index) {
+          var learned = alphabet[state.index];
+          var oldLevel = state.level;
+          state.combo++;
+          state.bestCombo = Math.max(state.bestCombo, state.combo);
+          var comboBonus = Math.min(200, (state.combo - 1) * 20);
+          var streakBonus = state.combo % 5 === 0 ? 150 : 0;
+          state.score += 100 + comboBonus + streakBonus;
+          updateCombo();
+          spark(item.x + item.size / 2, arena.clientHeight - 75);
+          beep("good");
+          speakFidel(state.index);
+          showToast("✓ " + learned[0] + " — " + learned[1] + (state.combo > 1 ? " · " + state.combo + "× combo +" + (comboBonus + streakBonus) : ""), 1500);
+          state.feedbackUntil = performance.now() + 1250;
+          removeItem(item);
+          state.index++;
+          state.targetOnScreen = false;
+          if (state.index >= state.count) {
+            state.score += 1000;
+            state.running = false;
+            cancelAnimationFrame(state.raf);
+            updateHud();
+            setTimeout(function () { endGame(true); }, 1350);
+            return true;
+          }
+          var nextLevel = getLevel(state.index);
+          if (nextLevel !== oldLevel) {
+            clearItems();
+            state.spawnClock = 450;
+            state.decoysSinceTarget = 0;
+            applyLevel(nextLevel, true);
+            updateHud();
+            return true;
+          }
+          updateHud();
+        } else {
+          var wrong = alphabet[item.idx][0];
+          removeItem(item);
+          loseLife("Not yet — skip " + wrong);
+        }
+        return false;
+      }
+
+      function loop(t) {
+        if (!state.running || state.paused) return;
+        if (t < state.feedbackUntil) {
+          state.lastTime = t;
+          state.raf = requestAnimationFrame(loop);
+          return;
+        }
+        var dt = Math.min(.032, (t - state.lastTime) / 1000 || 0);
+        state.lastTime = t;
+        state.spawnClock += dt * 1000;
+        if (state.keyDir) setBasket(state.basketX + state.keyDir * dt * .75);
+        if (state.spawnClock >= state.spawnEvery) {
+          state.spawnClock = 0;
+          spawn();
+        }
+        var ar = arena.getBoundingClientRect();
+        var br = basket.getBoundingClientRect();
+        var basketTop = br.top - ar.top;
+        var basketLeft = br.left - ar.left;
+        var basketRight = br.right - ar.left;
+        var items = state.items.slice();
+        for (var i = 0; i < items.length; i++) {
+          var item = items[i];
+          item.y += item.speed * dt;
+          item.el.style.transform = "translate(" + item.x + "px," + item.y + "px) rotate(" + Math.sin(item.y / 45) * 5 + "deg)";
+          var bottom = item.y + item.size;
+          var overlaps = item.x + item.size * .72 > basketLeft && item.x + item.size * .28 < basketRight;
+          if (bottom >= basketTop + 3 && item.y < basketTop + 24 && overlaps) {
+            var changedLevel = caught(item);
+            if (!state.running || changedLevel) break;
+          } else if (item.y > ar.height + 10) {
+            var wasTarget = item.target;
+            removeItem(item);
+            if (wasTarget) loseLife("Missed " + alphabet[state.index][0]);
+          }
+        }
+        if (state.running && !state.paused) state.raf = requestAnimationFrame(loop);
+      }
+
+      function clearItems() {
+        state.items.forEach(function (item) { item.el.remove(); });
+        state.items = [];
+        state.targetOnScreen = false;
+      }
+
+      function startGame() {
+        primeFidelAudio();
+        clearItems();
+        state.running = true; state.paused = false; state.index = 0; state.score = 0; state.lives = 3;
+        state.combo = 0; state.bestCombo = 0; state.decoysSinceTarget = 0;
+        state.spawnClock = 700; state.lastTime = performance.now(); state.startedAt = Date.now();
+        state.feedbackUntil = 0;
+        applyLevel(1, false);
+        updateCombo();
+        levelBanner.classList.remove("show");
+        setBasket(.5);
+        updateHud();
+        startOverlay.classList.add("hidden");
+        resultOverlay.classList.add("hidden");
+        pauseOverlay.classList.add("hidden");
+        hint.classList.remove("hidden");
+        setTimeout(function () { hint.classList.add("hidden"); }, 2600);
+        cancelAnimationFrame(state.raf);
+        state.raf = requestAnimationFrame(loop);
+      }
+
+      function endGame(won) {
+        state.running = false;
+        cancelAnimationFrame(state.raf);
+        clearItems();
+        document.getElementById("finalScore").textContent = state.score;
+        document.getElementById("resultTitle").textContent = won ? "Sequence complete!" : "So close!";
+        document.getElementById("resultCopy").textContent = won
+          ? "You cleared " + state.level + " levels and caught " + state.count + " fidels. Best combo: " + state.bestCombo + "×."
+          : "You reached " + state.index + " of " + state.count + " fidels. Best combo: " + state.bestCombo + "× — try again!";
+        resultOverlay.classList.remove("hidden");
+      }
+
+      function togglePause(forceResume) {
+        if (!state.running) return;
+        if (forceResume || state.paused) {
+          state.paused = false;
+          pauseOverlay.classList.add("hidden");
+          state.lastTime = performance.now();
+          state.raf = requestAnimationFrame(loop);
+        } else {
+          state.paused = true;
+          cancelAnimationFrame(state.raf);
+          pauseOverlay.classList.remove("hidden");
+        }
+      }
+
+      document.querySelectorAll(".mode").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".mode").forEach(function (b) { b.classList.remove("selected"); });
+          btn.classList.add("selected");
+          state.count = Number(btn.getAttribute("data-count"));
+        });
+      });
+      document.getElementById("startBtn").addEventListener("click", startGame);
+      document.getElementById("againBtn").addEventListener("click", startGame);
+      document.getElementById("changeBtn").addEventListener("click", function () {
+        resultOverlay.classList.add("hidden"); startOverlay.classList.remove("hidden");
+      });
+      document.getElementById("pauseBtn").addEventListener("click", function () { togglePause(false); });
+      document.getElementById("resumeBtn").addEventListener("click", function () { togglePause(true); });
+
+      function moveBy(delta) { if (state.running && !state.paused) setBasket(state.basketX + delta); }
+      function holdButton(el, dir) {
+        el.addEventListener("pointerdown", function (e) { e.preventDefault(); state.keyDir = dir; moveBy(dir * .08); });
+        el.addEventListener("pointerup", function () { state.keyDir = 0; });
+        el.addEventListener("pointercancel", function () { state.keyDir = 0; });
+        el.addEventListener("pointerleave", function () { state.keyDir = 0; });
+      }
+      holdButton(document.getElementById("leftBtn"), -1);
+      holdButton(document.getElementById("rightBtn"), 1);
+
+      arena.addEventListener("pointerdown", function (e) {
+        if (!state.running || state.paused || e.target.closest("button")) return;
+        state.dragging = true; arena.setPointerCapture(e.pointerId);
+        var r = arena.getBoundingClientRect(); setBasket((e.clientX - r.left) / r.width);
+      });
+      arena.addEventListener("pointermove", function (e) {
+        if (!state.dragging || !state.running || state.paused) return;
+        var r = arena.getBoundingClientRect(); setBasket((e.clientX - r.left) / r.width);
+      });
+      arena.addEventListener("pointerup", function () { state.dragging = false; });
+      arena.addEventListener("pointercancel", function () { state.dragging = false; });
+
+      window.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") { e.preventDefault(); state.keyDir = -1; }
+        if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") { e.preventDefault(); state.keyDir = 1; }
+        if (e.key === " " && state.running) { e.preventDefault(); togglePause(false); }
+      });
+      window.addEventListener("keyup", function (e) {
+        if (["ArrowLeft","ArrowRight","a","A","d","D"].indexOf(e.key) !== -1) state.keyDir = 0;
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden && state.running && !state.paused) togglePause(false);
+      });
+      window.addEventListener("resize", function () {
+        setBasket(state.basketX);
+        var maxX = Math.max(10, arena.clientWidth - 70);
+        state.items.forEach(function (item) { item.x = Math.max(10, Math.min(maxX, item.x)); });
+      });
+      updateHud();
+    })();
+  </script>
+</body>
+</html>
