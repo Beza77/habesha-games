@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#123b4a" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Sans+Ethiopic:wght@500;700;800&display=swap" rel="stylesheet">
+  <title>Simon Says Amharic</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #dceff1;
+      --bg-deep: #bddde1;
+      --ink: #102f36;
+      --muted: #41636a;
+      --panel: #f7fcfb;
+      --panel-2: #e9f5f4;
+      --line: #9cbfc2;
+      --accent: #b33f27;
+      --accent-ink: #fff8ef;
+      --ring: #164e59;
+      --shadow: 0 18px 48px rgba(19, 63, 70, .17);
+      --pad-shadow: inset 0 -8px 0 rgba(0,0,0,.16), 0 8px 20px rgba(15,44,48,.18);
+      --good: #1d7b5d;
+      --bad: #b32638;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #081f26;
+        --bg-deep: #0f3038;
+        --ink: #f1fbfa;
+        --muted: #b5d0d1;
+        --panel: #12343b;
+        --panel-2: #1a4148;
+        --line: #36636a;
+        --accent: #e97855;
+        --accent-ink: #1e110c;
+        --ring: #93d9dc;
+        --shadow: 0 20px 54px rgba(0,0,0,.34);
+        --pad-shadow: inset 0 -8px 0 rgba(0,0,0,.28), 0 8px 20px rgba(0,0,0,.25);
+        --good: #61c79e;
+        --bad: #ff8091;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, transparent 48%, rgba(255,255,255,.11) 48%, rgba(255,255,255,.11) 52%, transparent 52%) 0 0 / 38px 38px,
+        linear-gradient(0deg, transparent 48%, rgba(255,255,255,.11) 48%, rgba(255,255,255,.11) 52%, transparent 52%) 0 0 / 38px 38px,
+        var(--bg);
+      min-height: 100svh;
+    }
+    button, select { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      min-height: 100svh;
+      padding: max(18px, env(safe-area-inset-top)) clamp(14px, 3vw, 34px) max(24px, env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: minmax(300px, 1fr) minmax(260px, 360px);
+      gap: clamp(18px, 4vw, 52px);
+      align-items: center;
+    }
+    .game-column { min-width: 0; }
+    .hud {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      margin: 0 auto 14px;
+      max-width: 670px;
+      gap: 8px;
+    }
+    .stat { display: flex; flex-direction: column; gap: 1px; }
+    .stat:last-child { text-align: right; }
+    .stat-label { color: var(--muted); font-size: .78rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .stat-value { font-size: clamp(1.35rem, 3vw, 2rem); font-weight: 800; line-height: 1; }
+    .lives { display: flex; gap: 6px; justify-content: center; min-width: 82px; }
+    .bean {
+      width: 18px; height: 25px; border-radius: 55% 45% 55% 45%;
+      background: #8b3f24; transform: rotate(22deg); position: relative;
+      box-shadow: 0 2px 0 rgba(0,0,0,.18);
+    }
+    .bean::after { content: ""; position: absolute; left: 8px; top: 3px; width: 2px; height: 19px; background: #d99b72; border-radius: 50%; transform: rotate(8deg); }
+    .bean.lost { opacity: .2; filter: grayscale(1); }
+    .board-wrap {
+      position: relative;
+      width: min(670px, 100%);
+      aspect-ratio: 1;
+      margin: 0 auto;
+      display: grid;
+      place-items: center;
+    }
+    .woven-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, transparent 0 67%, var(--panel) 67.4% 70%, transparent 70.4%),
+        repeating-conic-gradient(from 3deg, #c84730 0 5deg, #f0bd3e 5deg 10deg, #176d71 10deg 15deg, #f3eee0 15deg 20deg);
+      box-shadow: var(--shadow), inset 0 0 0 3px rgba(15,56,62,.35);
+    }
+    .board {
+      position: absolute;
+      inset: 8.5%;
+      border-radius: 50%;
+      background: var(--panel);
+      box-shadow: inset 0 0 0 3px rgba(12,53,59,.16);
+    }
+    .pad {
+      position: absolute;
+      width: 31%;
+      aspect-ratio: 1;
+      border: 0;
+      border-radius: 42% 58% 50% 50%;
+      color: #fff;
+      display: grid;
+      place-content: center;
+      gap: 1px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: var(--pad-shadow);
+      transition: filter .12s ease, transform .12s ease, box-shadow .12s ease;
+      isolation: isolate;
+      overflow: hidden;
+      user-select: none;
+    }
+    .pad::after {
+      content: "";
+      position: absolute; inset: 7%; border-radius: inherit;
+      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.34), transparent 48%);
+      z-index: -1;
+    }
+    .pad:hover:not(:disabled) { filter: brightness(1.08) saturate(1.08); }
+    .pad:active:not(:disabled), .pad.active { transform: scale(.91) !important; filter: brightness(1.42) saturate(.78); box-shadow: inset 0 0 0 5px rgba(255,255,255,.86), 0 0 30px currentColor; }
+    .pad:focus-visible { outline: 4px solid var(--ring); outline-offset: 4px; }
+    .pad:disabled { cursor: default; }
+    .pad .am { font-family: "Noto Sans Ethiopic", sans-serif; font-size: clamp(.88rem, 2.4vw, 1.38rem); font-weight: 800; line-height: 1.1; text-shadow: 0 1px 3px rgba(0,0,0,.45); }
+    .pad .en { font-size: clamp(.62rem, 1.5vw, .82rem); opacity: .9; font-weight: 700; }
+    .p0 { left: 34.5%; top: 5%; background: #c43d31; transform: rotate(45deg); }
+    .p0 > span { transform: rotate(-45deg); }
+    .p1 { right: 8%; top: 24%; background: #dc8b17; transform: rotate(105deg); }
+    .p1 > span { transform: rotate(-105deg); }
+    .p2 { right: 8%; bottom: 24%; background: #24775b; transform: rotate(165deg); }
+    .p2 > span { transform: rotate(-165deg); }
+    .p3 { left: 34.5%; bottom: 5%; background: #246ba5; transform: rotate(225deg); }
+    .p3 > span { transform: rotate(-225deg); }
+    .p4 { left: 8%; bottom: 24%; background: #713f87; transform: rotate(285deg); }
+    .p4 > span { transform: rotate(-285deg); }
+    .p5 { left: 8%; top: 24%; background: #a24d25; transform: rotate(345deg); }
+    .p5 > span { transform: rotate(-345deg); }
+    .pad > span { display: block; pointer-events: none; }
+    .center {
+      position: absolute;
+      width: 28%; aspect-ratio: 1; border-radius: 50%;
+      background: var(--panel);
+      color: var(--ink);
+      border: 3px solid var(--line);
+      display: grid;
+      place-content: center;
+      text-align: center;
+      z-index: 4;
+      box-shadow: 0 8px 25px rgba(0,0,0,.18);
+      padding: 8px;
+    }
+    .center strong { font-family: "Noto Sans Ethiopic", sans-serif; font-size: clamp(1rem, 3vw, 1.55rem); line-height: 1.05; }
+    .center span { color: var(--muted); font-size: clamp(.65rem, 1.5vw, .85rem); margin-top: 4px; }
+    .center.listening { animation: pulse 1s ease-in-out infinite; }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--ring) 16%, transparent), 0 8px 25px rgba(0,0,0,.18); } }
+    .side {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: clamp(20px, 4vw, 34px);
+      box-shadow: var(--shadow);
+      border-radius: 8px 34px 8px 34px;
+    }
+    h1 {
+      font-family: "Noto Sans Ethiopic", sans-serif;
+      font-size: clamp(1.9rem, 4vw, 3.2rem);
+      line-height: 1.08;
+      letter-spacing: -.025em;
+      margin: 0 0 8px;
+      max-width: 10ch;
+    }
+    .lede { margin: 0 0 24px; color: var(--muted); line-height: 1.5; font-size: 1.02rem; }
+    .control { margin: 0 0 18px; }
+    .control label { display: block; font-weight: 700; margin: 0 0 7px; }
+    select {
+      width: 100%;
+      color: var(--ink); background: var(--panel-2);
+      border: 1px solid var(--line); border-radius: 8px;
+      padding: 12px 40px 12px 12px;
+    }
+    .difficulty { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .difficulty button { border: 0; border-right: 1px solid var(--line); padding: 10px 5px; color: var(--ink); background: var(--panel-2); cursor: pointer; font-weight: 700; }
+    .difficulty button:last-child { border-right: 0; }
+    .difficulty button.selected { background: var(--ring); color: var(--panel); }
+    .primary {
+      width: 100%; border: 0; border-radius: 12px 2px 12px 2px;
+      padding: 14px 18px; background: var(--accent); color: var(--accent-ink);
+      font-family: "Noto Sans Ethiopic", sans-serif; font-weight: 800; font-size: 1.12rem;
+      cursor: pointer; box-shadow: 0 5px 0 color-mix(in srgb, var(--accent) 68%, #000);
+    }
+    .primary:active { transform: translateY(4px); box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 68%, #000); }
+    .tiny-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 12px; color: var(--muted); font-size: .9rem; }
+    .sound-toggle { border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); border-radius: 99px; padding: 7px 11px; cursor: pointer; }
+    .how { margin-top: 23px; border-top: 1px solid var(--line); padding-top: 18px; }
+    .how h2 { font-size: 1rem; margin: 0 0 9px; }
+    .how ol { margin: 0; padding-left: 20px; color: var(--muted); line-height: 1.55; }
+    .toast {
+      position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom));
+      transform: translate(-50%, 18px); opacity: 0; pointer-events: none;
+      background: var(--ink); color: var(--panel); padding: 10px 16px; border-radius: 99px;
+      font-weight: 700; transition: .2s ease; z-index: 20; box-shadow: var(--shadow);
+      max-width: calc(100% - 28px); text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .result {
+      position: fixed; inset: 0; background: color-mix(in srgb, var(--bg) 82%, transparent);
+      backdrop-filter: blur(10px); display: none; place-items: center; padding: 20px; z-index: 30;
+    }
+    .result.show { display: grid; }
+    .result-card { width: min(420px, 100%); background: var(--panel); border: 2px solid var(--line); box-shadow: var(--shadow); padding: 30px; text-align: center; border-radius: 10px 40px 10px 40px; }
+    .result-mark { width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 15px; background: #e6b534; color: #352808; font-size: 2.2rem; font-weight: 800; }
+    .result h2 { font-family: "Noto Sans Ethiopic", sans-serif; font-size: 2rem; margin: 0 0 4px; }
+    .result p { color: var(--muted); margin: 0 0 20px; }
+    .result .primary { max-width: 260px; }
+    .shake { animation: shake .32s ease; }
+    @keyframes shake { 25% { transform: translateX(-8px); } 50% { transform: translateX(7px); } 75% { transform: translateX(-4px); } }
+    @media (max-width: 820px) {
+      .app { grid-template-columns: 1fr; align-items: start; max-width: 680px; }
+      .side { order: -1; padding: 18px; }
+      .side h1 { max-width: none; font-size: clamp(1.65rem, 8vw, 2.45rem); }
+      .lede { margin-bottom: 16px; }
+      .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .control { margin-bottom: 12px; }
+      .primary { margin-top: 0; }
+      .how { display: none; }
+      .tiny-controls { margin-top: 12px; }
+      .board-wrap { max-width: 560px; }
+    }
+    @media (max-width: 480px) {
+      .app { padding-left: 10px; padding-right: 10px; gap: 10px; }
+      .side { border-radius: 6px 22px 6px 22px; padding: 15px; }
+      .settings-grid { grid-template-columns: 1fr; }
+      .side h1 { font-size: 1.65rem; margin-bottom: 4px; }
+      .lede { font-size: .9rem; line-height: 1.35; margin-bottom: 11px; }
+      .control label { display: none; }
+      select { padding: 10px; }
+      .difficulty button { padding: 9px 4px; font-size: .9rem; }
+      .primary { padding: 11px; }
+      .tiny-controls { font-size: .78rem; }
+      .hud { margin-bottom: 5px; padding: 0 8px; }
+      .board-wrap { width: 100%; }
+      .pad .am { font-size: clamp(.78rem, 4vw, 1.12rem); }
+      .pad .en { display: none; }
+      .woven-ring { inset: 1.5%; }
+      .board { inset: 10%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="game-column" aria-label="Memory game board">
+      <div class="hud" aria-live="polite">
+        <div class="stat"><span class="stat-label">Round</span><span class="stat-value" id="round">0</span></div>
+        <div class="lives" id="lives" aria-label="3 coffee beans remaining"></div>
+        <div class="stat"><span class="stat-label">Best this visit</span><span class="stat-value" id="best">0</span></div>
+      </div>
+      <div class="board-wrap" id="boardWrap">
+        <div class="woven-ring" aria-hidden="true"></div>
+        <div class="board" aria-hidden="true"></div>
+        <button class="pad p0" data-index="0" aria-label="Red, ቀይ"><span class="am">ቀይ</span><span class="en">red</span></button>
+        <button class="pad p1" data-index="1" aria-label="Yellow, ቢጫ"><span class="am">ቢጫ</span><span class="en">yellow</span></button>
+        <button class="pad p2" data-index="2" aria-label="Green, አረንጓዴ"><span class="am">አረንጓዴ</span><span class="en">green</span></button>
+        <button class="pad p3" data-index="3" aria-label="Blue, ሰማያዊ"><span class="am">ሰማያዊ</span><span class="en">blue</span></button>
+        <button class="pad p4" data-index="4" aria-label="Purple, ሐምራዊ"><span class="am">ሐምራዊ</span><span class="en">purple</span></button>
+        <button class="pad p5" data-index="5" aria-label="Orange, ብርቱካናማ"><span class="am">ብርቱካናማ</span><span class="en">orange</span></button>
+        <div class="center" id="center"><strong id="centerAm">ዝግጁ?</strong><span id="centerEn">Ready?</span></div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <h1>አዳምጥ፤ አስታውስ፤ ድገም።</h1>
+      <p class="lede">Listen, remember, and repeat the growing pattern — while picking up Amharic words.</p>
+      <div class="settings-grid">
+        <div class="control">
+          <label for="category">Word deck</label>
+          <select id="category">
+            <option value="colors">ቀለማት · Colors</option>
+            <option value="numbers">ቁጥሮች · Numbers</option>
+            <option value="animals">እንስሳት · Animals</option>
+            <option value="home">ቤት ውስጥ · At home</option>
+          </select>
+        </div>
+        <div class="control">
+          <label>Difficulty</label>
+          <div class="difficulty" role="group" aria-label="Difficulty">
+            <button type="button" data-level="easy">Easy</button>
+            <button type="button" data-level="normal" class="selected">Normal</button>
+            <button type="button" data-level="fast">Fast</button>
+          </div>
+        </div>
+      </div>
+      <button class="primary" id="start" type="button">ጀምር · Start</button>
+      <div class="tiny-controls">
+        <span>3 mistakes = game over</span>
+        <button class="sound-toggle" id="sound" type="button" aria-pressed="true">Sound on</button>
+      </div>
+      <div class="how">
+        <h2>How to play</h2>
+        <ol>
+          <li>Watch and listen to the pattern.</li>
+          <li>Tap the words back in the same order.</li>
+          <li>Each round adds one more word.</li>
+        </ol>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+  <div class="result" id="result" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="result-card">
+      <div class="result-mark" aria-hidden="true">★</div>
+      <h2 id="resultTitle">በጣም ጥሩ!</h2>
+      <p id="resultText">You remembered 0 rounds.</p>
+      <button class="primary" id="again" type="button">እንደገና · Play again</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var decks = {
+        colors: [
+          ["ቀይ", "red"], ["ቢጫ", "yellow"], ["አረንጓዴ", "green"],
+          ["ሰማያዊ", "blue"], ["ሐምራዊ", "purple"], ["ብርቱካናማ", "orange"]
+        ],
+        numbers: [
+          ["አንድ", "one"], ["ሁለት", "two"], ["ሶስት", "three"],
+          ["አራት", "four"], ["አምስት", "five"], ["ስድስት", "six"]
+        ],
+        animals: [
+          ["አንበሳ", "lion"], ["ዝሆን", "elephant"], ["ጦጣ", "monkey"],
+          ["ወፍ", "bird"], ["ፈረስ", "horse"], ["ግመል", "camel"]
+        ],
+        home: [
+          ["በር", "door"], ["ወንበር", "chair"], ["ጠረጴዛ", "table"],
+          ["መስኮት", "window"], ["አልጋ", "bed"], ["ቤት", "home"]
+        ]
+      };
+      var pads = Array.prototype.slice.call(document.querySelectorAll(".pad"));
+      var category = document.getElementById("category");
+      var roundEl = document.getElementById("round");
+      var bestEl = document.getElementById("best");
+      var livesEl = document.getElementById("lives");
+      var center = document.getElementById("center");
+      var centerAm = document.getElementById("centerAm");
+      var centerEn = document.getElementById("centerEn");
+      var start = document.getElementById("start");
+      var soundBtn = document.getElementById("sound");
+      var toast = document.getElementById("toast");
+      var result = document.getElementById("result");
+      var resultText = document.getElementById("resultText");
+      var again = document.getElementById("again");
+      var boardWrap = document.getElementById("boardWrap");
+      var sequence = [];
+      var inputAt = 0;
+      var lives = 3;
+      var best = 0;
+      var playing = false;
+      var accepting = false;
+      var soundOn = true;
+      var level = "normal";
+      var timers = [];
+      var audioCtx = null;
+      var speeds = { easy: 680, normal: 500, fast: 340 };
+      var tones = [261.63, 293.66, 329.63, 392, 440, 523.25];
+
+      function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+      function later(fn, ms) { var id = setTimeout(fn, ms); timers.push(id); return id; }
+      function renderLives() {
+        livesEl.innerHTML = "";
+        for (var i = 0; i < 3; i++) {
+          var b = document.createElement("span");
+          b.className = "bean" + (i >= lives ? " lost" : "");
+          livesEl.appendChild(b);
+        }
+        livesEl.setAttribute("aria-label", lives + " coffee beans remaining");
+      }
+      function setCenter(am, en, listening) {
+        centerAm.textContent = am;
+        centerEn.textContent = en;
+        center.classList.toggle("listening", !!listening);
+      }
+      function updateDeck() {
+        var deck = decks[category.value];
+        pads.forEach(function (pad, i) {
+          pad.querySelector(".am").textContent = deck[i][0];
+          pad.querySelector(".en").textContent = deck[i][1];
+          pad.setAttribute("aria-label", deck[i][1] + ", " + deck[i][0]);
+        });
+      }
+      function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+      }
+      function tone(index, duration) {
+        if (!soundOn) return;
+        initAudio();
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = tones[index];
+        gain.gain.setValueAtTime(.0001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(.18, audioCtx.currentTime + .025);
+        gain.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime + duration / 1000);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration / 1000 + .03);
+      }
+      function speak(index) {
+        if (!soundOn || !("speechSynthesis" in window)) return;
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(decks[category.value][index][0]);
+        u.lang = "am-ET";
+        u.rate = .78;
+        u.volume = .85;
+        window.speechSynthesis.speak(u);
+      }
+      function light(index, withSpeech) {
+        pads[index].classList.add("active");
+        tone(index, 290);
+        if (withSpeech) speak(index);
+        if (navigator.vibrate) navigator.vibrate(18);
+        later(function () { pads[index].classList.remove("active"); }, 300);
+      }
+      function lockPads(lock) { pads.forEach(function (p) { p.disabled = lock; }); }
+      function flashSequence() {
+        accepting = false;
+        lockPads(true);
+        setCenter("ተመልከት", "Watch", true);
+        var speed = speeds[level];
+        sequence.forEach(function (item, i) {
+          later(function () { light(item, true); }, 450 + i * speed);
+        });
+        later(function () {
+          inputAt = 0;
+          accepting = true;
+          lockPads(false);
+          setCenter("ያንተ ተራ", "Your turn", false);
+        }, 500 + sequence.length * speed);
+      }
+      function nextRound() {
+        if (!playing) return;
+        sequence.push(Math.floor(Math.random() * 6));
+        roundEl.textContent = sequence.length;
+        best = Math.max(best, sequence.length - 1);
+        bestEl.textContent = best;
+        flashSequence();
+      }
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add("show");
+        later(function () { toast.classList.remove("show"); }, 1200);
+      }
+      function startGame() {
+        clearTimers();
+        result.classList.remove("show");
+        initAudio();
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+        sequence = [];
+        inputAt = 0;
+        lives = 3;
+        playing = true;
+        accepting = false;
+        start.textContent = "እንደገና · Restart";
+        roundEl.textContent = "0";
+        renderLives();
+        updateDeck();
+        showToast("Listen closely — በደንብ አዳምጥ");
+        later(nextRound, 700);
+      }
+      function gameOver() {
+        playing = false;
+        accepting = false;
+        lockPads(true);
+        setCenter("ጨዋታው አለቀ", "Game over", false);
+        best = Math.max(best, Math.max(0, sequence.length - 1));
+        bestEl.textContent = best;
+        resultText.textContent = "You completed " + Math.max(0, sequence.length - 1) + " round" + (sequence.length === 2 ? "" : "s") + " and learned from the " + category.options[category.selectedIndex].text.split("·")[1].trim().toLowerCase() + " deck.";
+        later(function () { result.classList.add("show"); again.focus(); }, 450);
+      }
+      function wrong() {
+        lives--;
+        renderLives();
+        boardWrap.classList.remove("shake");
+        void boardWrap.offsetWidth;
+        boardWrap.classList.add("shake");
+        tone(0, 500);
+        accepting = false;
+        lockPads(true);
+        if (lives <= 0) {
+          gameOver();
+        } else {
+          setCenter("እንደገና", "Try that round again", false);
+          showToast("Not quite — watch the same pattern again");
+          later(flashSequence, 900);
+        }
+      }
+      function choose(index) {
+        if (!playing || !accepting) return;
+        light(index, true);
+        if (index !== sequence[inputAt]) { wrong(); return; }
+        inputAt++;
+        if (inputAt === sequence.length) {
+          accepting = false;
+          lockPads(true);
+          best = Math.max(best, sequence.length);
+          bestEl.textContent = best;
+          setCenter("በጣም ጥሩ!", "Great!", false);
+          showToast(sequence.length % 5 === 0 ? "Coffee break bonus — keep going!" : "Pattern complete");
+          later(nextRound, 900);
+        }
+      }
+
+      pads.forEach(function (pad) {
+        pad.addEventListener("click", function () { choose(Number(pad.dataset.index)); });
+      });
+      category.addEventListener("change", function () {
+        if (playing) startGame(); else updateDeck();
+      });
+      document.querySelectorAll("[data-level]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          level = button.dataset.level;
+          document.querySelectorAll("[data-level]").forEach(function (b) { b.classList.toggle("selected", b === button); });
+          if (playing) startGame();
+        });
+      });
+      soundBtn.addEventListener("click", function () {
+        soundOn = !soundOn;
+        soundBtn.textContent = soundOn ? "Sound on" : "Sound off";
+        soundBtn.setAttribute("aria-pressed", String(soundOn));
+        if (soundOn) { initAudio(); tone(2, 220); }
+      });
+      start.addEventListener("click", startGame);
+      again.addEventListener("click", startGame);
+      document.addEventListener("keydown", function (e) {
+        var n = Number(e.key);
+        if (n >= 1 && n <= 6) choose(n - 1);
+      });
+
+      updateDeck();
+      renderLives();
+      lockPads(true);
+    })();
+  </script>
+</body>
+</html>
