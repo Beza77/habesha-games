@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>Anebabero</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Libre+Franklin:wght@700;800&display=swap');
+    :root{
+      color-scheme:light dark;
+      --bg:#f6edda;--ink:#2c1710;--muted:#735b4d;--panel:#fffaf0;--line:#d8c4a7;
+      --red:#b32e1d;--red-deep:#7d1e13;--gold:#efad22;--gold-soft:#ffd56f;--green:#315b3b;
+      --shadow:rgba(72,35,18,.18);--canvas:#e9d3a8;--btn-ink:#fff9ec;
+    }
+    @media(prefers-color-scheme:dark){
+      :root{--bg:#1b120e;--ink:#fff2d5;--muted:#cdbba2;--panel:#281b14;--line:#594332;
+        --red:#e15b3c;--red-deep:#a53d28;--gold:#f2ba3d;--gold-soft:#ffd773;--green:#78a982;
+        --shadow:rgba(0,0,0,.4);--canvas:#3a291c;--btn-ink:#1f120c;}
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--ink)}
+    body{min-height:100svh;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));overflow-x:hidden}
+    button{font:inherit}
+    .shell{width:min(1080px,100%);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px;align-items:start}
+    .game-wrap{min-width:0}
+    .hud{height:64px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 18px;background:var(--panel);border:2px solid var(--ink);border-bottom:0;border-radius:22px 22px 0 0;box-shadow:0 8px 0 var(--shadow)}
+    .hud-item{display:flex;flex-direction:column;line-height:1}.hud-item:last-child{text-align:right}
+    .hud b{font-family:"Libre Franklin",sans-serif;font-size:1.32rem;font-weight:800}.hud small{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+    .lives{display:flex;gap:6px}.life{width:18px;height:18px;background:var(--red);border:2px solid var(--ink);transform:rotate(45deg);border-radius:4px}.life.lost{background:transparent;opacity:.35}
+    .canvas-frame{position:relative;background:var(--canvas);border:2px solid var(--ink);border-radius:0 0 22px 22px;overflow:hidden;box-shadow:0 10px 0 var(--shadow);touch-action:manipulation;isolation:isolate}
+    canvas{display:block;width:100%;height:auto;aspect-ratio:760/640;cursor:pointer}
+    .phasebar{position:absolute;top:14px;left:50%;transform:translateX(-50%);min-width:230px;max-width:calc(100% - 24px);padding:9px 14px;text-align:center;background:color-mix(in srgb,var(--panel) 92%,transparent);border:2px solid var(--ink);border-radius:999px;font-weight:800;font-size:.9rem;box-shadow:0 4px 0 var(--shadow);pointer-events:none}
+    .phasebar span{color:var(--red)}
+    .tap-hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);padding:8px 14px;background:var(--ink);color:var(--panel);border-radius:999px;font-size:.78rem;font-weight:800;letter-spacing:.04em;pointer-events:none;transition:opacity .2s}
+    .sidebar{display:grid;gap:14px}
+    .intro h1{font-family:"Libre Franklin",sans-serif;font-size:clamp(2rem,5vw,3.8rem);line-height:.9;margin:2px 0 12px;letter-spacing:-.06em}.intro h1 em{display:block;color:var(--red);font-style:normal}
+    .intro p{color:var(--muted);line-height:1.5;margin:0}
+    .card{background:var(--panel);border:2px solid var(--ink);padding:17px;border-radius:18px;box-shadow:0 6px 0 var(--shadow)}
+    .card h2{font:800 1rem "Libre Franklin",sans-serif;margin:0 0 12px}
+    .steps{display:grid;gap:11px;counter-reset:s}.step{display:grid;grid-template-columns:29px 1fr;gap:10px;align-items:start;font-size:.86rem;line-height:1.35}.step:before{counter-increment:s;content:counter(s);width:27px;height:27px;display:grid;place-items:center;border-radius:50%;background:var(--gold);color:#24120c;border:2px solid var(--ink);font-weight:800}
+    .mode-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.mode{border:2px solid var(--line);background:transparent;color:var(--ink);border-radius:11px;padding:9px 3px;font-size:.76rem;font-weight:800;cursor:pointer}.mode.active{background:var(--red);border-color:var(--ink);color:#fff}
+    .sound-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;font-weight:700}
+    .sound-btn svg{width:18px;height:18px}
+    .overlay{position:absolute;inset:0;background:color-mix(in srgb,var(--bg) 88%,transparent);display:grid;place-items:center;padding:18px;z-index:5}.overlay.hidden{display:none}.dialog{width:min(430px,100%);background:var(--panel);border:3px solid var(--ink);border-radius:24px;padding:25px;text-align:center;box-shadow:0 10px 0 var(--shadow)}
+    .food-mark{width:112px;height:74px;margin:0 auto 16px;position:relative}.food-mark .inj{position:absolute;left:6px;width:100px;height:25px;border:2px solid var(--ink);border-radius:50%;background:radial-gradient(circle at 30% 30%,#6c4930 0 1px,transparent 1.5px),#b98755;background-size:8px 7px}.food-mark .inj:nth-child(1){bottom:0}.food-mark .inj:nth-child(2){bottom:19px}.food-mark .fill{position:absolute;bottom:34px;left:27px;width:58px;height:15px;border-radius:50%;background:var(--gold);border:2px solid var(--ink);box-shadow:inset 0 -4px 0 var(--red)}
+    .dialog h2{font:800 clamp(1.65rem,7vw,2.5rem) "Libre Franklin",sans-serif;letter-spacing:-.045em;margin:0 0 8px}.dialog p{color:var(--muted);line-height:1.45;margin:0 auto 18px;max-width:34ch}.primary{border:2px solid var(--ink);border-radius:13px;padding:13px 25px;background:var(--red);color:#fff;font-weight:800;cursor:pointer;box-shadow:0 5px 0 var(--ink);transition:transform .1s,box-shadow .1s}.primary:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+    .result-line{display:flex;justify-content:center;gap:24px;margin:14px 0 20px}.result-line div{display:flex;flex-direction:column}.result-line strong{font:800 1.5rem "Libre Franklin"}.result-line small{color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-size:.62rem}
+    .toast{position:absolute;left:50%;top:90px;transform:translate(-50%,-8px);z-index:4;background:var(--ink);color:var(--panel);padding:9px 16px;border-radius:8px;font-weight:800;opacity:0;pointer-events:none;transition:.18s}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .combo{color:var(--red);font-weight:800}
+    @media(max-width:820px){.shell{grid-template-columns:1fr}.sidebar{grid-template-columns:1fr 1fr}.intro{grid-column:1/-1;display:flex;align-items:end;gap:18px}.intro h1{min-width:170px;margin-bottom:0}.intro p{max-width:44ch}.canvas-frame{max-height:calc(100svh - 95px)}canvas{max-height:calc(100svh - 95px)}}
+    @media(max-width:560px){body{padding:8px 8px 14px}.hud{height:55px;padding:0 12px;border-radius:16px 16px 0 0}.hud b{font-size:1.08rem}.hud small{font-size:.58rem}.life{width:14px;height:14px}.canvas-frame{border-radius:0 0 16px 16px}.sidebar{grid-template-columns:1fr}.intro{display:block}.intro h1{font-size:2.25rem}.intro p{font-size:.88rem}.card{padding:14px}.phasebar{top:9px;font-size:.78rem;min-width:205px}.tap-hint{bottom:9px}.dialog{padding:21px 17px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.toast{transition:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="game-wrap" aria-label="Anebabero stacking game">
+      <div class="hud">
+        <div class="hud-item"><small>Score</small><b id="score">0</b></div>
+        <div class="lives" id="lives" aria-label="3 lives"><i class="life"></i><i class="life"></i><i class="life"></i></div>
+        <div class="hud-item"><small>Layer</small><b id="level">1</b></div>
+      </div>
+      <div class="canvas-frame" id="board">
+        <canvas id="game" width="760" height="640" aria-label="Tap to layer injera, kibe and berbere"></canvas>
+        <div class="phasebar" id="phase">Ready to stack</div>
+        <div class="tap-hint" id="hint">TAP ANYWHERE · SPACE</div>
+        <div class="toast" id="toast">Perfect!</div>
+        <div class="overlay" id="startOverlay">
+          <div class="dialog">
+            <div class="food-mark" aria-hidden="true"><i class="inj"></i><i class="inj"></i><i class="fill"></i></div>
+            <h2>Stack it. Spice it.</h2>
+            <p>Build anebabero one careful layer at a time. Center the injera, land the kibe, then hit it with berbere.</p>
+            <button class="primary" id="startBtn">Start stacking</button>
+          </div>
+        </div>
+        <div class="overlay hidden" id="endOverlay">
+          <div class="dialog">
+            <h2 id="endTitle">Tower toppled</h2>
+            <p id="endCopy">That stack got slippery. Try a steadier hand.</p>
+            <div class="result-line"><div><strong id="finalScore">0</strong><small>score</small></div><div><strong id="finalLayers">0</strong><small>layers</small></div><div><strong id="best">0</strong><small>best</small></div></div>
+            <button class="primary" id="againBtn">Stack again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="sidebar">
+      <div class="intro"><h1>Anebabero <em>challenge</em></h1><p>Timing gets tighter as your injera tower grows. A centered filling keeps every new layer steady.</p></div>
+      <section class="card"><h2>Three taps make a layer</h2><div class="steps"><div class="step">Drop the moving injera onto the stack.</div><div class="step">Catch the center with rich golden kibe.</div><div class="step">Sprinkle berbere right over the butter.</div></div></section>
+      <section class="card"><h2>Heat level</h2><div class="mode-row" role="group" aria-label="Difficulty"><button class="mode" data-mode="mild">Mild</button><button class="mode active" data-mode="hot">Hot</button><button class="mode" data-mode="fire">Fire</button></div></section>
+      <button class="sound-btn" id="soundBtn" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/></svg><span>Sound on</span></button>
+    </aside>
+  </main>
+<script>
+(function(){
+  'use strict';
+  const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+  const board=document.getElementById('board'),phaseEl=document.getElementById('phase'),scoreEl=document.getElementById('score'),levelEl=document.getElementById('level'),livesEl=document.getElementById('lives'),toast=document.getElementById('toast');
+  const startOverlay=document.getElementById('startOverlay'),endOverlay=document.getElementById('endOverlay');
+  let mode='hot',running=false,phase='injera',score=0,level=1,lives=3,combo=0,best=0,last=0,time=0,dir=1,current=null,stack=[],fillings=[],particles=[],shake=0,sound=true,audio=null;
+  const cfg={mild:{speed:165,tolerance:.28,lives:4},hot:{speed:225,tolerance:.36,lives:3},fire:{speed:290,tolerance:.43,lives:2}};
+  const W=760,H=640,plateY=568,layerH=28;
+
+  function setup(){
+    score=0;level=1;lives=cfg[mode].lives;combo=0;phase='injera';stack=[{x:190,w:380,y:plateY-38,h:30,seed:2}];fillings=[];particles=[];shake=0;
+    current={x:70,w:320,y:110,dir:1};updateHUD();setPhase();
+  }
+  function updateHUD(){scoreEl.textContent=score.toLocaleString();levelEl.textContent=level;const row=livesEl;row.innerHTML='';row.setAttribute('aria-label',lives+' lives');for(let i=0;i<cfg[mode].lives;i++){const e=document.createElement('i');e.className='life'+(i>=lives?' lost':'');row.appendChild(e)}}
+  function setPhase(){
+    if(phase==='injera')phaseEl.innerHTML='<span>INJERA</span> — tap to land the layer';
+    if(phase==='kibe')phaseEl.innerHTML='<span>KIBE</span> — place it near the center';
+    if(phase==='berbere')phaseEl.innerHTML='<span>BERBERE</span> — season the butter';
+  }
+  function begin(){setup();startOverlay.classList.add('hidden');endOverlay.classList.add('hidden');running=true;last=performance.now();tone(240,.06,'sine');requestAnimationFrame(loop)}
+  function loop(now){if(!running)return;const dt=Math.min(.035,(now-last)/1000);last=now;time+=dt;update(dt);draw();requestAnimationFrame(loop)}
+  function update(dt){
+    const speed=cfg[mode].speed+(level-1)*13;
+    current.x+=current.dir*speed*dt;
+    const margin=35;
+    if(current.x<margin){current.x=margin;current.dir=1}
+    if(current.x+current.w>W-margin){current.x=W-margin-current.w;current.dir=-1}
+    particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=230*dt;p.life-=dt});particles=particles.filter(p=>p.life>0);
+    shake*=Math.pow(.01,dt);
+  }
+  function act(){if(!running)return;
+    if(phase==='injera')dropInjera();else if(phase==='kibe')dropKibe();else dropBerbere();
+  }
+  function dropInjera(){
+    const base=stack[stack.length-1],left=Math.max(current.x,base.x),right=Math.min(current.x+current.w,base.x+base.w),overlap=Math.max(0,right-left),ratio=overlap/current.w;
+    if(ratio<cfg[mode].tolerance){miss('The injera slipped!');return}
+    const perfect=Math.abs((current.x+current.w/2)-(base.x+base.w/2))<18;
+    const y=base.y-layerH-9;
+    stack.push({x:left,w:overlap,y:y,h:layerH,seed:level*17+3});
+    if(perfect){combo++;score+=180+combo*25;showToast('Perfect layer · x'+combo);tone(530,.08,'triangle')}else{combo=0;score+=Math.round(70*ratio);tone(350,.06,'sine')}
+    phase='kibe';current={x:40,w:54,y:y-28,dir:1};burst(left+overlap/2,y,'crumb');setPhase();updateHUD();
+  }
+  function dropKibe(){
+    const top=stack[stack.length-1],cx=current.x+current.w/2,target=top.x+top.w/2,dist=Math.abs(cx-target),quality=Math.max(0,1-dist/(top.w*.55));
+    if(quality>.82){combo++;score+=130+combo*20;showToast('Kibe centered · x'+combo);tone(610,.08,'sine')}else if(quality>.38){score+=55;combo=0;tone(390,.06,'sine')}else{miss('Kibe slid off-center!');return}
+    fillings.push({type:'kibe',x:cx,y:top.y-3,w:Math.max(40,top.w*.34),quality});
+    phase='berbere';current={x:W-90,w:48,y:top.y-58,dir:-1};setPhase();updateHUD();
+  }
+  function dropBerbere(){
+    const kib=[...fillings].reverse().find(f=>f.type==='kibe'),cx=current.x+current.w/2,dist=Math.abs(cx-kib.x),quality=Math.max(0,1-dist/110);
+    if(quality>.78){combo++;score+=160+combo*25;showToast('Perfect spice · x'+combo);tone(720,.07,'square')}else if(quality>.3){score+=60;combo=0;tone(430,.06,'square')}else{miss('The berbere missed!');return}
+    fillings.push({type:'berbere',x:cx,y:kib.y-2,w:82,quality});
+    for(let i=0;i<25;i++)particles.push({x:cx+(Math.random()-.5)*45,y:kib.y-35,vx:(Math.random()-.5)*55,vy:40+Math.random()*80,life:.7,color:'#b5321e',r:2+Math.random()*2});
+    level++;if(level%12===1)showToast('New platter · speed up!');
+    compactStack();
+    const top=stack[stack.length-1];phase='injera';current={x:45,w:Math.max(155,top.w-8),y:90,dir:1};setPhase();updateHUD();
+  }
+  function compactStack(){const top=stack[stack.length-1];if(top.y<205){const shift=250;stack.forEach(s=>s.y+=shift);fillings.forEach(f=>f.y+=shift);while(stack.length>7)stack.shift();while(fillings.length>12)fillings.shift()}}
+  function miss(msg){
+    lives--;combo=0;shake=13;showToast(msg);tone(105,.18,'sawtooth');updateHUD();
+    if(lives<=0){running=false;best=Math.max(best,score);document.getElementById('finalScore').textContent=score.toLocaleString();document.getElementById('finalLayers').textContent=Math.max(0,level-1);document.getElementById('best').textContent=best.toLocaleString();document.getElementById('endTitle').textContent=level>12?'Feast finished':'Tower toppled';document.getElementById('endCopy').textContent=level>12?'A bold stack — can you build an even taller one?':'That stack got slippery. Try a steadier hand.';setTimeout(()=>endOverlay.classList.remove('hidden'),380);return}
+    const top=stack[stack.length-1];
+    if(phase==='injera')current={x:45,w:Math.max(155,top.w-8),y:90,dir:1};
+    if(phase==='kibe')current={x:45,w:54,y:top.y-28,dir:1};
+    if(phase==='berbere')current={x:W-90,w:48,y:top.y-58,dir:-1};
+  }
+  let toastTimer;function showToast(t){toast.textContent=t;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),850)}
+  function burst(x,y,type){for(let i=0;i<14;i++)particles.push({x,y,vx:(Math.random()-.5)*160,vy:-35-Math.random()*90,life:.55,color:type==='crumb'?'#7b4c2f':'#b5321e',r:2+Math.random()*3})}
+  function injera(x,y,w,h,seed){
+    ctx.save();ctx.beginPath();ctx.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,Math.PI*2);ctx.fillStyle='#9b6a42';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='#3c2318';ctx.stroke();
+    ctx.beginPath();ctx.ellipse(x+w/2,y+h*.34,w*.48,h*.38,0,0,Math.PI*2);const g=ctx.createRadialGradient(x+w*.42,y,x+w*.06,x+w/2,y,w*.5);g.addColorStop(0,'#d8b078');g.addColorStop(1,'#a87648');ctx.fillStyle=g;ctx.fill();
+    ctx.fillStyle='rgba(74,39,21,.42)';for(let i=0;i<Math.min(70,w/3);i++){const a=((i*137+seed*29)%360)*Math.PI/180,r=((i*47+seed*13)%100)/100*Math.min(w*.43,h*.29),px=x+w/2+Math.cos(a)*r*(w/h*.45),py=y+h*.32+Math.sin(a)*r;ctx.beginPath();ctx.arc(px,py,1+(i%3)*.45,0,Math.PI*2);ctx.fill()}
+    ctx.restore();
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);ctx.save();if(shake)ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+    let bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,getCSS('--canvas'));bg.addColorStop(1,blend(getCSS('--canvas'),'#8a512b',.2));ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    // woven basket backdrop
+    ctx.globalAlpha=.13;ctx.strokeStyle='#6d3c22';ctx.lineWidth=2;for(let i=-H;i<W;i+=32){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+H,H);ctx.stroke();ctx.beginPath();ctx.moveTo(i+H,0);ctx.lineTo(i,H);ctx.stroke()}ctx.globalAlpha=1;
+    // plate shadow and plate
+    ctx.fillStyle='rgba(44,20,10,.22)';ctx.beginPath();ctx.ellipse(W/2,plateY+39,275,35,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e9e3d5';ctx.beginPath();ctx.ellipse(W/2,plateY+12,250,43,0,0,Math.PI*2);ctx.fill();ctx.lineWidth=5;ctx.strokeStyle='#275883';ctx.stroke();ctx.beginPath();ctx.ellipse(W/2,plateY+8,210,29,0,0,Math.PI*2);ctx.strokeStyle='#eaa924';ctx.lineWidth=3;ctx.stroke();
+    stack.forEach(s=>injera(s.x,s.y,s.w,s.h,s.seed));
+    fillings.forEach(f=>{if(f.type==='kibe'){ctx.fillStyle='#efa922';ctx.beginPath();ctx.ellipse(f.x,f.y,f.w/2,10,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#6e391a';ctx.lineWidth=2;ctx.stroke()}else{ctx.fillStyle='rgba(166,42,24,.88)';for(let i=0;i<20;i++){const px=f.x+(((i*29)%f.w)-f.w/2),py=f.y+((i*7)%12)-5;ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fill()}}});
+    if(phase==='injera')injera(current.x,current.y,current.w,layerH,level*31);
+    else if(phase==='kibe'){ctx.fillStyle='#f2ad22';ctx.beginPath();ctx.ellipse(current.x+current.w/2,current.y+12,current.w/2,12,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#4b2817';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='#ffd970';ctx.beginPath();ctx.ellipse(current.x+current.w*.4,current.y+7,current.w*.18,4,0,0,Math.PI*2);ctx.fill()}
+    else{ctx.save();ctx.translate(current.x+24,current.y+20);ctx.rotate(-.25);ctx.fillStyle='#a83320';ctx.fillRect(-18,-19,36,38);ctx.fillStyle='#e7b75a';ctx.fillRect(-20,-25,40,9);ctx.fillStyle='#48271b';ctx.fillRect(-13,19,26,8);ctx.restore();for(let i=0;i<6;i++){ctx.fillStyle='#a93220';ctx.beginPath();ctx.arc(current.x+19+i*3,current.y+52+(i%2)*5,2,0,Math.PI*2);ctx.fill()}}
+    particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life*2);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;
+    // ground speed marks
+    ctx.strokeStyle='rgba(52,28,16,.22)';ctx.lineWidth=3;for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(55+i*145,H-29);ctx.lineTo(105+i*145,H-29);ctx.stroke()}
+    ctx.restore();
+  }
+  function getCSS(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+  function blend(a,b,t){function p(c){if(c[0]==='#')return [parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];return [120,90,60]}const x=p(a),y=p(b);return `rgb(${x.map((v,i)=>Math.round(v*(1-t)+y[i]*t)).join(',')})`}
+  function tone(freq,dur,type){if(!sound)return;try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type=type||'sine';o.frequency.value=freq;g.gain.setValueAtTime(.06,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+dur);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+dur)}catch(e){}}
+  board.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;act()});
+  document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();if(running)act()}});
+  document.getElementById('startBtn').addEventListener('click',begin);document.getElementById('againBtn').addEventListener('click',begin);
+  document.querySelectorAll('.mode').forEach(btn=>btn.addEventListener('click',()=>{mode=btn.dataset.mode;document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('active',b===btn));if(!running)setup()}));
+  document.getElementById('soundBtn').addEventListener('click',function(){sound=!sound;this.setAttribute('aria-pressed',sound);this.querySelector('span').textContent=sound?'Sound on':'Sound off';if(sound)tone(440,.08,'sine')});
+  setup();draw();window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+})();
+</script>
+</body>
+</html>
