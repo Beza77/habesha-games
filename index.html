@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+Ethiopic:wght@500;600;700&display=swap" rel="stylesheet">
+  <title>Habesha Games</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #eaf4f6;
+      --navy: #17324d;
+      --ink: #19334b;
+      --muted: #637b8d;
+      --panel: #ffffff;
+      --panel-2: #dfeef1;
+      --line: #c7dde2;
+      --cyan: #17a9be;
+      --cyan-dark: #0a788b;
+      --yellow: #f6c548;
+      --orange: #f17935;
+      --green: #2ca272;
+      --red: #dc584b;
+      --shadow: 0 18px 42px rgba(23,50,77,.16);
+      --focus: #004fd7;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #101d28;
+        --navy: #e9f7fb;
+        --ink: #edf7f9;
+        --muted: #aac0ca;
+        --panel: #192b38;
+        --panel-2: #203846;
+        --line: #36505e;
+        --cyan: #3cc2d4;
+        --cyan-dark: #75d9e6;
+        --yellow: #f4c95e;
+        --orange: #ff9557;
+        --green: #57c491;
+        --red: #ff8175;
+        --shadow: 0 20px 46px rgba(0,0,0,.32);
+        --focus: #8dc5ff;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100svh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 88% 3%, color-mix(in srgb, var(--yellow) 24%, transparent) 0 190px, transparent 191px),
+        radial-gradient(circle at 8% 30%, color-mix(in srgb, var(--cyan) 13%, transparent) 0 260px, transparent 261px),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Fredoka", "Noto Sans Ethiopic", system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button, input { font: inherit; }
+    button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .page { width: min(1180px, 100%); margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) clamp(16px, 4vw, 42px) max(44px, env(safe-area-inset-bottom)); }
+
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 28px; }
+    .welcome { min-width: 0; }
+    .welcome h1 { margin: 0; color: var(--navy); font-size: clamp(2rem, 5vw, 4.4rem); line-height: .96; letter-spacing: -.045em; max-width: 760px; text-wrap: balance; }
+    .welcome p { margin: 12px 0 0; color: var(--muted); font-size: clamp(.98rem, 2vw, 1.17rem); font-family: "Noto Sans Ethiopic", sans-serif; line-height: 1.55; }
+    .game-count { flex: 0 0 auto; display: grid; place-items: center; width: 78px; height: 78px; border-radius: 50%; background: var(--yellow); color: #352700; box-shadow: 0 7px 0 color-mix(in srgb, var(--orange) 72%, #8b3c00); transform: rotate(5deg); }
+    .game-count strong { display:block; font-size: 1.7rem; line-height: .8; text-align:center; }
+    .game-count small { display:block; font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; margin-top:5px; }
+
+    .tool-row { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+    .search { flex: 1; position: relative; }
+    .search svg { position:absolute; left:16px; top:50%; transform:translateY(-50%); width:21px; color:var(--muted); pointer-events:none; }
+    .search input { width:100%; min-height:52px; border:2px solid var(--line); border-radius:16px; padding: 11px 16px 11px 47px; color:var(--ink); background:var(--panel); box-shadow:0 8px 20px rgba(23,50,77,.08); }
+    .search input::placeholder { color:var(--muted); opacity:1; }
+    .filters { display:flex; gap:8px; }
+    .filter { border:1px solid var(--line); border-radius:999px; min-height:44px; padding: 8px 15px; background:var(--panel); color:var(--ink); font-weight:600; cursor:pointer; }
+    .filter[aria-pressed="true"] { background:var(--navy); color:var(--bg); border-color:var(--navy); }
+
+    .section-head { display:flex; align-items:end; justify-content:space-between; margin: 12px 0 14px; gap:16px; }
+    .section-head h2 { margin:0; font-size:clamp(1.25rem,3vw,1.8rem); color:var(--navy); }
+    .section-head span { color:var(--muted); font-size:.9rem; }
+
+    .games { display:grid; grid-template-columns:minmax(0, 1.3fr) minmax(280px, .7fr); gap:18px; }
+    .game-card {
+      --card-accent: var(--cyan);
+      position:relative; min-height:390px; overflow:hidden; border:0; border-radius:26px; padding:0; background:var(--panel); color:var(--ink); box-shadow:var(--shadow); cursor:pointer; text-align:left;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .game-card:hover { transform:translateY(-4px); box-shadow:0 24px 52px rgba(23,50,77,.22); }
+    .game-card:active { transform:translateY(1px); }
+    .game-card.featured { min-height:470px; }
+    .cover { position:absolute; inset:0; }
+    .cover img { width:100%; height:100%; display:block; object-fit:cover; transition:transform .35s ease; }
+    .game-card:hover .cover img { transform:scale(1.025); }
+    .cover::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 34%, rgba(6,22,32,.28) 56%, rgba(7,22,34,.93) 100%); }
+    .card-body { position:absolute; z-index:2; inset:auto 0 0; padding:clamp(18px,3vw,28px); color:#fff; }
+    .tags { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:10px; }
+    .tag { border:1px solid rgba(255,255,255,.42); background:rgba(7,22,34,.42); border-radius:999px; padding:5px 9px; font-size:.72rem; letter-spacing:.02em; }
+    .card-body h3 { margin:0; font-size:clamp(1.65rem,4vw,2.7rem); line-height:1; letter-spacing:-.03em; }
+    .card-body p { margin:8px 0 0; color:#d8edf2; font-family:"Noto Sans Ethiopic", sans-serif; line-height:1.48; font-size:.92rem; max-width:42ch; }
+    .play-badge { position:absolute; z-index:3; top:18px; right:18px; width:60px; height:60px; border:0; border-radius:50%; background:var(--yellow); color:#392900; display:grid; place-items:center; box-shadow:0 7px 0 rgba(111,64,0,.52); }
+    .play-badge svg { width:24px; margin-left:4px; }
+    .secondary { align-self:stretch; }
+    .secondary .card-body h3 { font-size:clamp(1.55rem,3vw,2.1rem); }
+    .empty { display:none; padding:48px 18px; text-align:center; color:var(--muted); border:2px dashed var(--line); border-radius:20px; background:color-mix(in srgb, var(--panel) 70%, transparent); }
+    .empty strong { display:block; color:var(--ink); font-size:1.2rem; margin-bottom:5px; }
+    .library-note { margin-top:20px; padding:18px 20px; display:flex; align-items:center; gap:14px; border-top:1px solid var(--line); color:var(--muted); font-family:"Noto Sans Ethiopic", sans-serif; line-height:1.5; }
+    .plus { flex:0 0 auto; width:38px; height:38px; display:grid; place-items:center; border-radius:12px 12px 17px 12px; background:var(--panel-2); color:var(--cyan-dark); font:700 1.5rem/1 "Fredoka", sans-serif; }
+
+    .player { position:fixed; inset:0; z-index:20; display:none; background:#0d1923; }
+    .player.open { display:block; }
+    .player-bar { position:absolute; z-index:2; top:max(10px, env(safe-area-inset-top)); left:10px; right:10px; height:50px; display:flex; align-items:center; justify-content:space-between; gap:12px; pointer-events:none; }
+    .back-btn, .fullscreen-btn { pointer-events:auto; min-height:44px; border:1px solid rgba(255,255,255,.25); border-radius:14px; padding:8px 14px; color:#fff; background:rgba(10,24,35,.86); font-weight:700; box-shadow:0 8px 24px rgba(0,0,0,.22); cursor:pointer; }
+    .back-btn { display:flex; align-items:center; gap:8px; }
+    .back-btn svg, .fullscreen-btn svg { width:20px; height:20px; }
+    .player-title { color:white; text-shadow:0 2px 8px rgba(0,0,0,.6); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .game-frame { width:100%; height:100%; border:0; background:#fff; display:block; }
+
+    @media (max-width:760px) {
+      .page { padding-inline:14px; }
+      .topline { align-items:flex-start; }
+      .game-count { width:65px; height:65px; }
+      .tool-row { align-items:stretch; flex-direction:column; }
+      .filters { display:grid; grid-template-columns:repeat(4,1fr); }
+      .filter { min-width:0; padding-inline:8px; }
+      .games { grid-template-columns:1fr; }
+      .game-card, .game-card.featured { min-height:390px; }
+      .library-note { padding-inline:4px; }
+      .player-bar { height:46px; }
+      .fullscreen-btn { display:none; }
+    }
+    @media (max-width:390px) {
+      .welcome h1 { font-size:2rem; }
+      .game-count { width:58px; height:58px; }
+      .game-count strong { font-size:1.4rem; }
+      .game-card, .game-card.featured { min-height:350px; }
+    }
+    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="topline" aria-labelledby="welcome-title">
+      <div class="welcome">
+        <h1 id="welcome-title">Pick a game.<br>Play right away.</h1>
+        <p lang="am">ይምረጡ፣ ይጫወቱ፣ በመዝናናት ይማሩ።</p>
+      </div>
+      <div class="game-count" aria-label="8 games available"><div><strong>8</strong><small>games</small></div></div>
+    </section>
+
+    <section class="tool-row" aria-label="Game discovery controls">
+      <label class="search">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+        <input id="search" type="search" placeholder="Find a game…" autocomplete="off" />
+      </label>
+      <div class="filters" role="group" aria-label="Filter games">
+        <button class="filter" type="button" data-filter="all" aria-pressed="true">All</button>
+        <button class="filter" type="button" data-filter="learning" aria-pressed="false">Learning</button>
+        <button class="filter" type="button" data-filter="puzzle" aria-pressed="false">Puzzles</button>
+        <button class="filter" type="button" data-filter="action" aria-pressed="false">Action</button>
+      </div>
+    </section>
+
+    <section aria-labelledby="play-title">
+      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">8 games</span></div>
+      <div class="games" id="gameGrid">
+        <button class="game-card featured" type="button" data-title="Fidel Fall ፊደል" data-category="learning" data-src="games/fidel-fall/" aria-label="Play Fidel Fall">
+          <span class="cover"><img src="assets/fidel-fall.jpg" alt="Golden Amharic letter falling toward a blue block" /></span>
+          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="card-body"><span class="tags"><span class="tag">Learning</span><span class="tag">Action</span></span><h3>Fidel Fall</h3><p lang="am">ትክክለኛውን ፊደል ይያዙ፤ ድምፁን ያዳምጡ፤ ተከታታይነቱን ይማሩ።</p></span>
+        </button>
+
+        <button class="game-card secondary" type="button" data-title="Guess the Amharic Word Emoji ቃል" data-category="puzzle" data-src="games/guess-the-word-by-emoji/" aria-label="Play Guess the Amharic Word">
+          <span class="cover"><img src="assets/emoji-word.jpg" alt="Smiling orange game tile with a cream puzzle piece" /></span>
+          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">60 riddles</span></span><h3>Guess the Amharic Word</h3><p lang="am">ኢሞጂዎቹን ተመልክተው ቃሉን ይገምቱ። ምድብ ይምረጡና ፈጣን ጨዋታ ይጀምሩ።</p></span>
+        </button>
+
+        <button class="game-card secondary" type="button" data-title="Buna Run Jebena Sini Coffee Runner" data-category="action" data-src="games/buna-run/" aria-label="Play Buna Run">
+          <span class="cover"><img src="assets/buna-run.jpg" alt="Stylized jebena character ready to run" /></span>
+          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">Endless runner</span></span><h3>Buna Run</h3><p>Run and jump as a jebena, collect sini cups, and keep your coffee streak alive.</p></span>
+        </button>
+
+        <button class="game-card secondary" type="button" data-title="Taxi Addis Blue Taxi Bole Meskel Square Kazanchis Sidist Kilo Piassa Minibus Bajaj" data-category="action" data-src="games/taxi-addis/" aria-label="Play Taxi Addis">
+          <span class="cover"><img src="assets/taxi-addis.jpg" alt="Taxi Addis driving game on a city road" /></span>
+          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">Arcade drive</span></span><h3>Taxi Addis</h3><p>Weave a blue taxi through Bole, Meskel Square, Kazanchis, Sidist Kilo, and Piassa.</p></span>
+        </button>
+
+        <button class="game-card secondary" type="button" data-title="Injera Stack Sefed Stacking" data-category="puzzle" data-src="games/injera-stack/" aria-label="Play Injera Stack">
+          <span class="cover"><img src="assets/injera-stack.jpg" alt="A tall stack of porous injera layers" /></span>
+          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">Stacking</span></span><h3>Injera Stack</h3><p>Time each drop and build a tall, steady stack of injera on the woven sefed.</p></span>
+        </button>
+
+        <button class="game-card secondary" type="button" data-title="Anebabero Injera Kibe Berbere Stacking" data-category="puzzle" data-src="games/anebabero/" aria-label="Play Anebabero">
+          <span class="cover"><img src="assets/anebabero.jpg" alt="Injera layers topped with golden seasoned butter" /></span>
+          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">Three-step stack</span></span><h3>Anebabero</h3><p>Land the injera, center the kibe, and sprinkle berbere to complete every layer.</p></span>
+        </button>
+      </div>
+      <div class="empty" id="emptyState"><strong>No games found</strong>Try another search or category.</div>
+    </section>
+
+    <aside class="library-note"><span class="plus">+</span><span>More games can join this library as they are ready.</span></aside>
+  </main>
+
+  <section class="player" id="player" aria-hidden="true" aria-label="Game player">
+    <div class="player-bar">
+      <button type="button" class="back-btn" id="closePlayer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>Games</button>
+      <div class="player-title" id="playerTitle"></div>
+      <button type="button" class="fullscreen-btn" id="fullScreen" aria-label="Enter full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg></button>
+    </div>
+        <button class="game-card secondary" type="button" data-title="Memory Match" data-category="puzzle" data-src="games/memory-match/" aria-label="Play Memory Match">
+          <span class="cover"><img src="assets/memory-match.jpg" alt="Memory Match card game" /></span>
+          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="card-body"><span class="tags"><span class="tag">Puzzles</span></span><h3>Memory Match</h3><p lang="am">ካርዶቹን ገልብጡ፤ ተመሳሳይ ጥንዶችን ያግኙ።</p></span>
+        </button>
+
+        <button class="game-card secondary" type="button" data-title="Simon Says Amharic" data-category="learning" data-src="games/simon-says-amharic/" aria-label="Play Simon Says Amharic">
+          <span class="cover"><img src="assets/simon-says-amharic.jpg" alt="Simon Says Amharic game" /></span>
+          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="card-body"><span class="tags"><span class="tag">Learning</span></span><h3>Simon Says Amharic</h3><p lang="am">ቅደም ተከተሉን ይድገሙ፤ የአማርኛ ቃላትን ይማሩ።</p></span>
+        </button>
+
+    <iframe class="game-frame" id="gameFrame" title="Game" allow="autoplay; fullscreen" src="about:blank"></iframe>
+  </section>
+
+  <script>
+    (function () {
+      var cards = Array.prototype.slice.call(document.querySelectorAll('.game-card'));
+      var filters = Array.prototype.slice.call(document.querySelectorAll('.filter'));
+      var search = document.getElementById('search');
+      var count = document.getElementById('resultCount');
+      var empty = document.getElementById('emptyState');
+      var player = document.getElementById('player');
+      var frame = document.getElementById('gameFrame');
+      var title = document.getElementById('playerTitle');
+      var activeFilter = 'all';
+
+      function updateGames() {
+        var query = search.value.trim().toLocaleLowerCase();
+        var visible = 0;
+        cards.forEach(function (card) {
+          var categoryMatch = activeFilter === 'all' || card.dataset.category === activeFilter;
+          var textMatch = !query || card.dataset.title.toLocaleLowerCase().indexOf(query) !== -1;
+          var show = categoryMatch && textMatch;
+          card.hidden = !show;
+          if (show) visible += 1;
+        });
+        count.textContent = visible + (visible === 1 ? ' game' : ' games');
+        empty.style.display = visible ? 'none' : 'block';
+      }
+
+      filters.forEach(function (button) {
+        button.addEventListener('click', function () {
+          activeFilter = button.dataset.filter;
+          filters.forEach(function (item) { item.setAttribute('aria-pressed', item === button ? 'true' : 'false'); });
+          updateGames();
+        });
+      });
+      search.addEventListener('input', updateGames);
+
+      function openGame(card) {
+        title.textContent = card.querySelector('h3').textContent;
+        frame.src = card.dataset.src;
+        player.classList.add('open');
+        player.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('closePlayer').focus();
+      }
+      function closeGame() {
+        player.classList.remove('open');
+        player.setAttribute('aria-hidden', 'true');
+        frame.src = 'about:blank';
+        document.body.style.overflow = '';
+      }
+      cards.forEach(function (card) { card.addEventListener('click', function () { openGame(card); }); });
+      document.getElementById('closePlayer').addEventListener('click', closeGame);
+      document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && player.classList.contains('open')) closeGame(); });
+      document.getElementById('fullScreen').addEventListener('click', function () {
+        if (player.requestFullscreen) player.requestFullscreen();
+      });
+    }());
+  </script>
+</body>
+</html>
