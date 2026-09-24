@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="am">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <title>Guess the Word by Emoji</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f2eadc;
+      --ink: #1d2923;
+      --muted: #59655f;
+      --surface: #fffdf8;
+      --surface-2: #f8f1e4;
+      --line: #d9cfbf;
+      --red: #c94134;
+      --red-dark: #983126;
+      --gold: #e7a21a;
+      --green: #2f7652;
+      --green-dark: #23573e;
+      --shadow: rgba(58, 43, 24, .14);
+      --correct: #287f55;
+      --wrong: #b93931;
+      --focus: #1670c9;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #171d19;
+        --ink: #f7f0e4;
+        --muted: #bfc8c1;
+        --surface: #222a25;
+        --surface-2: #2a332d;
+        --line: #465149;
+        --red: #ee6858;
+        --red-dark: #ff8b7e;
+        --gold: #f1b740;
+        --green: #63b187;
+        --green-dark: #95d5af;
+        --shadow: rgba(0, 0, 0, .26);
+        --correct: #60bd88;
+        --wrong: #ff756a;
+        --focus: #7fbdff;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100svh;
+      background:
+        radial-gradient(circle at 10% 8%, color-mix(in srgb, var(--gold) 17%, transparent) 0 120px, transparent 121px),
+        linear-gradient(135deg, transparent 0 48%, color-mix(in srgb, var(--green) 7%, transparent) 48% 52%, transparent 52%) 0 0 / 44px 44px,
+        var(--bg);
+      color: var(--ink);
+      font-family: "Noto Sans Ethiopic", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .app {
+      width: min(760px, 100%);
+      min-height: 100svh;
+      margin: 0 auto;
+      padding: max(20px, env(safe-area-inset-top)) clamp(16px, 4vw, 34px) max(28px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+    }
+    .screen { display: none; flex: 1; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    .intro {
+      justify-content: center;
+      gap: 22px;
+      padding-block: 18px;
+    }
+    .flag-line {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      height: 7px;
+      width: 118px;
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    .flag-line i:nth-child(1) { background: #28844f; }
+    .flag-line i:nth-child(2) { background: #f0c529; }
+    .flag-line i:nth-child(3) { background: #cb4037; }
+    h1 {
+      max-width: 620px;
+      margin: 0;
+      font-size: clamp(2.1rem, 7vw, 4.25rem);
+      line-height: .98;
+      letter-spacing: -.04em;
+      text-wrap: balance;
+    }
+    .intro-copy {
+      max-width: 590px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2.8vw, 1.18rem);
+      line-height: 1.7;
+    }
+    .how {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .how-step {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 16px 14px;
+      min-height: 116px;
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+    .how-step:nth-child(1) { border-radius: 26px 8px 8px 8px; }
+    .how-step:nth-child(2) { border-radius: 8px; }
+    .how-step:nth-child(3) { border-radius: 8px 26px 8px 8px; }
+    .how-step b {
+      display: grid;
+      place-items: center;
+      width: 29px;
+      height: 29px;
+      margin-bottom: 10px;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--green);
+      font-family: "Nunito", sans-serif;
+      font-size: .82rem;
+    }
+    .how-step span { line-height: 1.45; font-weight: 700; }
+    .category-title, .mode-title { margin: 3px 0 -9px; font-size: 1.05rem; }
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 9px;
+    }
+    .category {
+      min-height: 74px;
+      border: 2px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 9px 7px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 3px;
+      font-weight: 800;
+      transition: border-color .18s, background .18s, transform .18s;
+    }
+    .category:hover { border-color: var(--gold); transform: translateY(-2px); }
+    .category.selected { border-color: var(--green); background: color-mix(in srgb, var(--green) 10%, var(--surface)); }
+    .category-icon { font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif; font-size: 1.5rem; line-height: 1; }
+    .category-name { font-size: .82rem; line-height: 1.2; }
+    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .mode {
+      border: 2px solid var(--line);
+      color: var(--ink);
+      background: var(--surface);
+      padding: 15px;
+      border-radius: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .18s, background .18s, transform .18s;
+    }
+    .mode:hover { border-color: var(--green); transform: translateY(-2px); }
+    .mode.selected { border-color: var(--green); background: color-mix(in srgb, var(--green) 10%, var(--surface)); }
+    .mode strong { display: block; font-size: 1.05rem; margin-bottom: 4px; }
+    .mode small { color: var(--muted); }
+    .start-btn, .again-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px 14px 26px 14px;
+      padding: 17px 20px;
+      color: #fff;
+      background: var(--red);
+      box-shadow: 0 7px 0 var(--red-dark), 0 16px 30px var(--shadow);
+      font-weight: 800;
+      font-size: 1.12rem;
+      cursor: pointer;
+      transform: translateY(0);
+      transition: transform .12s, box-shadow .12s;
+    }
+    .start-btn:active, .again-btn:active { transform: translateY(5px); box-shadow: 0 2px 0 var(--red-dark); }
+
+    .game { gap: 16px; }
+    .topbar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+    .stat {
+      min-height: 55px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--surface) 90%, transparent);
+      border: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .stat-label { color: var(--muted); font-size: .72rem; font-weight: 700; }
+    .stat-value { font-family: "Nunito", "Noto Sans Ethiopic", sans-serif; font-size: 1.15rem; font-weight: 900; line-height: 1.1; }
+    .sound-btn {
+      min-height: 55px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+    .timer-track {
+      height: 9px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: var(--line);
+    }
+    .timer-fill { height: 100%; width: 100%; background: var(--green); transform-origin: left; }
+    .timer-fill.urgent { background: var(--red); }
+
+    .puzzle-card {
+      flex: 1;
+      min-height: 285px;
+      border: 1px solid var(--line);
+      border-radius: 30px 10px 30px 10px;
+      background: var(--surface);
+      box-shadow: 0 18px 45px var(--shadow);
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 18px;
+      padding: clamp(24px, 6vw, 48px);
+      position: relative;
+      overflow: hidden;
+    }
+    .puzzle-card::before,
+    .puzzle-card::after {
+      content: "";
+      position: absolute;
+      width: 84px;
+      height: 84px;
+      border: 16px solid color-mix(in srgb, var(--gold) 27%, transparent);
+      transform: rotate(45deg);
+    }
+    .puzzle-card::before { left: -60px; top: -58px; }
+    .puzzle-card::after { right: -58px; bottom: -58px; border-color: color-mix(in srgb, var(--green) 22%, transparent); }
+    .round-label { color: var(--muted); font-size: .82rem; font-weight: 800; }
+    .emoji-clue {
+      min-height: 116px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(7px, 2vw, 18px);
+      font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+      font-size: clamp(4.3rem, 17vw, 7.3rem);
+      line-height: 1;
+      filter: drop-shadow(0 8px 8px rgba(0,0,0,.12));
+      animation: bob 2.8s ease-in-out infinite;
+    }
+    .emoji-clue.count-3 { font-size: clamp(3.5rem, 13vw, 5.8rem); }
+    .emoji-clue.count-4, .emoji-clue.count-5 { font-size: clamp(2.8rem, 10vw, 4.5rem); }
+    .plus { color: var(--gold); font-family: "Nunito", sans-serif; font-size: .45em; font-weight: 900; filter: none; }
+    .prompt { margin: 0; font-weight: 800; font-size: clamp(1.05rem, 3.5vw, 1.3rem); text-align: center; }
+    .feedback {
+      min-height: 24px;
+      margin: 0;
+      font-size: .96rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--muted);
+    }
+    .feedback.good { color: var(--correct); }
+    .feedback.bad { color: var(--wrong); }
+
+    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .choices.long-choices { grid-template-columns: 1fr; }
+    .choices.long-choices .choice { min-height: 54px; }
+    .choice {
+      min-height: 64px;
+      border: 2px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 13px 14px;
+      font-weight: 800;
+      font-size: clamp(.95rem, 3vw, 1.08rem);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      text-align: left;
+      gap: 10px;
+      transition: border-color .15s, transform .15s, background .15s;
+    }
+    .choice:hover:not(:disabled) { border-color: var(--gold); transform: translateY(-2px); }
+    .choice:disabled { cursor: default; }
+    .choice.correct { border-color: var(--correct); background: color-mix(in srgb, var(--correct) 14%, var(--surface)); }
+    .choice.wrong { border-color: var(--wrong); background: color-mix(in srgb, var(--wrong) 14%, var(--surface)); }
+    .choice.hidden-option { opacity: .18; pointer-events: none; }
+    .num {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-family: "Nunito", sans-serif;
+      font-size: .82rem;
+    }
+    .game-tools { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .hint-btn, .quit-btn, .share-btn {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .hint-btn:disabled { opacity: .45; cursor: default; }
+    .quit-btn { color: var(--muted); }
+
+    .results { justify-content: center; gap: 18px; padding-block: 20px; }
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 30px 10px 30px 10px;
+      box-shadow: 0 18px 45px var(--shadow);
+      padding: clamp(26px, 6vw, 44px);
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .result-mark { font-size: 4.6rem; line-height: 1; margin-bottom: 10px; }
+    .result-card h2 { margin: 0 0 8px; font-size: clamp(1.8rem, 6vw, 3rem); line-height: 1.15; }
+    .result-card > p { margin: 0; color: var(--muted); line-height: 1.6; }
+    .score-big {
+      margin: 24px auto;
+      color: var(--red);
+      font-family: "Nunito", sans-serif;
+      font-size: clamp(3rem, 12vw, 5.5rem);
+      font-weight: 900;
+      line-height: .9;
+    }
+    .score-big small { display: block; margin-top: 8px; color: var(--muted); font-family: "Noto Sans Ethiopic"; font-size: .82rem; }
+    .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 22px; }
+    .result-stat { background: var(--surface-2); padding: 13px 8px; border-radius: 10px; }
+    .result-stat strong { display: block; font-family: "Nunito", sans-serif; font-size: 1.35rem; }
+    .result-stat span { color: var(--muted); font-size: .75rem; font-weight: 700; }
+    .result-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+    .share-btn { padding-inline: 18px; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      transform: translate(-50%, 20px);
+      background: var(--ink);
+      color: var(--surface);
+      padding: 11px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s, transform .2s;
+      z-index: 10;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 9; }
+    .confetti i { position: absolute; top: -20px; width: 11px; height: 18px; animation: fall 1.5s ease-in forwards; }
+
+    @keyframes bob { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-8px) rotate(1deg); } }
+    @keyframes pop { 0% { transform: scale(.8); } 65% { transform: scale(1.06); } 100% { transform: scale(1); } }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    @keyframes fall { to { transform: translateY(110vh) rotate(540deg); opacity: .8; } }
+    .pop { animation: pop .3s ease-out; }
+    .shake { animation: shake .28s ease; }
+
+    @media (max-width: 560px) {
+      .app { padding-inline: 14px; }
+      .how { grid-template-columns: 1fr; }
+      .how-step, .how-step:nth-child(n) { min-height: auto; display: grid; grid-template-columns: 31px 1fr; gap: 9px; align-items: center; border-radius: 13px; padding: 12px; }
+      .categories { grid-template-columns: repeat(2, 1fr); }
+      .category { min-height: 62px; grid-template-columns: 28px 1fr; justify-items: start; padding: 9px 12px; }
+      .category-icon { font-size: 1.25rem; }
+      .how-step b { margin: 0; }
+      .topbar { grid-template-columns: repeat(3, 1fr) 52px; gap: 6px; }
+      .stat { padding: 7px 8px; }
+      .stat-label { font-size: .64rem; }
+      .stat-value { font-size: 1rem; }
+      .puzzle-card { min-height: 245px; padding: 20px 16px; gap: 14px; }
+      .emoji-clue { min-height: 96px; }
+      .choice { min-height: 60px; padding: 10px; }
+      .result-actions { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 390px) {
+      .choices { grid-template-columns: 1fr; gap: 8px; }
+      .choice { min-height: 51px; }
+      .game { gap: 11px; }
+      .puzzle-card { min-height: 220px; }
+      .emoji-clue { font-size: 3.8rem; }
+      .emoji-clue.count-3 { font-size: 3rem; }
+      .emoji-clue.count-4, .emoji-clue.count-5 { font-size: 2.35rem; gap: 5px; }
+      .mode { padding: 12px 10px; }
+      .mode small { font-size: .7rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="screen intro active" id="introScreen">
+      <div class="flag-line" aria-hidden="true"><i></i><i></i><i></i></div>
+      <h1>ፍንጮቹን አገናኙ፣<br>ቃሉን ገምቱ!</h1>
+      <p class="intro-copy">እያንዳንዱ የኢሞጂ ጥምረት ትንሽ እንቆቅልሽ ነው። ቃሉን፣ ቦታውን ወይም ምሳሌውን ጊዜው ሳያልቅ ፍቱ።</p>
+      <div class="how" aria-label="የጨዋታ መመሪያ">
+        <div class="how-step"><b>1</b><span>ኢሞጂዎቹን ይመልከቱ</span></div>
+        <div class="how-step"><b>2</b><span>ቃሉን በፍጥነት ይገምቱ</span></div>
+        <div class="how-step"><b>3</b><span>ተከታታይ መልስ ነጥብ ያበዛል</span></div>
+      </div>
+      <h2 class="category-title">ምድብ ይምረጡ</h2>
+      <div class="categories" role="radiogroup" aria-label="የጥያቄ ምድብ">
+        <button class="category selected" type="button" data-category="all" role="radio" aria-checked="true"><span class="category-icon">🎲</span><span class="category-name">የተቀላቀለ</span></button>
+        <button class="category" type="button" data-category="animals" role="radio" aria-checked="false"><span class="category-icon">🐾</span><span class="category-name">እንስሳት</span></button>
+        <button class="category" type="button" data-category="food" role="radio" aria-checked="false"><span class="category-icon">🍲</span><span class="category-name">ምግብ</span></button>
+        <button class="category" type="button" data-category="culture" role="radio" aria-checked="false"><span class="category-icon">🇪🇹</span><span class="category-name">የኢትዮጵያ ባህል</span></button>
+        <button class="category" type="button" data-category="proverbs" role="radio" aria-checked="false"><span class="category-icon">🗣️</span><span class="category-name">አባባሎች</span></button>
+        <button class="category" type="button" data-category="places" role="radio" aria-checked="false"><span class="category-icon">🗺️</span><span class="category-name">ቦታዎች</span></button>
+        <button class="category" type="button" data-category="objects" role="radio" aria-checked="false"><span class="category-icon">🔎</span><span class="category-name">የዕለት ዕቃዎች</span></button>
+      </div>
+      <h2 class="mode-title">የጨዋታ ደረጃ</h2>
+      <div class="modes" role="radiogroup" aria-label="የጨዋታ ደረጃ">
+        <button class="mode selected" type="button" data-mode="normal" role="radio" aria-checked="true">
+          <strong>መደበኛ</strong><small id="normalMeta">15 ጥያቄዎች · 12 ሰከንድ</small>
+        </button>
+        <button class="mode" type="button" data-mode="fast" role="radio" aria-checked="false">
+          <strong>ፈጣን</strong><small id="fastMeta">20 ጥያቄዎች · 8 ሰከንድ</small>
+        </button>
+      </div>
+      <button class="start-btn" id="startBtn" type="button">ጨዋታውን ጀምር</button>
+    </section>
+
+    <section class="screen game" id="gameScreen" aria-live="polite">
+      <div class="topbar">
+        <div class="stat"><span class="stat-label">ጥያቄ</span><span class="stat-value" id="roundStat">1/15</span></div>
+        <div class="stat"><span class="stat-label">ነጥብ</span><span class="stat-value" id="scoreStat">0</span></div>
+        <div class="stat"><span class="stat-label">ሕይወት</span><span class="stat-value" id="livesStat">♥ ♥ ♥</span></div>
+        <button class="sound-btn" id="soundBtn" type="button" aria-label="ድምፅ አጥፋ" title="ድምፅ">🔊</button>
+      </div>
+      <div class="timer-track" aria-hidden="true"><div class="timer-fill" id="timerFill"></div></div>
+      <section class="puzzle-card" id="puzzleCard">
+        <span class="round-label" id="comboLabel">ተከታታይ መልስ ይጀምሩ</span>
+        <div class="emoji-clue" id="emojiClue" aria-label="የኢሞጂ ፍንጭ"></div>
+        <p class="prompt" id="promptText">ይህ ምንድን ነው?</p>
+        <p class="feedback" id="feedback">ከታች አንዱን ይምረጡ</p>
+      </section>
+      <div class="choices" id="choices"></div>
+      <div class="game-tools">
+        <button class="hint-btn" id="hintBtn" type="button">50/50 ፍንጭ <span id="hintCount">3</span></button>
+        <button class="quit-btn" id="quitBtn" type="button">ጨዋታውን ተው</button>
+      </div>
+    </section>
+
+    <section class="screen results" id="resultScreen">
+      <div class="result-card">
+        <div class="result-mark" id="resultMark" aria-hidden="true">🏆</div>
+        <h2 id="resultTitle">ጥሩ ስራ!</h2>
+        <p id="resultMessage">የኢሞጂ ቃላቱን በጥሩ ሁኔታ ገምተዋል።</p>
+        <div class="score-big"><span id="finalScore">0</span><small>ጠቅላላ ነጥብ</small></div>
+        <div class="result-grid">
+          <div class="result-stat"><strong id="correctStat">0</strong><span>ትክክል</span></div>
+          <div class="result-stat"><strong id="playedStat">0</strong><span>የተጫወቱ</span></div>
+          <div class="result-stat"><strong id="streakStat">0</strong><span>ምርጥ ተከታታይ</span></div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="again-btn" id="againBtn" type="button">እንደገና ተጫወት</button>
+        <button class="share-btn" id="shareBtn" type="button">ውጤት ቅዳ</button>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status"></div>
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var puzzles = [
+        { c:"animals", e:["🐊","💧","😭"], a:"የአዞ እንባ", d:["የአንበሳ ቁጣ","የቀበሮ ብልሃት","የዝንጀሮ ሳቅ"], q:"ይህ የትኛው አገላለጽ ነው?" },
+        { c:"animals", e:["🌼","🎵","🍯","🏠"], a:"የንብ ቀፎ", d:["የወፍ ጎጆ","የጉንዳን ቤት","የሸረሪት ድር"] },
+        { c:"animals", e:["🌳","🎵","🥚"], a:"የወፍ ጎጆ", d:["የንብ ቀፎ","የዶሮ ቤት","የእንስሳት መኖሪያ"] },
+        { c:"animals", e:["🏜️","🚢","💧"], a:"ግመል", d:["አዞ","አህያ","ጎሽ"], q:"የበረሃውን ምስጢር ይፍቱ" },
+        { c:"animals", e:["🌙","👀","🤫"], a:"ጉጉት", d:["ንስር","ቁራ","ጭልፊት"], q:"የሌሊቱ ጠባቂ ማን ነው?" },
+        { c:"animals", e:["⚫","💪","📦"], a:"ጉንዳን", d:["ንብ","ቢራቢሮ","ዝንብ"], q:"ትንሹን ኃያል ይፈልጉ" },
+        { c:"animals", e:["🐇","💤","🏁","🥇"], a:"ኤሊ", d:["ጥንቸል","እንቁራሪት","እባብ"], q:"ጥንቸሉ ሲተኛ ያሸነፈው ማን ነው?" },
+        { c:"animals", e:["🐛","⏳","🪽"], a:"ቢራቢሮ", d:["ንብ","ዝንብ","ጉንዳን"] },
+        { c:"animals", e:["👑","🌳","📣"], a:"አንበሳ", d:["ነብር","ጅብ","ቀበሮ"], q:"የደኑን ዘውድ የሚለብሰው ማን ነው?" },
+        { c:"animals", e:["🌍","👂","🧠"], a:"ዝሆን", d:["አውራሪስ","ጎሽ","ጉማሬ"], q:"ጆሮና ትውስታ ወደ ማን ያመራሉ?" },
+
+        { c:"food", e:["🐔","🌶️","🥘"], a:"ዶሮ ወጥ", d:["ሽሮ ወጥ","ምስር ወጥ","ቲብስ"] },
+        { c:"food", e:["🥩","🔪","🌶️"], a:"ክትፎ", d:["ጥብስ","ዱለት","ቁርጥ"] },
+        { c:"food", e:["🫓","✂️","🧈"], a:"ጨጨብሳ", d:["ፍርፍር","ገንፎ","ቂጣ"], q:"ተቆራርጦ በቅቤ የሚዘጋጀው ምንድን ነው?" },
+        { c:"food", e:["🫘","🌀","🥘"], a:"ሽሮ ወጥ", d:["ምስር ወጥ","አተር ክክ","አልጫ ወጥ"] },
+        { c:"food", e:["🫓","🌈","🥗"], a:"በያይነት", d:["ማህበራዊ","ዶሮ ወጥ","ፍርፍር"], q:"ብዙ ዓይነት ጾም ወጦችን የሚያጣምረው ምንድን ነው?" },
+        { c:"food", e:["🥩","🔥","🍳"], a:"ጥብስ", d:["ክትፎ","ዱለት","ቁርጥ"] },
+        { c:"food", e:["🌾","🥣","🧈"], a:"ገንፎ", d:["አጥሚት","ቂጣ","ኪንቼ"] },
+        { c:"food", e:["🍯","💧","🍷"], a:"ጠጅ", d:["ጠላ","ቡና","ቦርዴ"], q:"ከማር የሚዘጋጀው መጠጥ ምንድን ነው?" },
+        { c:"food", e:["🌱","🔥","👃","👥"], a:"የቡና ሥነ ሥርዓት", d:["የሻይ ጊዜ","የምሳ ግብዣ","የእጣን ጊዜ"] },
+        { c:"food", e:["🌾","💧","🫧","⭕"], a:"እንጀራ", d:["ዳቦ","ቂጣ","ሙልሙል"], q:"ከጤፍ ተነስቶ በምጣድ የሚያርፈው ምንድን ነው?" },
+
+        { c:"culture", e:["🌱","🔥","👃","👥"], a:"ቡና ሥነ ሥርዓት", d:["የምሳ ግብዣ","የሰርግ ሥነ ሥርዓት","የቤት ምረቃ"] },
+        { c:"culture", e:["👗","🧵","🇪🇹"], a:"የሀበሻ ቀሚስ", d:["የሰርግ ልብስ","የስፖርት ልብስ","የክረምት ካፖርት"] },
+        { c:"culture", e:["💃","🕺","🤷"], a:"እስክስታ", d:["ጭፈራ","ፉከራ","ሽለላ"], q:"ትከሻን በማወዛወዝ የሚደነሰው ምንድን ነው?" },
+        { c:"culture", e:["🍲","🤲","😊"], a:"ጉርሻ", d:["ግብዣ","ምሳ","ቁርስ"], q:"ፍቅርን በእጅ የሚያጎርሰው ባህል ምንድን ነው?" },
+        { c:"culture", e:["✝️","🔥","🌼"], a:"መስቀል", d:["ጥምቀት","ፋሲካ","ገና"] },
+        { c:"culture", e:["✝️","💧","👑"], a:"ጥምቀት", d:["መስቀል","ፋሲካ","ሆሳዕና"] },
+        { c:"culture", e:["👥","💰","🔄"], a:"እቁብ", d:["እድር","ማህበር","ስጦታ"], q:"ገንዘብ በተራ የሚደርስበት ባህላዊ ቁጠባ ምንድን ነው?" },
+        { c:"culture", e:["👥","🤝","🕯️"], a:"እድር", d:["እቁብ","ማህበር","ዕቃ ማስቀመጫ"], q:"በሐዘን ጊዜ ሰዎችን የሚያግዝ ማህበራዊ ድጋፍ ምንድን ነው?" },
+        { c:"culture", e:["👴","🤝","💍"], a:"ሽምግልና", d:["እጮኝነት","ሰርግ","ዕርቅ"], q:"ሽማግሌዎች የሚያስማሙበት ሂደት ምንድን ነው?" },
+        { c:"culture", e:["1️⃣","🧵","🎶"], a:"ማሲንቆ", d:["ክራር","ዋሽንት","ከበሮ"], q:"በአንድ ክር የሚዜም ባህላዊ መሣሪያ ምንድን ነው?" },
+
+        { c:"proverbs", e:["🐑","👩‍👩‍👦","🥛"], a:"የዋህ በግ ሁለት እናት ይጠባል", d:["አንድ እጅ አያጨበጭብም","የቸኮለ እግር ይሰበራል","አፍ ያለው ቤት ይገባል"], q:"ኢሞጂዎቹ የትኛውን ምሳሌ ይወክላሉ?" },
+        { c:"proverbs", e:["🐌","➡️","🥚","🚶"], a:"ቀስ በቀስ እንቁላል በእግሩ ይሄዳል", d:["ሳይቃጠል በቅጠል","ምክር ለሰሚው ነው","ውሃ ቢወቅጡት እምቦጭ"], q:"ኢሞጂዎቹ የትኛውን ምሳሌ ይወክላሉ?" },
+        { c:"proverbs", e:["👄","➡️","🏠"], a:"አፍ ያለው ቤት ይገባል", d:["አንድ እጅ አያጨበጭብም","ሳይቃጠል በቅጠል","የዋህ በግ ሁለት እናት ይጠባል"], q:"ኢሞጂዎቹ የትኛውን ምሳሌ ይወክላሉ?" },
+        { c:"proverbs", e:["🏃","🦵","💥"], a:"የቸኮለ እግር ይሰበራል", d:["ሁለት ዛፍ የጨበጠ ይሰነጠቃል","ምክር ለሰሚው ነው","አፍ ያለው ቤት ይገባል"], q:"ኢሞጂዎቹ የትኛውን ምሳሌ ይወክላሉ?" },
+        { c:"proverbs", e:["🤲","❌","👏"], a:"አንድ እጅ አያጨበጭብም", d:["የቸኮለ እግር ይሰበራል","ሳይቃጠል በቅጠል","ምክር ለሰሚው ነው"], q:"ኢሞጂዎቹ የትኛውን ምሳሌ ይወክላሉ?" },
+        { c:"proverbs", e:["🙌","🌳","🌳","💥"], a:"ሁለት ዛፍ የጨበጠ ይሰነጠቃል", d:["የዋህ በግ ሁለት እናት ይጠባል","አፍ ያለው ቤት ይገባል","ውሃ ቢወቅጡት እምቦጭ"], q:"ኢሞጂዎቹ የትኛውን ምሳሌ ይወክላሉ?" },
+        { c:"proverbs", e:["🔥","❌","🍃","📣"], a:"ሳይቃጠል በቅጠል", d:["የቸኮለ እግር ይሰበራል","ምክር ለሰሚው ነው","አንድ እጅ አያጨበጭብም"], q:"ኢሞጂዎቹ የትኛውን ምሳሌ ይወክላሉ?" },
+        { c:"proverbs", e:["👂","💡","✅"], a:"ምክር ለሰሚው ነው", d:["አፍ ያለው ቤት ይገባል","ሳይቃጠል በቅጠል","ውሃ ቢወቅጡት እምቦጭ"], q:"ኢሞጂዎቹ የትኛውን ምሳሌ ይወክላሉ?" },
+        { c:"proverbs", e:["💧","🥊","🫧"], a:"ውሃ ቢወቅጡት እምቦጭ", d:["ምክር ለሰሚው ነው","የቸኮለ እግር ይሰበራል","አንድ እጅ አያጨበጭብም"], q:"ኢሞጂዎቹ የትኛውን ምሳሌ ይወክላሉ?" },
+        { c:"proverbs", e:["😈","✅","⚖️","😇","❓"], a:"የሚያውቁት ሰይጣን ከማያውቁት መልአክ ይሻላል", d:["የዋህ በግ ሁለት እናት ይጠባል","ሁለት ዛፍ የጨበጠ ይሰነጠቃል","ሳይቃጠል በቅጠል"], q:"ኢሞጂዎቹ የትኛውን ምሳሌ ይወክላሉ?" },
+
+        { c:"places", e:["🌼","🏙️","🇪🇹"], a:"አዲስ አበባ", d:["ባህር ዳር","አዳማ","ሐዋሳ"] },
+        { c:"places", e:["⛪","🪨","⛏️"], a:"ላሊበላ", d:["አክሱም","ጎንደር","ሐረር"], q:"ከዓለት የተፈለፈሉ ቤተ ክርስቲያናት ያሉበት የት ነው?" },
+        { c:"places", e:["👑","🏰","🇪🇹"], a:"ጎንደር", d:["ላሊበላ","አክሱም","ደብረ ብርሃን"], q:"የቤተ መንግሥት ቅጥር የሚያስታውሰው ከተማ የትኛው ነው?" },
+        { c:"places", e:["🗿","👑","📜"], a:"አክሱም", d:["ጎንደር","ላሊበላ","ሐረር"], q:"ሐውልትና ጥንታዊ መንግሥት የሚያስታውሰው የት ነው?" },
+        { c:"places", e:["🌊","⛵","🌴"], a:"ባህር ዳር", d:["ሐዋሳ","አዲስ አበባ","ድሬዳዋ"], q:"ጣና ሐይቅን የምታይበት ከተማ የትኛዋ ናት?" },
+        { c:"places", e:["🧱","🚪","☕"], a:"ሐረር", d:["ጎንደር","ጅግጅጋ","ድሬዳዋ"], q:"የታጠረችው ጥንታዊ ከተማ የትኛዋ ናት?" },
+        { c:"places", e:["🏔️","🐒","🥾"], a:"ሰሜን ተራሮች", d:["ባሌ ተራሮች","እንጦጦ","የኤርታ አሌ"], q:"ገላዳ ዝንጀሮና ገደላማ ተራሮች የሚገኙት የት ነው?" },
+        { c:"places", e:["🌋","🧂","☀️"], a:"ዳናኪል ድብርት", d:["አዋሽ ሸለቆ","ኦሞ ሸለቆ","ሰሜን ተራሮች"], q:"እሳተ ገሞራ፣ ጨውና ከፍተኛ ሙቀት የሚገኙበት የት ነው?" },
+        { c:"places", e:["💦","🌈","🇪🇹"], a:"ጢስ እሳት", d:["ወንጪ ሐይቅ","አዋሽ ፏፏቴ","ሶፍ ዑመር"], q:"የጥቁር አባይ ታዋቂ ፏፏቴ ማን ይባላል?" },
+        { c:"places", e:["🌊","🐟","🏙️"], a:"ሐዋሳ", d:["ባህር ዳር","አርባ ምንጭ","ቢሾፍቱ"], q:"በሐይቋ እና በዓሣዋ የምትታወቀው ከተማ የትኛዋ ናት?" },
+
+        { c:"objects", e:["📱","⚡","🪫"], a:"የስልክ ቻርጀር", d:["የጆሮ ማዳመጫ","የስልክ መያዣ","የእጅ ባትሪ"], q:"ሶስቱን ፍንጮች አገናኙ" },
+        { c:"objects", e:["✍️","❌","🧽"], a:"ላጲስ", d:["እርሳስ","መስመር ማስመሪያ","መቀስ"], q:"ስህተትን የሚያጠፋውን ይፈልጉ" },
+        { c:"objects", e:["🌧️","🙆","🛡️"], a:"ጃንጥላ", d:["የዝናብ ካፖርት","ቦት ጫማ","ኮፍያ"] },
+        { c:"objects", e:["🚪","🔒","✅"], a:"የቤት ቁልፍ", d:["የመኪና ቁልፍ","የቁም ሳጥን ቁልፍ","የበር እጀታ"] },
+        { c:"objects", e:["💡","❌","🔥","🕰️"], a:"ሻማ", d:["የእጅ ባትሪ","ፋኖስ","ክብሪት"], q:"መብራት ሲጠፋ የሚተካው ምንድን ነው?" },
+        { c:"objects", e:["👕","💥","🧵","✅"], a:"መርፌና ክር", d:["መቀስና ወረቀት","ብሩሽና ቀለም","መዶሻና ሚስማር"] },
+        { c:"objects", e:["💧","🔥","☕"], a:"ማንቆርቆሪያ", d:["ጀበና","ድስት","ምጣድ"], q:"ፍንጮቹን አገናኝተው ዕቃውን ያግኙ" },
+        { c:"objects", e:["🦷","🫧","✨"], a:"የጥርስ ብሩሽ", d:["የፀጉር ብሩሽ","የጫማ ብሩሽ","የቀለም ብሩሽ"] },
+        { c:"objects", e:["🌙","⏰","🔔"], a:"የማንቂያ ሰዓት", d:["የእጅ ሰዓት","የግድግዳ ሰዓት","የጊዜ ቆጣሪ"], q:"ሌሊት ይዘጋጃል፣ ጠዋት ያስነሳል — ምንድን ነው?" },
+        { c:"objects", e:["📄","🌬️","🪨"], a:"የወረቀት መጫኛ", d:["የመጽሐፍ ምልክት","የጠረጴዛ ልብስ","የወረቀት ማያያዣ"], q:"ወረቀት በነፋስ እንዳይበር የሚይዘው ምንድን ነው?" }
+      ];
+
+      var mode = "normal", category = "all";
+      var settings = { normal:{ total:15, seconds:12, lives:3 }, fast:{ total:20, seconds:8, lives:2 } };
+      var deck = [], index = 0, score = 0, lives = 3, streak = 0, bestStreak = 0, correct = 0, hints = 3;
+      var timer = null, startedAt = 0, answering = false, soundOn = true, audioCtx = null;
+
+      var introScreen = document.getElementById("introScreen");
+      var gameScreen = document.getElementById("gameScreen");
+      var resultScreen = document.getElementById("resultScreen");
+      var roundStat = document.getElementById("roundStat");
+      var scoreStat = document.getElementById("scoreStat");
+      var livesStat = document.getElementById("livesStat");
+      var timerFill = document.getElementById("timerFill");
+      var emojiClue = document.getElementById("emojiClue");
+      var promptText = document.getElementById("promptText");
+      var comboLabel = document.getElementById("comboLabel");
+      var feedback = document.getElementById("feedback");
+      var choices = document.getElementById("choices");
+      var puzzleCard = document.getElementById("puzzleCard");
+      var hintBtn = document.getElementById("hintBtn");
+      var hintCount = document.getElementById("hintCount");
+      var toast = document.getElementById("toast");
+
+      function shuffle(arr) {
+        var out = arr.slice();
+        for (var i = out.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = out[i]; out[i] = out[j]; out[j] = t;
+        }
+        return out;
+      }
+
+      function showScreen(screen) {
+        [introScreen, gameScreen, resultScreen].forEach(function (s) { s.classList.toggle("active", s === screen); });
+      }
+
+      function initAudio() {
+        if (!audioCtx) {
+          var AudioCtor = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtor) audioCtx = new AudioCtor();
+        }
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      }
+
+      function tone(type) {
+        if (!soundOn) return;
+        initAudio();
+        if (!audioCtx) return;
+        var now = audioCtx.currentTime;
+        var notes = type === "good" ? [523.25, 659.25, 783.99] : type === "finish" ? [392, 523.25, 659.25, 783.99] : [210, 170];
+        notes.forEach(function (freq, i) {
+          var osc = audioCtx.createOscillator();
+          var gain = audioCtx.createGain();
+          osc.type = type === "bad" ? "sawtooth" : "sine";
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.0001, now + i * .08);
+          gain.gain.exponentialRampToValueAtTime(type === "bad" ? .055 : .08, now + i * .08 + .01);
+          gain.gain.exponentialRampToValueAtTime(.0001, now + i * .08 + .16);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now + i * .08); osc.stop(now + i * .08 + .18);
+        });
+      }
+
+      function startGame() {
+        initAudio();
+        var cfg = settings[mode];
+        var pool = category === "all" ? puzzles : puzzles.filter(function (p) { return p.c === category; });
+        deck = shuffle(pool).slice(0, Math.min(cfg.total, pool.length));
+        index = 0; score = 0; lives = cfg.lives; streak = 0; bestStreak = 0; correct = 0; hints = 3;
+        hintCount.textContent = hints;
+        hintBtn.disabled = false;
+        showScreen(gameScreen);
+        renderPuzzle();
+      }
+
+      function renderPuzzle() {
+        if (index >= deck.length || lives <= 0) { endGame(); return; }
+        answering = false;
+        clearInterval(timer);
+        var cfg = settings[mode];
+        var p = deck[index];
+        roundStat.textContent = (index + 1) + "/" + deck.length;
+        scoreStat.textContent = score;
+        livesStat.textContent = Array(lives + 1).join("♥ ").trim();
+        comboLabel.textContent = streak > 1 ? "🔥 " + streak + " ተከታታይ!" : "ተከታታይ መልስ ነጥብ ያበዛል";
+        feedback.textContent = "ከታች አንዱን ይምረጡ";
+        feedback.className = "feedback";
+        promptText.textContent = p.q || "ፍንጮቹ ምንን ይወክላሉ?";
+        emojiClue.className = "emoji-clue count-" + Math.min(p.e.length, 5);
+        emojiClue.innerHTML = p.e.map(function (item) { return "<span>" + item + "</span>"; }).join("<span class='plus'>+</span>");
+        void emojiClue.offsetWidth; emojiClue.classList.add("pop");
+        choices.className = "choices" + ([p.a].concat(p.d).some(function (text) { return text.length > 22; }) ? " long-choices" : "");
+        choices.innerHTML = "";
+        shuffle([p.a].concat(p.d)).forEach(function (text, i) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "choice";
+          btn.dataset.answer = text;
+          btn.innerHTML = "<span class='num'>" + (i + 1) + "</span><span>" + text + "</span>";
+          btn.addEventListener("click", function () { answer(text, btn); });
+          choices.appendChild(btn);
+        });
+        startTimer(cfg.seconds);
+      }
+
+      function startTimer(seconds) {
+        startedAt = performance.now();
+        timerFill.style.transform = "scaleX(1)";
+        timerFill.classList.remove("urgent");
+        timer = setInterval(function () {
+          var elapsed = (performance.now() - startedAt) / 1000;
+          var remain = Math.max(0, 1 - elapsed / seconds);
+          timerFill.style.transform = "scaleX(" + remain + ")";
+          timerFill.classList.toggle("urgent", remain < .3);
+          if (remain <= 0) { clearInterval(timer); timeout(); }
+        }, 40);
+      }
+
+      function disableChoices() {
+        Array.prototype.forEach.call(choices.children, function (b) { b.disabled = true; });
+      }
+
+      function answer(text, button) {
+        if (answering) return;
+        answering = true;
+        clearInterval(timer);
+        disableChoices();
+        var p = deck[index];
+        var remaining = Math.max(0, 1 - ((performance.now() - startedAt) / 1000) / settings[mode].seconds);
+        if (text === p.a) {
+          streak += 1; correct += 1; bestStreak = Math.max(bestStreak, streak);
+          var bonus = Math.round(100 + remaining * 100 + Math.min(streak - 1, 5) * 25);
+          score += bonus;
+          button.classList.add("correct");
+          feedback.textContent = "ትክክል!  +" + bonus + " ነጥብ";
+          feedback.className = "feedback good";
+          tone("good");
+          if (streak >= 4) burst(12);
+        } else {
+          streak = 0; lives -= 1;
+          button.classList.add("wrong");
+          markCorrect(p.a);
+          feedback.textContent = "መልሱ፦ " + p.a;
+          feedback.className = "feedback bad";
+          puzzleCard.classList.remove("shake"); void puzzleCard.offsetWidth; puzzleCard.classList.add("shake");
+          tone("bad");
+        }
+        scoreStat.textContent = score;
+        livesStat.textContent = lives > 0 ? Array(lives + 1).join("♥ ").trim() : "—";
+        setTimeout(nextPuzzle, p.c === "proverbs" ? 1650 : 1200);
+      }
+
+      function timeout() {
+        if (answering) return;
+        answering = true; streak = 0; lives -= 1;
+        disableChoices();
+        markCorrect(deck[index].a);
+        feedback.textContent = "ጊዜው አልቋል። መልሱ፦ " + deck[index].a;
+        feedback.className = "feedback bad";
+        livesStat.textContent = lives > 0 ? Array(lives + 1).join("♥ ").trim() : "—";
+        tone("bad");
+        setTimeout(nextPuzzle, 1300);
+      }
+
+      function markCorrect(answer) {
+        Array.prototype.forEach.call(choices.children, function (b) {
+          if (b.dataset.answer === answer) b.classList.add("correct");
+        });
+      }
+
+      function nextPuzzle() { index += 1; renderPuzzle(); }
+
+      function useHint() {
+        if (answering || hints <= 0) return;
+        var p = deck[index];
+        var wrongs = Array.prototype.filter.call(choices.children, function (b) { return b.dataset.answer !== p.a && !b.classList.contains("hidden-option"); });
+        shuffle(wrongs).slice(0, 2).forEach(function (b) { b.classList.add("hidden-option"); b.disabled = true; });
+        hints -= 1; hintCount.textContent = hints;
+        if (hints <= 0) hintBtn.disabled = true;
+        showToast("2 የተሳሳቱ ምርጫዎች ተወግደዋል");
+      }
+
+      function endGame() {
+        clearInterval(timer);
+        var played = Math.min(index, deck.length);
+        var ratio = played ? correct / played : 0;
+        var title, msg, mark;
+        if (ratio >= .85 && played >= 8) { title = "የኢሞጂ ሊቅ!"; msg = "ፍንጮቹን በፍጥነት ፈትተዋል።"; mark = "🏆"; burst(42); tone("finish"); }
+        else if (ratio >= .6) { title = "በጣም ጥሩ!"; msg = "አብዛኞቹን ቃላት በትክክል ገምተዋል።"; mark = "🌟"; burst(24); tone("finish"); }
+        else { title = "ጥሩ ሙከራ!"; msg = "እንደገና ይሞክሩ — በየጊዜው ይሻላሉ።"; mark = "💪"; }
+        document.getElementById("resultTitle").textContent = title;
+        document.getElementById("resultMessage").textContent = msg;
+        document.getElementById("resultMark").textContent = mark;
+        document.getElementById("finalScore").textContent = score;
+        document.getElementById("correctStat").textContent = correct;
+        document.getElementById("playedStat").textContent = played;
+        document.getElementById("streakStat").textContent = bestStreak;
+        showScreen(resultScreen);
+      }
+
+      function burst(count) {
+        var box = document.getElementById("confetti");
+        var colors = ["#28844f", "#f0c529", "#cb4037", "#f7efe1"];
+        for (var i = 0; i < count; i++) {
+          var bit = document.createElement("i");
+          bit.style.left = (Math.random() * 100) + "%";
+          bit.style.background = colors[i % colors.length];
+          bit.style.animationDelay = (Math.random() * .35) + "s";
+          bit.style.animationDuration = (1.1 + Math.random() * .9) + "s";
+          bit.style.transform = "rotate(" + Math.random() * 180 + "deg)";
+          box.appendChild(bit);
+          setTimeout(function (node) { if (node.parentNode) node.parentNode.removeChild(node); }, 2400, bit);
+        }
+      }
+
+      function showToast(message) {
+        toast.textContent = message; toast.classList.add("show");
+        setTimeout(function () { toast.classList.remove("show"); }, 1800);
+      }
+
+      function updateModeMeta() {
+        var count = category === "all" ? puzzles.length : puzzles.filter(function (p) { return p.c === category; }).length;
+        document.getElementById("normalMeta").textContent = Math.min(settings.normal.total, count) + " ጥያቄዎች · 12 ሰከንድ";
+        document.getElementById("fastMeta").textContent = Math.min(settings.fast.total, count) + " ጥያቄዎች · 8 ሰከንድ";
+      }
+
+      document.querySelectorAll(".category").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          category = btn.dataset.category;
+          document.querySelectorAll(".category").forEach(function (b) {
+            var on = b === btn; b.classList.toggle("selected", on); b.setAttribute("aria-checked", on ? "true" : "false");
+          });
+          updateModeMeta();
+        });
+      });
+
+      document.querySelectorAll(".mode").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          mode = btn.dataset.mode;
+          document.querySelectorAll(".mode").forEach(function (b) {
+            var on = b === btn; b.classList.toggle("selected", on); b.setAttribute("aria-checked", on ? "true" : "false");
+          });
+        });
+      });
+
+      document.getElementById("startBtn").addEventListener("click", startGame);
+      document.getElementById("againBtn").addEventListener("click", startGame);
+      hintBtn.addEventListener("click", useHint);
+      document.getElementById("quitBtn").addEventListener("click", function () { clearInterval(timer); showScreen(introScreen); });
+      document.getElementById("soundBtn").addEventListener("click", function () {
+        soundOn = !soundOn;
+        this.textContent = soundOn ? "🔊" : "🔇";
+        this.setAttribute("aria-label", soundOn ? "ድምፅ አጥፋ" : "ድምፅ ክፈት");
+        if (soundOn) tone("good");
+      });
+      document.getElementById("shareBtn").addEventListener("click", function () {
+        var text = "የኢሞጂ ቃል ጨዋታ፦ " + score + " ነጥብ | " + correct + "/" + Math.min(index, deck.length) + " ትክክል 🎯";
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { showToast("ውጤቱ ተቀድቷል"); }, function () { showToast("መቅዳት አልተቻለም"); });
+        } else { showToast("መቅዳት አልተቻለም"); }
+      });
+      document.addEventListener("keydown", function (ev) {
+        if (!gameScreen.classList.contains("active") || answering) return;
+        var n = parseInt(ev.key, 10);
+        if (n >= 1 && n <= 4) {
+          var btn = choices.children[n - 1];
+          if (btn && !btn.disabled) btn.click();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
