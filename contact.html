@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+Ethiopic:wght@500;600;700&display=swap" rel="stylesheet">
+  <title>Contact — Habesha Games</title>
+  <style>
+    :root { color-scheme: light dark; --bg:#eaf4f6; --navy:#17324d; --ink:#19334b; --muted:#637b8d; --panel:#ffffff; --line:#c7dde2; --cyan:#17a9be; }
+    @media (prefers-color-scheme: dark) { :root { --bg:#101d28; --navy:#e9f7fb; --ink:#edf7f9; --muted:#aac0ca; --panel:#192b38; --line:#36505e; --cyan:#3cc2d4; } }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:"Fredoka","Noto Sans Ethiopic",system-ui,sans-serif; }
+    .page { width:min(820px,100%); margin:0 auto; padding:32px clamp(16px,4vw,42px) 64px; }
+    a { color:var(--cyan); }
+    .back { display:inline-block; margin-bottom:18px; text-decoration:none; font-weight:600; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:clamp(20px,4vw,36px); box-shadow:0 18px 42px rgba(23,50,77,.12); text-align:center; }
+    h1 { color:var(--navy); margin:0 0 6px; font-size:clamp(1.4rem,3vw,2rem); }
+    .sub { color:var(--muted); margin-bottom:24px; }
+    .email-btn { display:inline-block; background:var(--navy); color:var(--bg); text-decoration:none; font-weight:700; font-size:1.05rem; padding:14px 32px; border-radius:14px; }
+    .topics { text-align:left; margin:28px auto 0; max-width:520px; }
+    .topics h2 { color:var(--navy); font-size:1.05rem; margin:0 0 8px; }
+    p, li { line-height:1.65; }
+    ul { padding-left:22px; }
+    footer { margin-top:28px; text-align:center; color:var(--muted); font-size:.85rem; }
+    footer a { margin:0 8px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <a class="back" href="./">← Back to games</a>
+    <div class="card">
+      <h1>Contact us</h1>
+      <p class="sub">Game ideas, feedback, or just saying selam — we read everything.</p>
+      <a class="email-btn" href="mailto:hello@habeshagames.com">hello@habeshagames.com</a>
+      <div class="topics">
+        <h2>What to write about</h2>
+        <ul>
+          <li>A game idea you would love to see in the library</li>
+          <li>Something not working in a game</li>
+          <li>Partnership or sponsorship inquiries</li>
+          <li>Privacy questions — see our <a href="privacy.html">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <footer><a href="./">Games</a><a href="about.html">About</a><a href="contact.html">Contact</a><a href="privacy.html">Privacy</a></footer>
+  </div>
+</body>
+</html>
