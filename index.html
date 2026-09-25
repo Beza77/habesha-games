@@ -152,7 +152,7 @@
         <h1 id="welcome-title">Pick a game.<br>Play right away.</h1>
         <p lang="am">ይምረጡ፣ ይጫወቱ፣ በመዝናናት ይማሩ።</p>
       </div>
-      <div class="game-count" aria-label="13 games available"><div><strong>13</strong><small>games</small></div></div>
+      <div class="game-count" aria-label="14 games available"><div><strong>14</strong><small>games</small></div></div>
     </section>
 
     <section class="tool-row" aria-label="Game discovery controls">
@@ -170,7 +170,7 @@
     </section>
 
     <section aria-labelledby="play-title">
-      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">13 games</span></div>
+      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">14 games</span></div>
       <div class="games" id="gameGrid">
         <button class="game-card featured" type="button" data-title="Fidel Fall ፊደል" data-category="learning" data-src="games/fidel-fall/" aria-label="Play Fidel Fall">
           <span class="cover"><img src="assets/fidel-fall.jpg" alt="Golden Amharic letter falling toward a blue block" /></span>
@@ -248,6 +248,11 @@
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
                   <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">❤ For the girls</span></span><h3>Barbie: The Floor Is Lava</h3><p lang="am">ወለሉ ላቫ ነው — ዝላይ!</p></span>
                 </button>
+                <button class="game-card secondary" type="button" data-title="Guess the Game Guess the Song መዝሙር" data-category="music" data-src="games/guess-the-game/" aria-label="Play Guess the Game">
+                  <span class="cover"><img src="assets/guess-the-game.jpg" alt="Guess the Game" /></span>
+                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess the Game</h3><p lang="am">መዝሙሩን ገምት — ፈጣኑ ያሸንፋል!</p></span>
+                </button>
 
       </div>
       <div class="empty" id="emptyState"><strong>No games found</strong>Try another search or category.</div>
@@ -278,7 +283,7 @@
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20260924b';
+      var SITE_VERSION = '20260924c';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
