@@ -277,6 +277,8 @@
       var frame = document.getElementById('gameFrame');
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
+      // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
+      var SITE_VERSION = '20260924a';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
@@ -303,7 +305,7 @@
 
       function openGame(card) {
         title.textContent = card.querySelector('h3').textContent;
-        frame.src = card.dataset.src;
+        frame.src = card.dataset.src + '?v=' + SITE_VERSION;
         player.classList.add('open');
         player.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
