@@ -4,7 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light dark" />
-  <link rel="icon" href="data:," />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+Ethiopic:wght@500;600;700&display=swap" rel="stylesheet">
@@ -152,7 +153,7 @@
         <h1 id="welcome-title">Pick a game.<br>Play right away.</h1>
         <p lang="am">ይምረጡ፣ ይጫወቱ፣ በመዝናናት ይማሩ።</p>
       </div>
-      <div class="game-count" aria-label="12 games available"><div><strong>12</strong><small>games</small></div></div>
+      <div class="game-count" aria-label="11 games available"><div><strong>11</strong><small>games</small></div></div>
     </section>
 
     <section class="tool-row" aria-label="Game discovery controls">
@@ -170,13 +171,15 @@
     </section>
 
     <section aria-labelledby="play-title">
-      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">12 games</span></div>
+      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">11 games</span></div>
       <div class="games" id="gameGrid">
+        <!-- HIDDEN until perfected: Fidel Fall
         <button class="game-card featured" type="button" data-title="Fidel Fall ፊደል" data-category="learning" data-src="games/fidel-fall/" aria-label="Play Fidel Fall">
           <span class="cover"><img src="assets/fidel-fall.jpg" alt="Golden Amharic letter falling toward a blue block" /></span>
           <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
           <span class="card-body"><span class="tags"><span class="tag">Learning</span><span class="tag">Action</span></span><h3>Fidel Fall</h3><p lang="am">ትክክለኛውን ፊደል ይያዙ፤ ድምፁን ያዳምጡ፤ ተከታታይነቱን ይማሩ።</p></span>
         </button>
+        -->
 
         <button class="game-card secondary" type="button" data-title="Guess the Amharic Word Emoji ቃል" data-category="puzzle" data-src="games/guess-the-word-by-emoji/" aria-label="Play Guess the Amharic Word">
           <span class="cover"><img src="assets/emoji-word.jpg" alt="Smiling orange game tile with a cream puzzle piece" /></span>
@@ -287,7 +290,7 @@
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20260924g';
+      var SITE_VERSION = '20260924h';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
