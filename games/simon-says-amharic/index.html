@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Sans+Ethiopic:wght@500;700;800&display=swap" rel="stylesheet">
-  <title>Simon Says Amharic</title>
+  <title>Copy Me</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -146,18 +146,19 @@
     .pad .am { font-family: "Noto Sans Ethiopic", sans-serif; font-size: clamp(.88rem, 2.4vw, 1.38rem); font-weight: 800; line-height: 1.1; text-shadow: 0 1px 3px rgba(0,0,0,.45); }
     .pad .en { font-size: clamp(.62rem, 1.5vw, .82rem); opacity: .9; font-weight: 700; }
     .p0 { left: 34.5%; top: 5%; background: #c43d31; transform: rotate(45deg); }
-    .p0 > span { transform: rotate(-45deg); }
+    .p0 > .pad-label { transform: rotate(-45deg); }
     .p1 { right: 8%; top: 24%; background: #dc8b17; transform: rotate(105deg); }
-    .p1 > span { transform: rotate(-105deg); }
+    .p1 > .pad-label { transform: rotate(-105deg); }
     .p2 { right: 8%; bottom: 24%; background: #24775b; transform: rotate(165deg); }
-    .p2 > span { transform: rotate(-165deg); }
+    .p2 > .pad-label { transform: rotate(-165deg); }
     .p3 { left: 34.5%; bottom: 5%; background: #246ba5; transform: rotate(225deg); }
-    .p3 > span { transform: rotate(-225deg); }
+    .p3 > .pad-label { transform: rotate(-225deg); }
     .p4 { left: 8%; bottom: 24%; background: #713f87; transform: rotate(285deg); }
-    .p4 > span { transform: rotate(-285deg); }
+    .p4 > .pad-label { transform: rotate(-285deg); }
     .p5 { left: 8%; top: 24%; background: #a24d25; transform: rotate(345deg); }
-    .p5 > span { transform: rotate(-345deg); }
-    .pad > span { display: block; pointer-events: none; }
+    .p5 > .pad-label { transform: rotate(-345deg); }
+    .pad-label { display: grid; gap: 3px; place-items: center; max-width: 92%; pointer-events: none; }
+    .pad-label > span { display: block; }
     .center {
       position: absolute;
       width: 28%; aspect-ratio: 1; border-radius: 50%;
@@ -260,8 +261,8 @@
       .tiny-controls { font-size: .78rem; }
       .hud { margin-bottom: 5px; padding: 0 8px; }
       .board-wrap { width: 100%; }
-      .pad .am { font-size: clamp(.78rem, 4vw, 1.12rem); }
-      .pad .en { display: none; }
+      .pad .am { font-size: clamp(.72rem, 3.7vw, 1.06rem); }
+      .pad .en { display: block; font-size: clamp(.58rem, 2.7vw, .74rem); line-height: 1.05; }
       .woven-ring { inset: 1.5%; }
       .board { inset: 10%; }
     }
@@ -281,12 +282,12 @@
       <div class="board-wrap" id="boardWrap">
         <div class="woven-ring" aria-hidden="true"></div>
         <div class="board" aria-hidden="true"></div>
-        <button class="pad p0" data-index="0" aria-label="Red, ቀይ"><span class="am">ቀይ</span><span class="en">red</span></button>
-        <button class="pad p1" data-index="1" aria-label="Yellow, ቢጫ"><span class="am">ቢጫ</span><span class="en">yellow</span></button>
-        <button class="pad p2" data-index="2" aria-label="Green, አረንጓዴ"><span class="am">አረንጓዴ</span><span class="en">green</span></button>
-        <button class="pad p3" data-index="3" aria-label="Blue, ሰማያዊ"><span class="am">ሰማያዊ</span><span class="en">blue</span></button>
-        <button class="pad p4" data-index="4" aria-label="Purple, ሐምራዊ"><span class="am">ሐምራዊ</span><span class="en">purple</span></button>
-        <button class="pad p5" data-index="5" aria-label="Orange, ብርቱካናማ"><span class="am">ብርቱካናማ</span><span class="en">orange</span></button>
+        <button class="pad p0" data-index="0" aria-label="Red, ቀይ"><span class="pad-label"><span class="am">ቀይ</span><span class="en">red</span></span></button>
+        <button class="pad p1" data-index="1" aria-label="Yellow, ቢጫ"><span class="pad-label"><span class="am">ቢጫ</span><span class="en">yellow</span></span></button>
+        <button class="pad p2" data-index="2" aria-label="Green, አረንጓዴ"><span class="pad-label"><span class="am">አረንጓዴ</span><span class="en">green</span></span></button>
+        <button class="pad p3" data-index="3" aria-label="Blue, ሰማያዊ"><span class="pad-label"><span class="am">ሰማያዊ</span><span class="en">blue</span></span></button>
+        <button class="pad p4" data-index="4" aria-label="Purple, ሐምራዊ"><span class="pad-label"><span class="am">ሐምራዊ</span><span class="en">purple</span></span></button>
+        <button class="pad p5" data-index="5" aria-label="Orange, ብርቱካናማ"><span class="pad-label"><span class="am">ብርቱካናማ</span><span class="en">orange</span></span></button>
         <div class="center" id="center"><strong id="centerAm">ዝግጁ?</strong><span id="centerEn">Ready?</span></div>
       </div>
     </section>
@@ -333,7 +334,7 @@
   <div class="result" id="result" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
     <div class="result-card">
       <div class="result-mark" aria-hidden="true">★</div>
-      <h2 id="resultTitle">በጣም ጥሩ!</h2>
+      <h2 id="resultTitle">በጣም ጥሩ! · Great!</h2>
       <p id="resultText">You remembered 0 rounds.</p>
       <button class="primary" id="again" type="button">እንደገና · Play again</button>
     </div>
