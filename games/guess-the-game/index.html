@@ -126,7 +126,7 @@
         <button class="small-btn" id="restartSong" type="button">Restart song</button>
       </div>
       <div class="controls">
-        <button class="primary" id="drawSong" type="button">Draw &amp; play a song</button>
+        <button class="primary" id="drawSong" type="button" disabled>Loading player…</button>
         <button class="secondary" id="revealSong" type="button" disabled>Reveal answer</button>
       </div>
 
@@ -160,7 +160,7 @@
     var video = song.videos.find(function(v){return v && v.video_id;});
     return {title:song.title, artist:song.artist, videoId:video.video_id, url:video.url};
   });
-  var deck=[], current=null, round=0, revealed=false, awarded=false, scores={}, history=[], player=null, ytReady=false, resetArmed=false, toastTimer=null;
+  var deck=[], current=null, round=0, revealed=false, awarded=false, scores={}, history=[], player=null, ytReady=false, playerReady=false, resetArmed=false, toastTimer=null;
   var $=function(id){return document.getElementById(id);};
 
   function shuffle(items){
@@ -173,14 +173,21 @@
   function setPlaying(on){$('mystery').classList.toggle('playing',!!on);$('playPause').textContent=on?'Pause':'Play';}
   function updateCounts(){$('songTotal').textContent=all.length.toLocaleString();$('roundNumber').textContent=round;$('remainingCount').textContent=deck.length.toLocaleString();}
 
-  window.onYouTubeIframeAPIReady=function(){ytReady=true;if(current)loadPlayer(current.videoId);};
-  function loadPlayer(videoId){
-    if(!ytReady)return;
-    if(player&&player.loadVideoById){player.loadVideoById(videoId);player.playVideo();setPlaying(true);return;}
+  window.onYouTubeIframeAPIReady=function(){ytReady=true;preparePlayer();};
+  function preparePlayer(){
+    if(!ytReady||player)return;
     $('playerHost').innerHTML='<div id="ytPlayer"></div>';
-    player=new YT.Player('ytPlayer',{height:'100%',width:'100%',videoId:videoId,playerVars:{autoplay:1,controls:0,disablekb:1,fs:0,playsinline:1,rel:0},events:{onReady:function(e){e.target.playVideo();setPlaying(true);},onStateChange:function(e){if(e.data===YT.PlayerState.PLAYING)setPlaying(true);if(e.data===YT.PlayerState.PAUSED||e.data===YT.PlayerState.ENDED)setPlaying(false);}}});
+    player=new YT.Player('ytPlayer',{height:'100%',width:'100%',playerVars:{autoplay:0,controls:0,disablekb:1,fs:0,playsinline:1,rel:0},events:{onReady:function(e){
+      playerReady=true;
+      if(all.length&&e.target.cueVideoById)e.target.cueVideoById(all[0].videoId);
+      if(!current){$('drawSong').disabled=false;$('drawSong').textContent='Draw & play a song';}
+    },onStateChange:function(e){if(e.data===YT.PlayerState.PLAYING)setPlaying(true);if(e.data===YT.PlayerState.PAUSED||e.data===YT.PlayerState.ENDED||e.data===YT.PlayerState.CUED)setPlaying(false);}}});
   }
-  function destroyPlayer(){if(player&&player.destroy){player.destroy();}player=null;$('playerHost').innerHTML='';setPlaying(false);}
+  function loadPlayer(videoId){
+    if(!playerReady||!player||!player.loadVideoById)return;
+    player.loadVideoById(videoId);player.playVideo();setPlaying(true);
+  }
+  function stopPlayer(){if(playerReady&&player&&player.stopVideo){player.stopVideo();}setPlaying(false);}
 
   function drawSong(){
     resetArmed=false;$('resetGame').textContent='Reset game';
@@ -226,7 +233,7 @@
   }
   function resetGame(){
     if(!resetArmed){resetArmed=true;$('resetGame').textContent='Tap again to reset';setTimeout(function(){resetArmed=false;$('resetGame').textContent='Reset game';},2600);return;}
-    destroyPlayer();deck=shuffle(all);current=null;round=0;revealed=false;awarded=false;scores={};history=[];resetArmed=false;
+    stopPlayer();deck=shuffle(all);current=null;round=0;revealed=false;awarded=false;scores={};history=[];resetArmed=false;
     $('resetGame').textContent='Reset game';$('mystery').hidden=false;$('answer').hidden=true;$('listenTitle').textContent='Ready for the first song?';$('listenSub').textContent='The title stays hidden until you reveal it.';
     $('drawSong').disabled=false;$('drawSong').textContent='Draw & play a song';$('revealSong').disabled=true;$('playControls').hidden=true;$('chooseWinner').disabled=true;$('winnerForm').hidden=true;$('winnerName').value='';$('winnerName').disabled=true;$('awardPoint').disabled=true;$('awardPoint').textContent='Award point';
     updateCounts();renderScores();renderHistory();notify('New game ready.');
@@ -235,7 +242,10 @@
   $('playPause').addEventListener('click',function(){if(!player||!player.getPlayerState){notify('Player is still loading.');return;}if(player.getPlayerState()===YT.PlayerState.PLAYING){player.pauseVideo();}else{player.playVideo();}});
   $('restartSong').addEventListener('click',function(){if(player&&player.seekTo){player.seekTo(0,true);player.playVideo();}});
   deck=shuffle(all);updateCounts();
-  if(!all.length){$('drawSong').disabled=true;$('listenTitle').textContent='Song catalog unavailable';$('listenSub').textContent='The playable song list could not be loaded.';}
+  if(!all.length){$('drawSong').disabled=true;$('listenTitle').textContent='Song catalog unavailable';$('listenSub').textContent='The playable song list could not be loaded.';}else{
+    $('drawSong').disabled=true;$('drawSong').textContent='Loading player…';
+    if(window.YT&&YT.Player){ytReady=true;preparePlayer();}
+  }
 })();
 </script>
 </body>
