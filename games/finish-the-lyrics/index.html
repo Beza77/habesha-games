@@ -483,7 +483,7 @@
     // ---- hint modal ----
     $("btnHint").addEventListener("click", () => {
       if (!g || !g.current) return;
-      $("hintFrame").src = "https://www.youtube.com/embed/" + g.current.song.video_id + "?autoplay=1&rel=0";
+      $("hintFrame").src = "https://www.youtube.com/embed/" + g.current.song.video_id + "?autoplay=1&rel=0&playsinline=1";
       $("hintModal").classList.add("open");
     });
     function closeHint() {
