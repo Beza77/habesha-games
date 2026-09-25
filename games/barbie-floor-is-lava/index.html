@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>Barbie — The Floor Is Lava</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap');
+    :root {
+      color-scheme: light dark;
+      --ink:#311632; --muted:#76566f; --paper:#fff7fb; --panel:#ffffff;
+      --pink:#e91478; --pink-dark:#b90859; --rose:#ff6cae; --yellow:#ffd648;
+      --blue:#43b8e9; --lavender:#e6c8f2; --line:#f0c9dd; --shadow:rgba(98,21,64,.18);
+      --button:#fff; --focus:#1e78a1;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --ink:#fff1f8; --muted:#d6b7c8; --paper:#1b101c; --panel:#29152a; --pink:#ff4b9b; --pink-dark:#ff70ac; --rose:#ff83b8; --yellow:#ffe06a; --blue:#6bd1f5; --lavender:#5b3862; --line:#633052; --shadow:rgba(0,0,0,.38); --button:#3a1c35; --focus:#8adfff; }
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;overflow-x:hidden}
+    body{background:var(--paper);color:var(--ink);font-family:"Nunito",sans-serif;padding:clamp(12px,3vw,28px);padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+    main{max-width:940px;margin:0 auto}
+    .game-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:4px 2px 14px}
+    h1{font:700 clamp(31px,6vw,54px)/.96 "Fredoka",sans-serif;margin:0;letter-spacing:-1.4px;color:var(--pink)}
+    .game-intro p{margin:8px 0 0;color:var(--muted);font-weight:700;font-size:clamp(14px,2vw,17px)}
+    .objective{flex:0 0 auto;background:var(--yellow);color:#4a2d00;border:2px solid #4a2d00;padding:8px 12px;border-radius:99px;font-weight:900;font-size:13px;box-shadow:3px 3px 0 #4a2d00;transform:rotate(1deg)}
+    .frame{position:relative;background:var(--panel);border:3px solid var(--ink);border-radius:24px 24px 14px 14px;overflow:hidden;box-shadow:0 18px 50px var(--shadow);touch-action:none}
+    .hud{position:absolute;inset:12px 12px auto;z-index:3;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+    .hud-cluster{display:flex;gap:8px;flex-wrap:wrap}
+    .stat{background:rgba(255,255,255,.9);color:#32152e;border:2px solid #32152e;border-radius:14px;padding:7px 10px;font:800 13px/1 "Nunito",sans-serif;box-shadow:2px 2px 0 #32152e}
+    .stat strong{color:#d0086b}
+    canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#ffd7e9}
+    .overlay{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:rgba(45,9,36,.52);padding:20px;backdrop-filter:blur(3px)}
+    .overlay[hidden]{display:none}
+    .start-card{max-width:460px;text-align:center;background:var(--panel);color:var(--ink);border:3px solid var(--ink);border-radius:24px;padding:clamp(20px,5vw,34px);box-shadow:7px 8px 0 var(--ink)}
+    .start-card .tiny{font-weight:900;color:var(--pink);margin-bottom:8px}
+    .start-card h2{font:700 clamp(28px,7vw,46px)/1 "Fredoka",sans-serif;margin:0 0 11px}
+    .start-card p{margin:0 0 18px;color:var(--muted);font-weight:700;line-height:1.45}
+    .primary{appearance:none;border:2px solid var(--ink);border-radius:14px;background:var(--pink);color:white;padding:12px 24px;font:800 17px "Nunito",sans-serif;box-shadow:4px 4px 0 var(--ink);cursor:pointer}
+    .primary:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+    .primary:focus-visible,.control:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(68px,1fr));gap:10px;max-width:500px;margin:14px auto 0}
+    .control{min-height:56px;border:2px solid var(--ink);border-radius:15px;background:var(--button);color:var(--ink);font:900 16px "Nunito",sans-serif;box-shadow:3px 4px 0 var(--ink);touch-action:manipulation;cursor:pointer;user-select:none;-webkit-user-select:none}
+    .control.jump{background:var(--pink);color:white}
+    .control:active,.control.active{transform:translate(2px,3px);box-shadow:1px 1px 0 var(--ink)}
+    .how{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;margin:18px 4px 0;color:var(--muted);font-size:14px;font-weight:700;line-height:1.45}
+    .how strong{color:var(--ink)}
+    .key{display:inline-block;border:1.5px solid var(--ink);border-bottom-width:3px;border-radius:6px;background:var(--panel);color:var(--ink);padding:1px 6px;margin:0 2px;font-size:12px}
+    .cast{display:flex;align-items:center;gap:8px;color:var(--ink);white-space:nowrap}
+    .cast-dots{display:flex}
+    .cast-dot{width:30px;height:30px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;background:var(--rose);color:white;font:800 13px "Fredoka";margin-left:-5px}
+    .cast-dot:first-child{margin-left:0;background:var(--blue)}
+    @media (max-width:620px){
+      body{padding:10px}
+      .game-intro{align-items:flex-start}.objective{display:none}
+      .frame{border-radius:18px 18px 10px 10px;border-width:2px}
+      canvas{aspect-ratio:4/3}
+      .hud{inset:8px 8px auto}.stat{font-size:11px;padding:6px 8px;border-radius:10px}
+      .how{grid-template-columns:1fr}.desktop-tip{display:none}.cast{justify-content:center}
+    }
+    @media (prefers-reduced-motion:reduce){.objective{transform:none}}
+  </style>
+</head>
+<body>
+<main>
+  <section class="game-intro" aria-labelledby="game-title">
+    <div><h1 id="game-title">The floor is lava!</h1><p>Leap across the playroom, collect hearts, and reach Ken.</p></div>
+    <div class="objective">3 rooms to win</div>
+  </section>
+
+  <section class="frame" id="gameFrame" aria-label="Barbie floor is lava game">
+    <div class="hud">
+      <div class="hud-cluster"><div class="stat">ROOM <strong id="room">1/3</strong></div><div class="stat">HEARTS <strong id="score">0</strong></div></div>
+      <div class="stat">SAFE STEPS <strong id="lives">3</strong></div>
+    </div>
+    <canvas id="game" width="960" height="540" role="img" aria-label="A colorful playroom game where Barbie jumps between toys above a lava floor"></canvas>
+    <div class="overlay" id="overlay">
+      <div class="start-card">
+        <div class="tiny">BARBIE &amp; KEN'S PLAYROOM</div>
+        <h2 id="overlayTitle">Don’t touch the floor</h2>
+        <p id="overlayText">The rug turned into lava. Jump onto blocks, books, and toy boxes. Ken is waiting at the far side!</p>
+        <button class="primary" id="playBtn">Start jumping</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="controls" aria-label="Game controls">
+    <button class="control" id="leftBtn" aria-label="Move left">← Left</button>
+    <button class="control jump" id="jumpBtn" aria-label="Jump">Jump ↑</button>
+    <button class="control" id="rightBtn" aria-label="Move right">Right →</button>
+  </div>
+
+  <div class="how">
+    <div><strong>How to play:</strong> land on the toys, grab the floating hearts, and find Ken in each room. <span class="desktop-tip">Use <span class="key">←</span><span class="key">→</span> and <span class="key">SPACE</span>.</span></div>
+    <div class="cast"><span>Playing together</span><span class="cast-dots"><span class="cast-dot">K</span><span class="cast-dot">B</span></span></div>
+  </div>
+</main>
+<script>
+(function(){
+  'use strict';
+  const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+  const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),text=document.getElementById('overlayText'),playBtn=document.getElementById('playBtn');
+  const scoreEl=document.getElementById('score'),roomEl=document.getElementById('room'),livesEl=document.getElementById('lives');
+  const W=960,H=540,ground=478;
+  let running=false,won=false,room=1,score=0,lives=3,last=0,acc=0,shake=0;
+  const keys={left:false,right:false};
+  const player={x:72,y:390,w:38,h:80,vx:0,vy:0,on:false,dir:1,anim:0};
+  let platforms=[],hearts=[],ken={x:860,y:350},particles=[];
+  let audio=null;
+  const palettes=[
+    {wall:'#ffd8ea',stripe:'#f8bed9',lava:'#fa3b42',lava2:'#ff9c28',trim:'#e21877'},
+    {wall:'#ccefff',stripe:'#a9e2fa',lava:'#f33e49',lava2:'#ffba35',trim:'#168fbe'},
+    {wall:'#eee0ff',stripe:'#dcc6f6',lava:'#f0454f',lava2:'#ff9e30',trim:'#8b4cb0'}
+  ];
+  function resize(){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0)}
+  addEventListener('resize',resize); resize();
+  function beep(freq,dur,type){try{if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)(); if(audio.state==='suspended')audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type=type||'sine';o.frequency.value=freq;g.gain.setValueAtTime(.06,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+dur);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+dur)}catch(e){}}
+  function makeRoom(n){
+    const sets=[
+      [{x:0,y:455,w:135,h:36,t:'rug'},{x:188,y:410,w:122,h:38,t:'blocks'},{x:362,y:355,w:120,h:36,t:'book'},{x:535,y:408,w:112,h:44,t:'box'},{x:706,y:348,w:112,h:38,t:'blocks'},{x:840,y:427,w:120,h:42,t:'rug'}],
+      [{x:0,y:442,w:128,h:45,t:'rug'},{x:170,y:365,w:112,h:42,t:'box'},{x:325,y:430,w:100,h:34,t:'book'},{x:470,y:328,w:126,h:40,t:'blocks'},{x:640,y:400,w:112,h:42,t:'box'},{x:820,y:330,w:140,h:40,t:'rug'}],
+      [{x:0,y:442,w:122,h:45,t:'rug'},{x:157,y:400,w:92,h:36,t:'book'},{x:292,y:337,w:108,h:41,t:'blocks'},{x:450,y:398,w:100,h:42,t:'box'},{x:598,y:314,w:118,h:38,t:'book'},{x:760,y:382,w:92,h:41,t:'blocks'},{x:872,y:315,w:88,h:42,t:'rug'}]
+    ];
+    platforms=sets[n-1].map(o=>Object.assign({},o));
+    hearts=platforms.slice(1,-1).filter((_,i)=>i%2===0||n===3).map((p,i)=>({x:p.x+p.w/2,y:p.y-42,r:12,taken:false,bob:i*.7}));
+    const end=platforms[platforms.length-1];ken={x:end.x+end.w-58,y:end.y-78};
+    player.x=54;player.y=platforms[0].y-player.h;player.vx=0;player.vy=0;player.on=true;
+    roomEl.textContent=n+'/3';
+  }
+  function jump(){if(!running)return;if(player.on){player.vy=-610;player.on=false;beep(420,.08,'square')}}
+  function resetGame(){room=1;score=0;lives=3;won=false;scoreEl.textContent='0';livesEl.textContent='3';particles=[];makeRoom(1)}
+  function start(){if(won||lives<=0)resetGame();overlay.hidden=true;running=true;last=performance.now();beep(660,.12);requestAnimationFrame(loop)}
+  playBtn.addEventListener('click',start);
+  function bindHold(id,key){const el=document.getElementById(id);const down=e=>{e.preventDefault();keys[key]=true;el.classList.add('active');if(audio&&audio.state==='suspended')audio.resume()};const up=e=>{e.preventDefault();keys[key]=false;el.classList.remove('active')};el.addEventListener('pointerdown',down);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.addEventListener('pointerleave',up)}
+  bindHold('leftBtn','left');bindHold('rightBtn','right');
+  document.getElementById('jumpBtn').addEventListener('pointerdown',e=>{e.preventDefault();jump()});
+  addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='ArrowLeft')keys.left=true;if(e.code==='ArrowRight')keys.right=true;if(e.code==='Space')jump()});
+  addEventListener('keyup',e=>{if(e.code==='ArrowLeft')keys.left=false;if(e.code==='ArrowRight')keys.right=false});
+  canvas.addEventListener('pointerdown',e=>{if(running)jump()});
+  function fail(){
+    lives--;livesEl.textContent=lives;shake=10;beep(110,.25,'sawtooth');
+    if(lives<=0){running=false;title.textContent='The lava got you';text.textContent='Almost! Try again and keep Barbie on the toys.';playBtn.textContent='Try again';overlay.hidden=false}
+    else{const p=platforms[0];player.x=p.x+50;player.y=p.y-player.h;player.vx=0;player.vy=0;player.on=true}
+  }
+  function nextRoom(){
+    running=false;
+    if(room===3){won=true;title.textContent='You found Ken!';text.textContent='Barbie made it across all three lava rooms. Perfect teamwork! Hearts collected: '+score+'.';playBtn.textContent='Play again';overlay.hidden=false;beep(784,.12);setTimeout(()=>beep(988,.18),120)}
+    else{room++;makeRoom(room);title.textContent='Room '+room+' is ready';text.textContent='The toys moved and the lava is bubbling. Keep going — Ken is waiting!';playBtn.textContent='Jump in';overlay.hidden=false;beep(720,.12)}
+  }
+  function burst(x,y,color){for(let i=0;i<12;i++)particles.push({x,y,vx:(Math.random()-.5)*180,vy:-Math.random()*180-40,life:1,color})}
+  function update(dt){
+    const accel=1500,max=260,friction=player.on?.78:.94;
+    if(keys.left){player.vx-=accel*dt;player.dir=-1}if(keys.right){player.vx+=accel*dt;player.dir=1}if(!keys.left&&!keys.right)player.vx*=Math.pow(friction,dt*60);
+    player.vx=Math.max(-max,Math.min(max,player.vx));player.vy+=1500*dt;
+    const prevBottom=player.y+player.h;player.x+=player.vx*dt;player.y+=player.vy*dt;player.on=false;player.x=Math.max(0,Math.min(W-player.w,player.x));
+    for(const p of platforms){if(player.vy>=0&&player.x+player.w>p.x+5&&player.x<p.x+p.w-5&&prevBottom<=p.y+5&&player.y+player.h>=p.y){player.y=p.y-player.h;player.vy=0;player.on=true}}
+    if(player.y+player.h>ground+28)fail();
+    for(const h of hearts){h.bob+=dt*3;if(!h.taken){const dx=player.x+player.w/2-h.x,dy=player.y+player.h/2-h.y;if(dx*dx+dy*dy<1100){h.taken=true;score++;scoreEl.textContent=score;burst(h.x,h.y,'#ff2e87');beep(880,.1)}}}
+    if(player.x+player.w>ken.x-8&&Math.abs((player.y+player.h)-(ken.y+78))<65)nextRoom();
+    player.anim+=dt*(Math.abs(player.vx)*.035+2);
+    particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=420*dt;p.life-=dt*1.6});particles=particles.filter(p=>p.life>0);
+    shake*=.82;
+  }
+  function rr(x,y,w,h,r,fill,stroke,lw){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.lineWidth=lw||2;ctx.strokeStyle=stroke;ctx.stroke()}}
+  function heart(x,y,s,color){ctx.save();ctx.translate(x,y);ctx.beginPath();ctx.moveTo(0,s*.8);ctx.bezierCurveTo(-s*1.35,0,-s,-s*.9,0,-s*.25);ctx.bezierCurveTo(s,-s*.9,s*1.35,0,0,s*.8);ctx.fillStyle=color;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#7d1648';ctx.stroke();ctx.restore()}
+  function drawRoom(){
+    const p=palettes[room-1];ctx.fillStyle=p.wall;ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=.25;ctx.fillStyle=p.stripe;for(let x=-60;x<W;x+=120){ctx.save();ctx.translate(x,0);ctx.rotate(-.2);ctx.fillRect(0,0,48,390);ctx.restore()}ctx.globalAlpha=1;
+    ctx.fillStyle='#fff';ctx.fillRect(95,84,155,174);ctx.strokeStyle='#783857';ctx.lineWidth=7;ctx.strokeRect(95,84,155,174);ctx.fillStyle='#82d5f5';ctx.fillRect(105,94,135,154);ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(173,94);ctx.lineTo(173,248);ctx.moveTo(105,170);ctx.lineTo(240,170);ctx.stroke();
+    ctx.fillStyle='#fff4a8';ctx.beginPath();ctx.arc(140,130,26,0,Math.PI*2);ctx.fill();
+    rr(700,105,150,115,12,'#fff7fb','#82355e',6);ctx.fillStyle=p.trim;ctx.beginPath();ctx.arc(775,160,36,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='700 25px Fredoka';ctx.textAlign='center';ctx.fillText(room===1?'PLAY':room===2?'DREAM':'DANCE',775,169);
+    ctx.fillStyle=p.lava;ctx.fillRect(0,ground,W,H-ground);for(let x=0;x<W;x+=52){ctx.fillStyle=(x/52)%2?p.lava2:'#ffcf3b';ctx.beginPath();ctx.arc(x+25,ground+12+Math.sin(x)*6,20,0,Math.PI*2);ctx.fill()}
+    ctx.fillStyle='rgba(255,255,255,.5)';for(let x=20;x<W;x+=110){ctx.beginPath();ctx.arc(x,ground+36+Math.sin(x)*8,7,0,Math.PI*2);ctx.fill()}
+  }
+  function drawPlatform(p){
+    if(p.t==='rug'){rr(p.x,p.y,p.w,p.h,10,'#61c9e9','#38203b',4);ctx.fillStyle='#fff2a1';for(let x=p.x+12;x<p.x+p.w;x+=26)ctx.fillRect(x,p.y+9,10,p.h-18)}
+    if(p.t==='box'){rr(p.x,p.y,p.w,p.h,6,'#ffcc42','#38203b',4);ctx.fillStyle='#ef4a91';ctx.fillRect(p.x+8,p.y+10,p.w-16,10);ctx.strokeStyle='#38203b';ctx.beginPath();ctx.moveTo(p.x+p.w/2,p.y);ctx.lineTo(p.x+p.w/2,p.y+p.h);ctx.stroke()}
+    if(p.t==='book'){rr(p.x,p.y+10,p.w,p.h-10,5,'#8659bd','#38203b',4);rr(p.x+6,p.y,p.w-10,p.h-10,5,'#ff658e','#38203b',4);ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(p.x+25,p.y+8);ctx.lineTo(p.x+p.w-20,p.y+8);ctx.stroke()}
+    if(p.t==='blocks'){const colors=['#ff5e9c','#52c6e8','#ffd24c'];const bw=p.w/3;for(let i=0;i<3;i++){rr(p.x+i*bw,p.y,p.w/3+2,p.h,4,colors[i],'#38203b',4);ctx.fillStyle='#38203b';ctx.font='700 19px Fredoka';ctx.textAlign='center';ctx.fillText(['B','K','♥'][i],p.x+i*bw+bw/2,p.y+26)}}
+  }
+  function drawPerson(o,isKen){
+    ctx.save();ctx.translate(o.x,o.y);if(!isKen&&player.dir<0){ctx.translate(player.w,0);ctx.scale(-1,1)}
+    const bounce=isKen?Math.sin(performance.now()/300)*2:Math.sin(player.anim)*2;ctx.translate(0,bounce);
+    ctx.strokeStyle='#51273b';ctx.lineWidth=5;ctx.lineCap='round';
+    if(isKen){
+      ctx.fillStyle='#f2bd92';ctx.beginPath();ctx.arc(18,16,13,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#d5a466';ctx.beginPath();ctx.arc(18,11,13,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#58b9e5';rr(4,31,29,31,7,'#57bce6','#51273b',4);ctx.beginPath();ctx.moveTo(8,40);ctx.lineTo(-2,27+Math.sin(performance.now()/180)*6);ctx.stroke();ctx.beginPath();ctx.moveTo(11,61);ctx.lineTo(8,78);ctx.moveTo(28,61);ctx.lineTo(31,78);ctx.stroke();
+    } else {
+      ctx.fillStyle='#7d4b2e';ctx.beginPath();ctx.arc(19,17,17,Math.PI*.8,Math.PI*2.2);ctx.fill();ctx.fillStyle='#f1b68b';ctx.beginPath();ctx.arc(19,18,13,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#e91478';ctx.beginPath();ctx.moveTo(6,34);ctx.lineTo(32,34);ctx.lineTo(38,64);ctx.lineTo(0,64);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(5,40);ctx.lineTo(-5,53);ctx.moveTo(32,40);ctx.lineTo(42,29);ctx.stroke();const leg=Math.sin(player.anim)*5;ctx.beginPath();ctx.moveTo(10,64);ctx.lineTo(8+leg,80);ctx.moveTo(28,64);ctx.lineTo(30-leg,80);ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(15,17,2,0,7);ctx.arc(23,17,2,0,7);ctx.fill();ctx.strokeStyle='#a83d66';ctx.lineWidth=2;ctx.beginPath();ctx.arc(19,22,4,0,Math.PI);ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function draw(){
+    ctx.save();if(shake)ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);drawRoom();platforms.forEach(drawPlatform);
+    hearts.forEach(h=>{if(!h.taken)heart(h.x,h.y+Math.sin(h.bob)*5,h.r,'#ff3e91')});
+    drawPerson(ken,true);ctx.fillStyle='#43213b';ctx.font='800 15px Nunito';ctx.textAlign='center';ctx.fillText('KEN',ken.x+18,ken.y-9);
+    drawPerson(player,false);
+    particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life);heart(p.x,p.y,5,p.color)});ctx.globalAlpha=1;ctx.restore();
+  }
+  function loop(t){if(!running){draw();return}const dt=Math.min((t-last)/1000,.032);last=t;acc+=dt;while(acc>1/120){update(1/120);acc-=1/120}draw();if(running)requestAnimationFrame(loop)}
+  makeRoom(1);draw();
+})();
+</script>
+</body>
+</html>
