@@ -152,7 +152,7 @@
         <h1 id="welcome-title">Pick a game.<br>Play right away.</h1>
         <p lang="am">ይምረጡ፣ ይጫወቱ፣ በመዝናናት ይማሩ።</p>
       </div>
-      <div class="game-count" aria-label="14 games available"><div><strong>14</strong><small>games</small></div></div>
+      <div class="game-count" aria-label="12 games available"><div><strong>12</strong><small>games</small></div></div>
     </section>
 
     <section class="tool-row" aria-label="Game discovery controls">
@@ -170,7 +170,7 @@
     </section>
 
     <section aria-labelledby="play-title">
-      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">14 games</span></div>
+      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">12 games</span></div>
       <div class="games" id="gameGrid">
         <button class="game-card featured" type="button" data-title="Fidel Fall ፊደል" data-category="learning" data-src="games/fidel-fall/" aria-label="Play Fidel Fall">
           <span class="cover"><img src="assets/fidel-fall.jpg" alt="Golden Amharic letter falling toward a blue block" /></span>
@@ -202,11 +202,13 @@
           <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">Stacking</span></span><h3>Injera Stack</h3><p>Time each drop and build a tall, steady stack of injera on the woven sefed.</p></span>
         </button>
 
+        <!-- HIDDEN until perfected: Anebabero
         <button class="game-card secondary" type="button" data-title="Anebabero Injera Kibe Berbere Stacking" data-category="puzzle" data-src="games/anebabero/" aria-label="Play Anebabero">
           <span class="cover"><img src="assets/anebabero.jpg" alt="Injera layers topped with golden seasoned butter" /></span>
           <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
           <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">Three-step stack</span></span><h3>Anebabero</h3><p>Land the injera, center the kibe, and sprinkle berbere to complete every layer.</p></span>
         </button>
+        -->
         <button class="game-card secondary" type="button" data-title="Memory Match" data-category="puzzle" data-src="games/memory-match/" aria-label="Play Memory Match">
                   <span class="cover"><img src="assets/memory-match.jpg" alt="Memory Match card game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
@@ -219,11 +221,13 @@
                   <span class="card-body"><span class="tags"><span class="tag">Learning</span></span><h3>Simon Says Amharic</h3><p lang="am">ቅደም ተከተሉን ይድገሙ፤ የአማርኛ ቃላትን ይማሩ።</p></span>
                 </button>
 
+                <!-- HIDDEN until perfected: Finish the Lyrics
                 <button class="game-card secondary" type="button" data-title="Finish the Lyrics" data-category="music" data-src="games/finish-the-lyrics/" aria-label="Play Finish the Lyrics">
                   <span class="cover"><img src="assets/finish-the-lyrics.jpg" alt="Finish the Lyrics game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
                   <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Finish the Lyrics</h3><p lang="am">የመዝሙሩን ቀጣይ መስመር ምረጥ፤ ነጥብ ሰብስብ።</p></span>
                 </button>
+                -->
 
                 <button class="game-card secondary" type="button" data-title="Worship Song Bingo" data-category="music" data-src="games/worship-song-bingo/" aria-label="Play Worship Song Bingo">
                   <span class="cover"><img src="assets/worship-song-bingo.jpg" alt="Worship Song Bingo game" /></span>
@@ -283,7 +287,7 @@
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20260924f';
+      var SITE_VERSION = '20260924g';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
