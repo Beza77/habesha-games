@@ -152,7 +152,7 @@
         <h1 id="welcome-title">Pick a game.<br>Play right away.</h1>
         <p lang="am">ይምረጡ፣ ይጫወቱ፣ በመዝናናት ይማሩ።</p>
       </div>
-      <div class="game-count" aria-label="8 games available"><div><strong>8</strong><small>games</small></div></div>
+      <div class="game-count" aria-label="10 games available"><div><strong>10</strong><small>games</small></div></div>
     </section>
 
     <section class="tool-row" aria-label="Game discovery controls">
@@ -165,11 +165,12 @@
         <button class="filter" type="button" data-filter="learning" aria-pressed="false">Learning</button>
         <button class="filter" type="button" data-filter="puzzle" aria-pressed="false">Puzzles</button>
         <button class="filter" type="button" data-filter="action" aria-pressed="false">Action</button>
+        <button class="filter" type="button" data-filter="music" aria-pressed="false">Music</button>
       </div>
     </section>
 
     <section aria-labelledby="play-title">
-      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">8 games</span></div>
+      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">10 games</span></div>
       <div class="games" id="gameGrid">
         <button class="game-card featured" type="button" data-title="Fidel Fall ፊደል" data-category="learning" data-src="games/fidel-fall/" aria-label="Play Fidel Fall">
           <span class="cover"><img src="assets/fidel-fall.jpg" alt="Golden Amharic letter falling toward a blue block" /></span>
@@ -229,6 +230,18 @@
           <span class="cover"><img src="assets/simon-says-amharic.jpg" alt="Simon Says Amharic game" /></span>
           <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
           <span class="card-body"><span class="tags"><span class="tag">Learning</span></span><h3>Simon Says Amharic</h3><p lang="am">ቅደም ተከተሉን ይድገሙ፤ የአማርኛ ቃላትን ይማሩ።</p></span>
+        </button>
+
+        <button class="game-card secondary" type="button" data-title="Finish the Lyrics" data-category="music" data-src="games/finish-the-lyrics/" aria-label="Play Finish the Lyrics">
+          <span class="cover"><img src="assets/finish-the-lyrics.jpg" alt="Finish the Lyrics game" /></span>
+          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Finish the Lyrics</h3><p lang="am">የመዝሙሩን ቀጣይ መስመር ምረጥ፤ ነጥብ ሰብስብ።</p></span>
+        </button>
+
+        <button class="game-card secondary" type="button" data-title="Worship Song Bingo" data-category="music" data-src="games/worship-song-bingo/" aria-label="Play Worship Song Bingo">
+          <span class="cover"><img src="assets/worship-song-bingo.jpg" alt="Worship Song Bingo game" /></span>
+          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Worship Song Bingo</h3><p lang="am">የመዝሙር ብንጎ — ካርድህን ሙላ፤ ብንጎ ብለህ ጩኸት!</p></span>
         </button>
 
     <iframe class="game-frame" id="gameFrame" title="Game" allow="autoplay; fullscreen" src="about:blank"></iframe>
