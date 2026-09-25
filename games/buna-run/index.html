@@ -55,7 +55,8 @@
     .control svg{width:25px;height:25px;fill:currentColor}.jump{background:var(--button);color:var(--button-ink);font-size:17px}
     .below{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:14px}
     .tips,.legend{border:1px solid var(--line);border-radius:18px;background:var(--panel);padding:16px 18px}
-    .tips h2,.legend h2{font-size:14px;margin:0 0 10px;color:var(--ink)}
+    .tips summary,.legend h2{font-size:14px;margin:0;color:var(--ink);font-weight:800}
+    .tips summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px}.tips summary::-webkit-details-marker{display:none}.tips summary::after{content:"+";font-size:20px;line-height:1;color:var(--orange)}.tips[open] summary::after{content:"−"}.tips[open] summary{margin-bottom:10px}
     .tip-list{display:flex;flex-wrap:wrap;gap:8px}.tip{font-size:12px;font-weight:700;color:var(--muted);padding:7px 9px;border-radius:9px;background:color-mix(in srgb,var(--panel) 82%,var(--sun))}
     .legend-row{display:flex;gap:14px;flex-wrap:wrap}.legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);font-weight:700}.swatch{width:18px;height:18px;border-radius:6px;background:#d46c38}.swatch.bean{border-radius:50%;background:#773b28}.swatch.boost{background:#f2b828;transform:rotate(45deg);border-radius:4px}
     .toast{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);font-family:"Fugaz One",sans-serif;color:white;font-size:clamp(25px,6vw,48px);text-shadow:0 4px 0 rgba(68,35,26,.3);z-index:4;opacity:0;pointer-events:none}.toast.show{animation:pop .65s ease-out}@keyframes pop{0%{opacity:0;transform:translate(-50%,-25%) scale(.7)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
@@ -127,7 +128,7 @@
   </nav>
 
   <div class="below">
-    <aside class="tips"><h2>Runner tips</h2><div class="tip-list"><span class="tip">Two jumps before landing</span><span class="tip">Duck under hanging banners</span><span class="tip">Sini streaks raise your multiplier</span><span class="tip">Buna boost ignores one crash</span></div></aside>
+    <details class="tips"><summary>Runner tips</summary><div class="tip-list"><span class="tip">Two jumps before landing</span><span class="tip">Duck under hanging banners</span><span class="tip">Sini streaks raise your multiplier</span><span class="tip">Buna boost ignores one crash</span></div></details>
     <aside class="legend"><h2>On the street</h2><div class="legend-row"><span class="legend-item"><i class="swatch"></i>Obstacle</span><span class="legend-item"><i class="swatch bean"></i>Sini</span><span class="legend-item"><i class="swatch boost"></i>Buna boost</span></div></aside>
   </div>
 </main>
@@ -141,7 +142,7 @@
   var distance=0,cups=0,combo=1,streak=0,level=1,lives=3,speed=330,spawnTimer=1.5,boost=0,shake=0,nightMix=0;
   var entities=[],particles=[],clouds=[],audioCtx=null,muted=false,beatTimer=0,beatStep=0;
   var player={x:180,y:0,w:54,h:88,vy:0,jumps:0,duck:false,inv:0,anim:0};
-  var modes={warm:{speed:300,lives:3,spawn:1.25},street:{speed:360,lives:2,spawn:1.05},blitz:{speed:425,lives:1,spawn:.9}};
+  var modes={warm:{speed:245,lives:3,spawn:1.45},street:{speed:300,lives:2,spawn:1.2},blitz:{speed:355,lives:1,spawn:1}};
 
   function resize(){
     var r=canvas.getBoundingClientRect();dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);W=r.width;H=r.height;groundY=H*.78;ctx.setTransform(dpr,0,0,dpr,0,0);player.x=Math.max(95,W*.2);if(!running)player.y=groundY-player.h;
@@ -191,7 +192,7 @@
     }else{entities.push({kind:'boost',x:x,y:groundY-145,w:40,h:40,t:0,got:false})}
   }
   function update(dt){
-    distance+=speed*dt*.04;level=1+Math.floor(distance/250);var cfg=modes[mode];speed=cfg.speed+Math.min(260,(level-1)*23)+(boost>0?80:0);nightMix=Math.min(1,Math.max(0,(distance-700)/700));
+    distance+=speed*dt*.035;level=1+Math.floor(distance/400);var cfg=modes[mode];speed=cfg.speed+Math.min(170,(level-1)*15)+(boost>0?70:0);nightMix=Math.min(1,Math.max(0,(distance-1000)/900));
     player.anim+=dt*(9+speed/90);player.inv=Math.max(0,player.inv-dt);boost=Math.max(0,boost-dt);
     if(player.duck&&player.y<groundY-player.h)player.vy+=1100*dt;
     player.vy+=1820*dt;player.y+=player.vy*dt;
@@ -215,7 +216,7 @@
   }
   function burst(x,y,color,n){for(var i=0;i<n;i++)particles.push({x:x,y:y,vx:(Math.random()-.5)*220,vy:-40-Math.random()*220,life:.4+Math.random()*.5,color:color,s:3+Math.random()*5})}
   function showToast(text){toast.textContent=text;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show')}
-  function updateHUD(){distanceEl.textContent=Math.floor(distance)+' m';cupsEl.textContent=cups;levelEl.textContent=level;comboEl.textContent='×'+combo;objectiveEl.textContent=(boost>0?'Boost '+boost.toFixed(1)+'s · ':'')+'♥ '.repeat(Math.max(0,lives))+(distance<250?' · collect 10 sini':level<4?' · keep your streak':' · city pace rising')}
+  function updateHUD(){distanceEl.textContent=Math.floor(distance)+' m';cupsEl.textContent=cups;levelEl.textContent=level;comboEl.textContent='×'+combo;objectiveEl.textContent=(boost>0?'Boost '+boost.toFixed(1)+'s · ':'')+'♥ '.repeat(Math.max(0,lives))+(distance<400?' · collect 10 sini':level<4?' · keep your streak':' · city pace rising')}
 
   function roundedRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
   function lerp(a,b,t){return a+(b-a)*t}
@@ -231,7 +232,7 @@
   }
   function drawPlayer(){
     var x=player.x,y=player.y,duck=player.duck&&player.y>=groundY-player.h-2,flash=player.inv>0&&Math.floor(player.inv*10)%2===0;if(flash)ctx.globalAlpha=.35;
-    ctx.save();ctx.translate(x,y);if(boost>0){ctx.strokeStyle='rgba(255,225,87,.78)';ctx.lineWidth=6;ctx.beginPath();ctx.arc(29,44,50+Math.sin(player.anim)*3,0,Math.PI*2);ctx.stroke()}
+    ctx.save();ctx.translate(x+player.w,y);ctx.scale(-1,1);if(boost>0){ctx.strokeStyle='rgba(255,225,87,.78)';ctx.lineWidth=6;ctx.beginPath();ctx.arc(29,44,50+Math.sin(player.anim)*3,0,Math.PI*2);ctx.stroke()}
     var bob=Math.sin(player.anim)*3;if(duck){ctx.translate(0,27);ctx.rotate(-.15)}else ctx.translate(0,bob);
     var leg=Math.sin(player.anim)*15;ctx.strokeStyle='#251c1a';ctx.lineCap='round';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(23,66);ctx.lineTo(14+leg,84);ctx.moveTo(38,66);ctx.lineTo(46-leg,84);ctx.stroke();ctx.strokeStyle='#f1b632';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(10+leg,85);ctx.lineTo(23+leg,85);ctx.moveTo(42-leg,85);ctx.lineTo(55-leg,85);ctx.stroke();
     ctx.strokeStyle='#241b19';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(39,23);ctx.bezierCurveTo(68,10,70,50,46,50);ctx.stroke();
