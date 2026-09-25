@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>Yadon's Addis Drive</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap');
+    :root {
+      color-scheme: light dark;
+      --ink: #15314b;
+      --muted: #4e6373;
+      --paper: #f3f7f5;
+      --panel: #ffffff;
+      --line: #cbd9d6;
+      --red: #d64035;
+      --red-dark: #a72620;
+      --green: #168d65;
+      --sun: #f5b942;
+      --blue: #2279b9;
+      --shadow: 0 14px 36px rgba(28, 67, 82, .16);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #edf6f3;
+        --muted: #bad0cb;
+        --paper: #0e2029;
+        --panel: #16313a;
+        --line: #36545b;
+        --red: #ff685d;
+        --red-dark: #e54c42;
+        --green: #43c693;
+        --sun: #ffd26a;
+        --blue: #70bce8;
+        --shadow: 0 16px 42px rgba(0,0,0,.28);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--sun) 18%, transparent) 0 10%, transparent 30%),
+        var(--paper);
+      color: var(--ink);
+      font-family: "Nunito", sans-serif;
+    }
+    button { font: inherit; }
+    .page {
+      width: min(100%, 1040px);
+      margin: 0 auto;
+      padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+    }
+    .mission {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 16px;
+      margin: 4px 2px 12px;
+    }
+    .mission h1 {
+      margin: 0;
+      font-family: "Baloo 2", sans-serif;
+      font-size: clamp(25px, 4vw, 40px);
+      line-height: 1;
+      letter-spacing: -.03em;
+    }
+    .mission p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .score-box {
+      text-align: right;
+      min-width: 92px;
+    }
+    .score-label { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .score-value { font-family: "Baloo 2"; font-size: 28px; font-weight: 800; line-height: .95; }
+    .route {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: start;
+      position: relative;
+      margin: 0 2px 14px;
+    }
+    .route::before {
+      content: "";
+      position: absolute;
+      left: 8%; right: 8%; top: 8px;
+      height: 4px;
+      border-radius: 8px;
+      background: var(--line);
+    }
+    .route-fill {
+      position: absolute;
+      left: 8%; top: 8px;
+      width: 0;
+      max-width: 84%;
+      height: 4px;
+      border-radius: 8px;
+      background: var(--green);
+      transition: width .25s ease;
+    }
+    .stop { text-align: center; position: relative; z-index: 1; color: var(--muted); }
+    .stop i {
+      display: block;
+      width: 18px; height: 18px;
+      border: 3px solid var(--line);
+      background: var(--panel);
+      border-radius: 50%;
+      margin: 0 auto 5px;
+      transition: .2s ease;
+    }
+    .stop span { font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .stop.done { color: var(--ink); }
+    .stop.done i { border-color: var(--green); background: var(--green); box-shadow: inset 0 0 0 3px var(--panel); }
+    .game-shell {
+      overflow: hidden;
+      border: 2px solid color-mix(in srgb, var(--ink) 14%, transparent);
+      border-radius: 22px 22px 10px 10px;
+      background: #65bfe2;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: min(60vh, 610px);
+      min-height: 380px;
+      touch-action: none;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(8, 34, 48, .45);
+      padding: 22px;
+      transition: opacity .2s ease;
+    }
+    .overlay.hidden { opacity: 0; pointer-events: none; }
+    .start-card {
+      width: min(100%, 390px);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.25);
+      text-align: center;
+    }
+    .start-card .road-mark {
+      width: 56px; height: 56px;
+      display: grid; place-items: center;
+      margin: 0 auto 10px;
+      border-radius: 16px;
+      background: var(--red);
+      color: white;
+      font-family: "Baloo 2";
+      font-size: 25px;
+      transform: rotate(-3deg);
+      box-shadow: 0 5px 0 var(--red-dark);
+    }
+    .start-card h2 { margin: 0; font-family: "Baloo 2"; font-size: 30px; line-height: 1.05; }
+    .start-card p { margin: 8px 0 18px; color: var(--muted); font-weight: 700; line-height: 1.45; }
+    .start-btn {
+      appearance: none;
+      border: 0;
+      border-radius: 13px;
+      background: var(--red);
+      color: white;
+      padding: 12px 24px;
+      min-width: 160px;
+      font-weight: 900;
+      font-size: 17px;
+      box-shadow: 0 5px 0 var(--red-dark);
+      cursor: pointer;
+    }
+    .start-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--red-dark); }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .steer {
+      appearance: none;
+      min-height: 66px;
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 26px;
+      font-weight: 900;
+      box-shadow: 0 5px 0 color-mix(in srgb, var(--line) 85%, #000 15%);
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .steer:active, .steer.pressed { transform: translateY(3px); box-shadow: 0 2px 0 color-mix(in srgb, var(--line) 85%, #000 15%); background: color-mix(in srgb, var(--green) 12%, var(--panel)); }
+    .hint { margin: 12px 4px 0; text-align: center; color: var(--muted); font-size: 12px; font-weight: 700; }
+    @media (min-width: 760px) {
+      .page { padding-top: 24px; }
+      .controls { width: 420px; margin: 16px auto 0; }
+      .stop span { font-size: 12px; }
+    }
+    @media (max-width: 420px) {
+      .page { padding-left: 10px; padding-right: 10px; }
+      .mission { margin-left: 5px; margin-right: 5px; }
+      canvas { min-height: 360px; height: 55vh; }
+      .game-shell { border-radius: 18px 18px 8px 8px; }
+      .start-card { padding: 20px 16px; }
+      .stop span { font-size: 9px; letter-spacing: -.02em; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .route-fill, .stop i, .overlay { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="mission" aria-label="Game mission">
+      <div>
+        <h1>Yadon's Addis Drive</h1>
+        <p>A Habesha Games adventure, dedicated to Yadon · Megenagna → Gurd Shola → CMC → Salite Mihret</p>
+      </div>
+      <div class="score-box" aria-live="polite">
+        <div class="score-label">ROAD STARS</div>
+        <div class="score-value"><span id="score">0</span>/12</div>
+      </div>
+    </section>
+
+    <nav class="route" aria-label="Route progress">
+      <div class="route-fill" id="routeFill"></div>
+      <div class="stop done"><i></i><span>Megenagna</span></div>
+      <div class="stop"><i></i><span>Gurd Shola</span></div>
+      <div class="stop"><i></i><span>CMC</span></div>
+      <div class="stop"><i></i><span>Salite Mihret</span></div>
+    </nav>
+
+    <section class="game-shell" aria-label="Driving game">
+      <canvas id="game" aria-label="A driving game through Addis Ababa"></canvas>
+      <div class="overlay" id="overlay">
+        <div class="start-card">
+          <div class="road-mark" aria-hidden="true">Y</div>
+          <h2 id="cardTitle">Yadon, ready to drive?</h2>
+          <p id="cardText">This Addis adventure is dedicated to you. Steer around road cones, collect stars, and spot landmarks from Megenagna to Salite Mihret.</p>
+          <button class="start-btn" id="startBtn">Start driving</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="controls" aria-label="Steering controls">
+      <button class="steer" id="leftBtn" aria-label="Steer left">←</button>
+      <button class="steer" id="rightBtn" aria-label="Steer right">→</button>
+    </div>
+    <p class="hint">Hold the arrows to steer. Keyboard: ← → or A D.</p>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  var overlay = document.getElementById('overlay');
+  var startBtn = document.getElementById('startBtn');
+  var cardTitle = document.getElementById('cardTitle');
+  var cardText = document.getElementById('cardText');
+  var scoreEl = document.getElementById('score');
+  var fill = document.getElementById('routeFill');
+  var stopEls = Array.prototype.slice.call(document.querySelectorAll('.stop'));
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0, last = 0, running = false;
+  var keys = { left: false, right: false };
+  var player, objects, distance, score, lastSpawn, lastStar, shake, landmarkShown;
+  var duration = 48;
+  var landmarks = [
+    { p: 0.03, name: 'MEGENAGNA', sub: 'Roundabout · Start', kind: 'roundabout' },
+    { p: 0.31, name: 'GURD SHOLA', sub: 'Junction', kind: 'junction' },
+    { p: 0.61, name: 'CMC', sub: 'Checkpoint', kind: 'gate' },
+    { p: 0.88, name: 'SALITE MIHRET', sub: 'Church', kind: 'church' }
+  ];
+
+  function resize() {
+    var r = canvas.getBoundingClientRect();
+    W = Math.max(300, r.width); H = Math.max(360, r.height);
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (player) player.x = Math.max(0.23, Math.min(0.77, player.x));
+    draw();
+  }
+
+  function reset() {
+    player = { x: .5, y: .78, w: 38, h: 67, inv: 0 };
+    objects = []; distance = 0; score = 0; lastSpawn = 0; lastStar = 0; shake = 0; landmarkShown = {};
+    scoreEl.textContent = '0'; fill.style.width = '0%';
+    stopEls.forEach(function(el, i){ el.classList.toggle('done', i === 0); });
+  }
+
+  function start() {
+    reset(); running = true; last = performance.now(); overlay.classList.add('hidden'); requestAnimationFrame(loop);
+  }
+
+  function roadBounds(y) {
+    var horizon = H * .24;
+    var t = Math.max(0, Math.min(1, (y - horizon) / (H - horizon)));
+    var half = W * (.12 + t * .34);
+    return { left: W/2 - half, right: W/2 + half, t: t };
+  }
+
+  function laneX(lane, y) {
+    var b = roadBounds(y);
+    return b.left + (lane + .5) * (b.right - b.left) / 3;
+  }
+
+  function spawn() {
+    var p = distance / duration;
+    if (distance - lastSpawn > 1.35) {
+      objects.push({ type:'cone', lane: Math.floor(Math.random()*3), y: H*.22, speed: .16, hit:false });
+      lastSpawn = distance;
+    }
+    if (distance - lastStar > 2.9) {
+      objects.push({ type:'star', lane: Math.floor(Math.random()*3), y: H*.23, speed: .14, hit:false, phase:Math.random()*6 });
+      lastStar = distance;
+    }
+    landmarks.forEach(function(l, i){
+      if (p >= l.p && !landmarkShown[i]) {
+        objects.push({ type:'landmark', side:i%2 ? 'left':'right', y:H*.25, speed:.105, data:l, idx:i });
+        landmarkShown[i] = true;
+      }
+    });
+  }
+
+  function update(dt) {
+    distance += dt;
+    var steer = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+    player.x += steer * dt * .48;
+    player.x = Math.max(.20, Math.min(.80, player.x));
+    player.inv = Math.max(0, player.inv - dt);
+    shake = Math.max(0, shake - dt);
+    spawn();
+    objects.forEach(function(o){ o.y += o.speed * H * dt; });
+    objects.forEach(function(o){
+      if (o.hit || (o.type !== 'cone' && o.type !== 'star')) return;
+      var ox = laneX(o.lane, o.y);
+      var px = W * player.x;
+      if (Math.abs(o.y - H*player.y) < 42 && Math.abs(ox-px) < 34) {
+        o.hit = true;
+        if (o.type === 'star') {
+          score = Math.min(12, score + 1); scoreEl.textContent = score;
+          beep(660, .07);
+        } else if (player.inv <= 0) {
+          player.inv = 1.1; shake = .25; distance = Math.max(0, distance - 1.2); beep(150, .10);
+        }
+      }
+    });
+    objects = objects.filter(function(o){ return o.y < H*1.15 && !(o.hit && o.type === 'star'); });
+    var progress = Math.min(1, distance / duration);
+    fill.style.width = (progress * 84) + '%';
+    var active = progress >= .88 ? 3 : progress >= .61 ? 2 : progress >= .31 ? 1 : 0;
+    stopEls.forEach(function(el, i){ el.classList.toggle('done', i <= active); });
+    if (progress >= 1) finish();
+  }
+
+  var audioCtx = null;
+  function beep(freq, sec) {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      var osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+      osc.frequency.value = freq; osc.type = 'sine';
+      gain.gain.setValueAtTime(.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + sec);
+      osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + sec);
+    } catch(e) {}
+  }
+
+  function finish() {
+    running = false; fill.style.width = '84%'; stopEls.forEach(function(el){el.classList.add('done');});
+    cardTitle.textContent = 'You made it!';
+    cardText.textContent = 'Yadon reached Salite Mihret with ' + score + ' road star' + (score === 1 ? '' : 's') + '. Great driving!';
+    startBtn.textContent = 'Drive again'; overlay.classList.remove('hidden'); beep(880,.18);
+  }
+
+  function roundedRect(x,y,w,h,r,fillColor) {
+    ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fillStyle=fillColor; ctx.fill();
+  }
+
+  function drawBackdrop(scroll) {
+    var dark = matchMedia('(prefers-color-scheme: dark)').matches;
+    var sky = ctx.createLinearGradient(0,0,0,H*.58);
+    sky.addColorStop(0, dark ? '#225271' : '#63c0e8'); sky.addColorStop(1, dark ? '#4c8191' : '#d4f2ee');
+    ctx.fillStyle = sky; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = dark ? '#f7cd63' : '#ffd864'; ctx.beginPath(); ctx.arc(W*.82,H*.11,27,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = dark ? '#214d45' : '#78a768';
+    ctx.beginPath(); ctx.moveTo(0,H*.29); ctx.lineTo(W*.13,H*.18); ctx.lineTo(W*.28,H*.30); ctx.lineTo(W*.41,H*.20); ctx.lineTo(W*.57,H*.3); ctx.lineTo(W*.74,H*.19); ctx.lineTo(W,H*.31); ctx.lineTo(W,H*.48); ctx.lineTo(0,H*.48); ctx.closePath(); ctx.fill();
+    // city silhouettes
+    for (var i=0;i<10;i++) {
+      var bw=W*.055+(i%3)*7, bh=30+(i*13)%55, bx=i*W/9-10;
+      ctx.fillStyle = dark ? '#254e54' : '#d8caaa'; ctx.fillRect(bx,H*.28-bh,bw,bh+H*.12);
+      ctx.fillStyle = dark ? '#efc86a' : '#65848c';
+      for(var wy=H*.29-bh;wy<H*.27;wy+=14){ ctx.fillRect(bx+8,wy,5,5); }
+    }
+    // shoulders and road
+    ctx.fillStyle = dark ? '#315a3f' : '#63a95c';
+    ctx.beginPath(); ctx.moveTo(0,H*.22);ctx.lineTo(W*.38,H*.22);ctx.lineTo(W*.08,H);ctx.lineTo(0,H);ctx.fill();
+    ctx.beginPath(); ctx.moveTo(W,H*.22);ctx.lineTo(W*.62,H*.22);ctx.lineTo(W*.92,H);ctx.lineTo(W,H);ctx.fill();
+    ctx.fillStyle = dark ? '#27323a' : '#4b555b';
+    ctx.beginPath(); ctx.moveTo(W*.38,H*.22);ctx.lineTo(W*.62,H*.22);ctx.lineTo(W*.92,H);ctx.lineTo(W*.08,H);ctx.closePath();ctx.fill();
+    ctx.strokeStyle = '#f0eee2'; ctx.lineWidth=4;
+    ctx.beginPath();ctx.moveTo(W*.38,H*.22);ctx.lineTo(W*.08,H);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(W*.62,H*.22);ctx.lineTo(W*.92,H);ctx.stroke();
+    // dashed lane lines with perspective
+    [1,2].forEach(function(line){
+      for(var n=-1;n<10;n++){
+        var yy=H*.22+(((n*.12 + scroll*.20)%1.12))*H*.78;
+        var b=roadBounds(yy), x=b.left+(b.right-b.left)*line/3, t=b.t;
+        ctx.strokeStyle='#f5d45e';ctx.lineWidth=1+t*4;ctx.setLineDash([6+t*18,7+t*18]);
+        ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x,yy+14+t*28);ctx.stroke();ctx.setLineDash([]);
+      }
+    });
+    // roadside trees
+    for(var j=0;j<8;j++){
+      var ty=H*.27+(((j*.15+scroll*.13)%1.1))*H*.72;
+      var tb=roadBounds(ty), side=j%2?-1:1, tx=side<0?tb.left-24-tb.t*30:tb.right+24+tb.t*30, s=.25+tb.t*.75;
+      ctx.fillStyle='#6d442b';ctx.fillRect(tx-3*s,ty,6*s,24*s);
+      ctx.fillStyle=dark?'#2f7250':'#31915b';ctx.beginPath();ctx.arc(tx,ty,14*s,0,Math.PI*2);ctx.fill();
+    }
+  }
+
+  function drawCone(o) {
+    var x=laneX(o.lane,o.y), t=roadBounds(o.y).t, s=.35+t*.8;
+    ctx.save();ctx.translate(x,o.y);ctx.scale(s,s);
+    if(o.hit) ctx.rotate(.9);
+    ctx.fillStyle='#ff7c31';ctx.beginPath();ctx.moveTo(0,-19);ctx.lineTo(-12,15);ctx.lineTo(12,15);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#fff';ctx.fillRect(-7,-2,14,6);ctx.fillStyle='#303941';ctx.fillRect(-16,15,32,6);ctx.restore();
+  }
+
+  function drawStar(o) {
+    var x=laneX(o.lane,o.y),t=roadBounds(o.y).t,s=.35+t*.9;
+    ctx.save();ctx.translate(x,o.y);ctx.rotate((distance+o.phase)*2);ctx.scale(s,s);ctx.fillStyle='#ffd64d';ctx.strokeStyle='#b87d16';ctx.lineWidth=2;
+    ctx.beginPath();for(var i=0;i<10;i++){var a=-Math.PI/2+i*Math.PI/5,r=i%2?8:18;var px=Math.cos(a)*r,py=Math.sin(a)*r;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+  }
+
+  function drawLandmark(o) {
+    var t=roadBounds(o.y).t,s=.42+t*.7,b=roadBounds(o.y),right=o.side==='right';
+    var x=right?b.right+78*s:b.left-78*s;
+    ctx.save();ctx.translate(x,o.y);ctx.scale(s,s);
+    // sign
+    ctx.fillStyle='#293c45';ctx.fillRect(-4,4,8,78);
+    roundedRect(-70,-52,140,58,8,'#f5f0da');
+    ctx.strokeStyle='#2f5148';ctx.lineWidth=3;ctx.strokeRect(-67,-49,134,52);
+    ctx.fillStyle='#193d43';ctx.textAlign='center';ctx.font='800 16px Nunito';ctx.fillText(o.data.name,0,-26);
+    ctx.font='700 11px Nunito';ctx.fillStyle='#4c625f';ctx.fillText(o.data.sub,0,-9);
+    // landmark silhouette above sign
+    ctx.fillStyle='#d43f35';
+    if(o.data.kind==='church'){
+      ctx.fillRect(-22,-92,44,38);ctx.beginPath();ctx.moveTo(-28,-92);ctx.lineTo(0,-118);ctx.lineTo(28,-92);ctx.fill();ctx.fillRect(-2,-132,4,16);ctx.fillRect(-8,-127,16,4);
+    } else if(o.data.kind==='roundabout'){
+      ctx.beginPath();ctx.arc(0,-82,20,0,Math.PI*2);ctx.strokeStyle='#d43f35';ctx.lineWidth=9;ctx.stroke();ctx.beginPath();ctx.moveTo(-5,-103);ctx.lineTo(10,-97);ctx.lineTo(1,-89);ctx.fill();
+    } else if(o.data.kind==='gate'){
+      ctx.fillRect(-30,-95,8,41);ctx.fillRect(22,-95,8,41);ctx.fillRect(-30,-95,60,8);ctx.beginPath();ctx.arc(0,-84,11,Math.PI,0);ctx.strokeStyle='#d43f35';ctx.lineWidth=6;ctx.stroke();
+    } else {
+      ctx.fillRect(-33,-87,66,9);ctx.beginPath();ctx.moveTo(-36,-83);ctx.lineTo(-18,-105);ctx.lineTo(0,-83);ctx.lineTo(18,-105);ctx.lineTo(36,-83);ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawCar() {
+    var x=W*player.x,y=H*player.y;
+    ctx.save();ctx.translate(x,y);
+    if(shake>0) ctx.translate((Math.random()-.5)*8,(Math.random()-.5)*5);
+    if(player.inv>0 && Math.floor(player.inv*12)%2===0) ctx.globalAlpha=.45;
+    // shadow
+    ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(0,28,30,15,0,0,Math.PI*2);ctx.fill();
+    // wheels
+    roundedRect(-29,-16,10,25,4,'#15242b');roundedRect(19,-16,10,25,4,'#15242b');
+    roundedRect(-29,22,10,25,4,'#15242b');roundedRect(19,22,10,25,4,'#15242b');
+    // body
+    roundedRect(-24,-34,48,70,13,'#d84035');
+    ctx.fillStyle='#a82422';ctx.fillRect(-24,4,48,9);
+    roundedRect(-17,-22,34,24,7,'#bde8ed');
+    ctx.fillStyle='#315b69';ctx.fillRect(-14,-18,28,15);
+    ctx.fillStyle='#fff5b5';ctx.beginPath();ctx.arc(-15,-28,5,0,Math.PI*2);ctx.arc(15,-28,5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#f7df54';ctx.beginPath();ctx.arc(-15,30,4,0,Math.PI*2);ctx.arc(15,30,4,0,Math.PI*2);ctx.fill();
+    // Y badge
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,15,9,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b52825';ctx.font='800 12px Nunito';ctx.textAlign='center';ctx.fillText('Y',0,19);
+    ctx.restore();
+  }
+
+  function drawHud() {
+    if(!running) return;
+    roundedRect(12,12,124,35,10,'rgba(14,34,42,.72)');
+    ctx.fillStyle='#fff';ctx.font='800 13px Nunito';ctx.textAlign='left';
+    var p=Math.min(1,distance/duration), next=p<.31?'Gurd Shola':p<.61?'CMC':p<.88?'Salite Mihret':'Finish';
+    ctx.fillText('NEXT  ' + next,24,35);
+  }
+
+  function draw() {
+    if(!W||!H) return;
+    ctx.save();
+    if(shake>0) ctx.translate((Math.random()-.5)*4,0);
+    drawBackdrop(distance);
+    objects.filter(function(o){return o.type==='landmark';}).forEach(drawLandmark);
+    objects.filter(function(o){return o.type==='cone';}).forEach(drawCone);
+    objects.filter(function(o){return o.type==='star';}).forEach(drawStar);
+    drawCar(); drawHud(); ctx.restore();
+  }
+
+  function loop(now) {
+    if(!running) return;
+    var dt=Math.min(.034,(now-last)/1000); last=now; update(dt); draw();
+    if(running) requestAnimationFrame(loop);
+  }
+
+  function bindHold(el, key) {
+    function on(e){ e.preventDefault(); keys[key]=true; el.classList.add('pressed'); if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume(); }
+    function off(e){ if(e)e.preventDefault(); keys[key]=false; el.classList.remove('pressed'); }
+    el.addEventListener('pointerdown',on); el.addEventListener('pointerup',off); el.addEventListener('pointercancel',off); el.addEventListener('pointerleave',off);
+  }
+  bindHold(document.getElementById('leftBtn'),'left'); bindHold(document.getElementById('rightBtn'),'right');
+  window.addEventListener('keydown',function(e){ if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){keys.left=true;e.preventDefault();} if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){keys.right=true;e.preventDefault();} });
+  window.addEventListener('keyup',function(e){ if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')keys.left=false; if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')keys.right=false; });
+  startBtn.addEventListener('click',start);
+  window.addEventListener('resize',resize);
+  reset(); resize();
+})();
+</script>
+</body>
+</html>
