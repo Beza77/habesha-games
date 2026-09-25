@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Noto+Sans+Ethiopic:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <title>Guess the Game</title>
+  <title>Guess the Song</title>
   <style>
     :root{
       color-scheme:light dark;
@@ -71,7 +71,10 @@
     .small-btn{min-height:42px;border:1px solid var(--line);background:transparent;color:var(--ink);padding:7px 14px}
     .winner-panel{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
     .winner-panel h3{font-size:15px;margin:0 0 3px}.winner-panel p{font-size:12px;color:var(--muted);margin:0 0 10px}
-    .winner-form{display:grid;grid-template-columns:1fr auto;gap:8px}
+    .winner-choice{min-height:44px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:8px 14px;font-weight:800}
+    .winner-choice:disabled{opacity:.45;cursor:not-allowed}
+    .winner-form{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+    .winner-form[hidden]{display:none}
     .winner-form input{min-width:0;min-height:48px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:9px 12px}
     .award{border:0;background:var(--teal);color:#fff;border-radius:10px;padding:9px 16px;font-weight:800}
     .award:disabled,.winner-form input:disabled{opacity:.45;cursor:not-allowed}
@@ -93,7 +96,7 @@
 <main class="shell">
   <header class="topline">
     <div>
-      <h1>Guess the Game</h1>
+      <h1>Guess the Song</h1>
       <p>Listen. Guess. Win. The leader reveals the answer.</p>
     </div>
     <span class="deck-count"><span id="songTotal">—</span> playable songs</span>
@@ -128,9 +131,10 @@
       </div>
 
       <section class="winner-panel" aria-labelledby="winnerHeading">
-        <h3 id="winnerHeading">Who guessed first?</h3>
-        <p>The leader decides the winner and awards the point.</p>
-        <div class="winner-form">
+        <h3 id="winnerHeading">Did someone guess it?</h3>
+        <p>A winner is optional. You can draw the next song if nobody got it.</p>
+        <button class="winner-choice" id="chooseWinner" type="button" disabled>Choose a winner</button>
+        <div class="winner-form" id="winnerForm" hidden>
           <input id="winnerName" list="players" maxlength="36" autocomplete="off" placeholder="Winner’s name" disabled aria-label="Winner's name">
           <datalist id="players"></datalist>
           <button class="award" id="awardPoint" type="button" disabled>Award point</button>
@@ -185,7 +189,7 @@
     history.unshift({round:round,song:current,revealed:false,winner:''});
     $('mystery').hidden=false;$('answer').hidden=true;$('listenTitle').textContent='Song '+round+' is playing';$('listenSub').textContent='Listen closely — call out your answer first.';
     $('revealSong').disabled=false;$('drawSong').disabled=true;$('drawSong').textContent='Draw next song';
-    $('winnerName').value='';$('winnerName').disabled=true;$('awardPoint').disabled=true;$('awardPoint').textContent='Award point';$('playControls').hidden=false;
+    $('chooseWinner').disabled=true;$('winnerForm').hidden=true;$('winnerName').value='';$('winnerName').disabled=true;$('awardPoint').disabled=true;$('awardPoint').textContent='Award point';$('playControls').hidden=false;
     updateCounts();renderHistory();loadPlayer(current.videoId);
   }
   function revealSong(){
@@ -193,7 +197,11 @@
     revealed=true;history[0].revealed=true;
     $('answerTitle').textContent=current.title;$('answerArtist').textContent=current.artist;$('youtubeLink').href=current.url;
     $('mystery').hidden=true;$('answer').hidden=false;$('revealSong').disabled=true;$('drawSong').disabled=false;
-    $('winnerName').disabled=false;$('awardPoint').disabled=false;$('winnerName').focus();renderHistory();
+    $('chooseWinner').disabled=false;renderHistory();
+  }
+  function chooseWinner(){
+    if(!revealed||!current)return;
+    $('winnerForm').hidden=false;$('winnerName').disabled=false;$('awardPoint').disabled=false;$('winnerName').focus();
   }
   function awardPoint(){
     if(!revealed||!current)return;
@@ -220,10 +228,10 @@
     if(!resetArmed){resetArmed=true;$('resetGame').textContent='Tap again to reset';setTimeout(function(){resetArmed=false;$('resetGame').textContent='Reset game';},2600);return;}
     destroyPlayer();deck=shuffle(all);current=null;round=0;revealed=false;awarded=false;scores={};history=[];resetArmed=false;
     $('resetGame').textContent='Reset game';$('mystery').hidden=false;$('answer').hidden=true;$('listenTitle').textContent='Ready for the first song?';$('listenSub').textContent='The title stays hidden until you reveal it.';
-    $('drawSong').disabled=false;$('drawSong').textContent='Draw & play a song';$('revealSong').disabled=true;$('playControls').hidden=true;$('winnerName').value='';$('winnerName').disabled=true;$('awardPoint').disabled=true;$('awardPoint').textContent='Award point';
+    $('drawSong').disabled=false;$('drawSong').textContent='Draw & play a song';$('revealSong').disabled=true;$('playControls').hidden=true;$('chooseWinner').disabled=true;$('winnerForm').hidden=true;$('winnerName').value='';$('winnerName').disabled=true;$('awardPoint').disabled=true;$('awardPoint').textContent='Award point';
     updateCounts();renderScores();renderHistory();notify('New game ready.');
   }
-  $('drawSong').addEventListener('click',drawSong);$('revealSong').addEventListener('click',revealSong);$('awardPoint').addEventListener('click',awardPoint);$('winnerName').addEventListener('keydown',function(e){if(e.key==='Enter')awardPoint();});$('resetGame').addEventListener('click',resetGame);
+  $('drawSong').addEventListener('click',drawSong);$('revealSong').addEventListener('click',revealSong);$('chooseWinner').addEventListener('click',chooseWinner);$('awardPoint').addEventListener('click',awardPoint);$('winnerName').addEventListener('keydown',function(e){if(e.key==='Enter')awardPoint();});$('resetGame').addEventListener('click',resetGame);
   $('playPause').addEventListener('click',function(){if(!player||!player.getPlayerState){notify('Player is still loading.');return;}if(player.getPlayerState()===YT.PlayerState.PLAYING){player.pauseVideo();}else{player.playVideo();}});
   $('restartSong').addEventListener('click',function(){if(player&&player.seekTo){player.seekTo(0,true);player.playVideo();}});
   deck=shuffle(all);updateCounts();
