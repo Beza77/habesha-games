@@ -87,6 +87,10 @@
     .section-head { display:flex; align-items:end; justify-content:space-between; margin: 6px 0 10px; gap:16px; }
     .section-head h2 { margin:0; font-size:clamp(1.05rem,2.4vw,1.35rem); color:var(--navy); }
     .section-head span { color:var(--muted); font-size:.9rem; }
+    .site-intro { color:var(--muted); max-width:780px; margin:2px 0 16px; line-height:1.6; font-size:.95rem; }
+    .site-footer { display:flex; justify-content:space-between; align-items:center; gap:10px 18px; flex-wrap:wrap; width:min(1180px,100%); margin:30px auto 0; padding:20px clamp(16px,4vw,42px) 10px; color:var(--muted); font-size:.85rem; border-top:1px solid var(--line); }
+    .site-footer nav a { color:var(--muted); margin-left:18px; text-decoration:none; font-weight:600; }
+    .site-footer nav a:hover { color:var(--ink); text-decoration:underline; }
 
     .games { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:14px; }
     .game-card {
@@ -170,6 +174,8 @@
       </div>
     </section>
 
+    <p class="site-intro">Habesha Games is a free arcade of Ethiopian-themed games that play right in your browser — no downloads, no sign-up. Race a blue taxi through Addis Ababa, stack injera high on a sefed, run with a jebena coffee pot, test your worship song knowledge, or learn Amharic words as you play. New games join the library as they are ready.</p>
+
     <section aria-labelledby="play-title">
       <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">11 games</span></div>
       <div class="games" id="gameGrid">
@@ -177,67 +183,67 @@
         <button class="game-card secondary" type="button" data-title="Guess the Song መዝሙር" data-category="music" data-src="games/guess-the-game/" aria-label="Play Guess the Song">
                   <span class="cover"><img src="assets/guess-the-game.jpg" alt="Guess the Song" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess the Song</h3><p lang="am">መዝሙሩን ገምት — ፈጣኑ ያሸንፋል!</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess the Song</h3><p lang="am">መዝሙሩን ገምት — ፈጣኑ ያሸንፋል! Hear a worship song clip and guess the title before time runs out — faster answers score more.</p></span>
                 </button>
 
         <button class="game-card secondary" type="button" data-title="Worship Song Bingo" data-category="music" data-src="games/worship-song-bingo/" aria-label="Play Worship Song Bingo">
                   <span class="cover"><img src="assets/worship-song-bingo.jpg" alt="Worship Song Bingo game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Worship Song Bingo</h3><p lang="am">የመዝሙር ብንጎ — ካርድህን ሙላ፤ ብንጎ ብለህ ጩኸት!</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Worship Song Bingo</h3><p lang="am">የመዝሙር ብንጎ — ካርድህን ሙላ፤ ብንጎ ብለህ ጩኸት! Mark each song as it plays and shout bingo when your card is full.</p></span>
                 </button>
 
         <button class="game-card secondary" type="button" data-title="Guess the Emoji" data-category="puzzle" data-src="games/guess-the-word-by-emoji/" aria-label="Play Guess the Emoji">
           <span class="cover"><img src="assets/emoji-word.jpg" alt="Smiling orange game tile with a cream puzzle piece" /></span>
           <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">60 riddles</span></span><h3>Guess the Emoji</h3><p lang="am">ኢሞጂዎቹን ተመልክተው ቃሉን ይገምቱ። ምድብ ይምረጡና ፈጣን ጨዋታ ይጀምሩ።</p></span>
+          <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">60 riddles</span></span><h3>Guess the Emoji</h3><p lang="am">ኢሞጂዎቹን ተመልክተው ቃሉን ይገምቱ። ምድብ ይምረጡና ፈጣን ጨዋታ ይጀምሩ። Read the emoji clues, guess the hidden word, and clear all 60 riddles.</p></span>
         </button>
 
         <button class="game-card secondary" type="button" data-title="Buna Run Jebena Sini Coffee Runner" data-category="action" data-src="games/buna-run/" aria-label="Play Buna Run">
           <span class="cover"><img src="assets/buna-run.jpg" alt="Stylized jebena character ready to run" /></span>
           <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">Endless runner</span></span><h3>Buna Run</h3><p>Run and jump as a jebena, collect sini cups, and keep your coffee streak alive.</p></span>
+          <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">Endless runner</span></span><h3>Buna Run</h3><p>Run and jump as a jebena, collect sini cups, and keep your coffee streak alive. Tap to jump over obstacles — how long can you keep the run going?</p></span>
         </button>
 
         <button class="game-card secondary" type="button" data-title="Injera Stack Sefed Stacking" data-category="puzzle" data-src="games/injera-stack/" aria-label="Play Injera Stack">
           <span class="cover"><img src="assets/injera-stack.jpg" alt="A tall stack of porous injera layers" /></span>
           <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">Stacking</span></span><h3>Injera Stack</h3><p>Time each drop and build a tall, steady stack of injera on the woven sefed.</p></span>
+          <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">Stacking</span></span><h3>Injera Stack</h3><p>Time each drop and build a tall, steady stack of injera on the woven sefed. One wobbly landing and the whole stack tumbles.</p></span>
         </button>
 
         <button class="game-card secondary" type="button" data-title="Taxi Addis Blue Taxi Bole Meskel Square Kazanchis Sidist Kilo Piassa Minibus Bajaj" data-category="action" data-src="games/taxi-addis/" aria-label="Play Taxi Addis">
           <span class="cover"><img src="assets/taxi-addis.jpg" alt="Taxi Addis driving game on a city road" /></span>
           <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">Arcade drive</span></span><h3>Taxi Addis</h3><p>Weave a blue taxi through Bole, Meskel Square, Kazanchis, Sidist Kilo, and Piassa.</p></span>
+          <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">Arcade drive</span></span><h3>Taxi Addis</h3><p>Weave a blue taxi through Bole, Meskel Square, Kazanchis, Sidist Kilo, and Piassa. Dodge traffic, grab fares, and see how far across Addis you can drive.</p></span>
         </button>
 
         <button class="game-card secondary" type="button" data-title="Memory Match" data-category="puzzle" data-src="games/memory-match/" aria-label="Play Memory Match">
                   <span class="cover"><img src="assets/memory-match.jpg" alt="Memory Match card game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Puzzles</span></span><h3>Memory Match</h3><p lang="am">ካርዶቹን ገልብጡ፤ ተመሳሳይ ጥንዶችን ያግኙ።</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Puzzles</span></span><h3>Memory Match</h3><p lang="am">ካርዶቹን ገልብጡ፤ ተመሳሳይ ጥንዶችን ያግኙ። Flip the cards and find every matching pair in as few moves as you can.</p></span>
                 </button>
 
         <button class="game-card secondary" type="button" data-title="Copy Me" data-category="learning" data-src="games/simon-says-amharic/" aria-label="Play Copy Me">
                   <span class="cover"><img src="assets/simon-says-amharic.jpg" alt="Copy Me game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Learning</span></span><h3>Copy Me</h3><p lang="am">ቅደም ተከተሉን ይድገሙ፤ የአማርኛ ቃላትን ይማሩ።</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Learning</span></span><h3>Copy Me</h3><p lang="am">ቅደም ተከተሉን ይድገሙ፤ የአማርኛ ቃላትን ይማሩ። Watch the sequence, repeat it back, and learn Amharic colors, numbers, and animals along the way.</p></span>
                 </button>
 
         <button class="game-card secondary" type="button" data-title="Yadon's Addis Drive Megenagna CMC Gurd Shola Salite Mihret driving" data-category="action" data-src="games/yadons-addis-drive/" aria-label="Play Yadon's Addis Drive">
                   <span class="cover"><img src="assets/yadons-drive.jpg" alt="Yadon's Addis Drive game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">❤ For Yadon</span></span><h3>Yadon's Addis Drive</h3><p lang="am">ከመገናኛ እስከ ሲኤምሲ — መኪናውን ንዳ!</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">❤ For Yadon</span></span><h3>Yadon's Addis Drive</h3><p lang="am">ከመገናኛ እስከ ሲኤምሲ — መኪናውን ንዳ! Drive from Megenagna to CMC through Gurd Shola and Salite Mihret.</p></span>
                 </button>
 
         <button class="game-card secondary" type="button" data-title="Salem's Playground Quest jumping math playground" data-category="action" data-src="games/salems-playground-quest/" aria-label="Play Salem's Playground Quest">
                   <span class="cover"><img src="assets/salems-playground-quest.jpg" alt="Salem's Playground Quest game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">❤ For Salem</span></span><h3>Salem's Playground Quest</h3><p lang="am">ዝላይ፤ ምታ፤ ሂሳብ ስሪ!</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">❤ For Salem</span></span><h3>Salem's Playground Quest</h3><p lang="am">ዝላይ፤ ምታ፤ ሂሳብ ስሪ! Jump across the playground and solve quick math challenges to move ahead.</p></span>
                 </button>
 
-        <button class="game-card secondary" type="button" data-title="Barbie The Floor Is Lava jumping toy rooms" data-category="action" data-src="games/barbie-floor-is-lava/" aria-label="Play Barbie The Floor Is Lava">
-                  <span class="cover"><img src="assets/barbie-floor-is-lava.jpg" alt="Barbie The Floor Is Lava game" /></span>
+        <button class="game-card secondary" type="button" data-title="The Floor Is Lava jumping toy rooms" data-category="action" data-src="games/barbie-floor-is-lava/" aria-label="Play The Floor Is Lava">
+                  <span class="cover"><img src="assets/barbie-floor-is-lava.jpg" alt="The Floor Is Lava jumping game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">❤ For the girls</span></span><h3>Barbie: The Floor Is Lava</h3><p lang="am">ወለሉ ላቫ ነው — ዝላይ!</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">❤ For the girls</span></span><h3>The Floor Is Lava</h3><p>The floor is lava — don't touch it! Jump between toys across three rooms and collect hearts.</p></span>
                 </button>
 
         <!-- HIDDEN until perfected: Fidel Fall
@@ -270,6 +276,11 @@
     <aside class="library-note"><span class="plus">+</span><span>More games can join this library as they are ready.</span></aside>
   </main>
 
+  <footer class="site-footer">
+    <span>© 2026 Habesha Games</span>
+    <nav aria-label="Site"><a href="about.html">About</a><a href="privacy.html">Privacy Policy</a><a href="contact.html">Contact</a></nav>
+  </footer>
+
   <section class="player" id="player" aria-hidden="true" aria-label="Game player">
     <div class="player-bar">
       <button type="button" class="back-btn" id="closePlayer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>Games</button>
@@ -292,7 +303,7 @@
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20260924m';
+      var SITE_VERSION = '20260924n';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
