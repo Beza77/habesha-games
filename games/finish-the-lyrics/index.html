@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="am">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>ግጥሙን ጨርስ · Finish the Lyrics</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;600;700;800&display=swap');
+
+    :root {
+      color-scheme: light dark;
+      --bg: #3b1f5e;
+      --bg-deep: #241239;
+      --panel: #fffdf6;
+      --panel-2: #fbf3df;
+      --ink: #2c1a12;
+      --muted: #7a6a58;
+      --gold: #f6c548;
+      --gold-deep: #d99a1f;
+      --purple: #7c3aed;
+      --purple-deep: #5b21b6;
+      --green: #1e8a5a;
+      --red: #c0392b;
+      --line: #e6d3a8;
+      --shadow: rgba(20, 8, 35, .35);
+      --focus: #126eab;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1030;
+        --bg-deep: #120a20;
+        --panel: #2c2144;
+        --panel-2: #382b56;
+        --ink: #fdf3dd;
+        --muted: #c9b795;
+        --gold: #f6c548;
+        --gold-deep: #e0a92e;
+        --purple: #a06bff;
+        --purple-deep: #c4a1ff;
+        --green: #4ecb8d;
+        --red: #ff7a6b;
+        --line: #54437a;
+        --shadow: rgba(0, 0, 0, .45);
+        --focus: #80c9ff;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Baloo 2", "Noto Sans Ethiopic", sans-serif;
+      background:
+        radial-gradient(circle at 85% 8%, rgba(246,197,72,.35) 0 120px, transparent 121px),
+        radial-gradient(circle at 10% 90%, rgba(124,58,237,.4) 0 160px, transparent 161px),
+        linear-gradient(160deg, var(--bg), var(--bg-deep));
+      overscroll-behavior: none;
+    }
+    button { font: inherit; }
+    button:focus-visible, input:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+
+    .shell {
+      width: min(720px, 100%);
+      margin: 0 auto;
+      padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(26px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+      min-height: 100dvh;
+      display: grid;
+      align-content: start;
+      gap: 14px;
+    }
+
+    .hero {
+      text-align: center;
+      color: #fff8e6;
+      padding: 10px 6px 2px;
+    }
+    .hero h1 { margin: 0; font-size: clamp(30px, 7vw, 44px); font-weight: 800; text-shadow: 0 3px 0 rgba(0,0,0,.25); }
+    .hero .en-lane {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 13px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(246,197,72,.55);
+      border-radius: 999px;
+      padding: 3px 14px;
+    }
+    .hero p { margin: 10px auto 0; max-width: 46ch; font-size: 16px; color: #f3e7c9; }
+
+    .card {
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 20px;
+      box-shadow: 0 14px 30px var(--shadow);
+      padding: 20px 18px;
+    }
+
+    .hud {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .pill {
+      background: var(--panel-2);
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .pill b { color: var(--purple-deep); }
+    @media (prefers-color-scheme: dark) { .pill b { color: var(--gold); } }
+    .pill.streak b { color: #e07b00; }
+
+    .prompt-label { text-align: center; color: var(--muted); font-size: 15px; margin: 2px 0 0; }
+    .song-tag {
+      text-align: center;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--purple-deep);
+      margin: 4px 0 0;
+    }
+    @media (prefers-color-scheme: dark) { .song-tag { color: var(--gold); } }
+    .lyric-line {
+      margin: 12px 0 4px;
+      font-size: clamp(21px, 5.4vw, 28px);
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.55;
+      background: var(--panel-2);
+      border: 2px dashed var(--gold-deep);
+      border-radius: 16px;
+      padding: 18px 14px;
+    }
+    .q { text-align: center; font-size: 18px; font-weight: 700; margin: 14px 0 6px; }
+    .q small { display: block; font-weight: 600; color: var(--muted); font-size: 13px; letter-spacing: .08em; }
+
+    .options { display: grid; gap: 12px; margin-top: 10px; }
+    .opt {
+      min-height: 64px;
+      border: 3px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: clamp(17px, 4.6vw, 21px);
+      font-weight: 600;
+      line-height: 1.5;
+      cursor: pointer;
+      transition: transform .08s ease, border-color .15s ease, background .15s ease;
+      text-align: center;
+      width: 100%;
+    }
+    .opt:active { transform: scale(.985); }
+    .opt.correct { border-color: var(--green); background: color-mix(in srgb, var(--green) 14%, var(--panel)); }
+    .opt.wrong { border-color: var(--red); background: color-mix(in srgb, var(--red) 12%, var(--panel)); }
+    .opt.dim { opacity: .55; }
+    .opt:disabled { cursor: default; }
+
+    .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 30px;
+      font-size: 19px;
+      font-weight: 800;
+      cursor: pointer;
+      min-height: 56px;
+      color: #2c1a12;
+      background: linear-gradient(180deg, var(--gold), var(--gold-deep));
+      box-shadow: 0 6px 0 rgba(0,0,0,.22);
+      transition: transform .08s ease;
+    }
+    .btn:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,.22); }
+    .btn.ghost {
+      background: transparent;
+      color: var(--ink);
+      border: 3px solid var(--line);
+      box-shadow: none;
+    }
+    .btn .en { display: block; font-size: 12px; font-weight: 600; letter-spacing: .06em; opacity: .75; }
+
+    .hint-btn {
+      border: 3px solid var(--purple);
+      background: transparent;
+      color: var(--purple-deep);
+      border-radius: 999px;
+      padding: 10px 22px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 52px;
+    }
+    @media (prefers-color-scheme: dark) { .hint-btn { color: var(--purple-deep); } }
+    .hint-btn .en { display: block; font-size: 11px; letter-spacing: .06em; opacity: .75; }
+
+    .feedback {
+      min-height: 34px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 800;
+      margin-top: 10px;
+    }
+    .feedback.good { color: var(--green); }
+    .feedback.bad { color: var(--red); }
+
+    .modal-back {
+      position: fixed; inset: 0;
+      background: rgba(10, 4, 22, .72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 50;
+    }
+    .modal-back.open { display: flex; }
+    .modal {
+      width: min(640px, 100%);
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 16px;
+      border: 2px solid var(--line);
+    }
+    .modal h3 { margin: 0 0 10px; text-align: center; }
+    .video-wrap { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; background: #000; }
+    .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+    .name-row { display: flex; gap: 10px; margin-top: 12px; }
+    .name-row input {
+      flex: 1;
+      font: inherit;
+      font-size: 18px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 3px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      min-height: 56px;
+    }
+    .board { margin-top: 14px; }
+    .board h3 { margin: 0 0 8px; text-align: center; }
+    .board h3 small { display: block; color: var(--muted); font-size: 12px; letter-spacing: .1em; }
+    .board ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+    .board li {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--panel-2);
+      border: 2px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 18px; font-weight: 700;
+    }
+    .board li .sc { color: var(--purple-deep); font-size: 20px; }
+    @media (prefers-color-scheme: dark) { .board li .sc { color: var(--gold); } }
+    .board .empty { text-align: center; color: var(--muted); font-size: 15px; }
+
+    .score-big { text-align: center; font-size: clamp(40px, 10vw, 64px); font-weight: 800; color: var(--purple-deep); margin: 4px 0; }
+    @media (prefers-color-scheme: dark) { .score-big { color: var(--gold); } }
+    .score-sub { text-align: center; color: var(--muted); font-size: 16px; margin: 0 0 6px; }
+
+    .hidden { display: none !important; }
+    .loading { text-align: center; color: #f3e7c9; font-size: 18px; padding: 40px 0; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <h1>🎵 ግጥሙን ጨርስ</h1>
+      <span class="en-lane">English: Finish the Lyrics</span>
+      <p>የመዝሙሩን ቀጣይ መስመር ምረጥ! · Pick the line that comes next in the song!</p>
+    </header>
+
+    <div id="loading" class="loading">መዝሙሮች በመጫን ላይ… · Loading songs…</div>
+
+    <!-- START -->
+    <section id="screen-start" class="card hidden">
+      <p class="prompt-label">የመዝሙር ጨዋታ · A gospel lyrics game</p>
+      <div class="q" style="font-size:22px">10 ዙሮች · 10 rounds<br /><small>ROUND RULES</small></div>
+      <p class="prompt-label" style="font-size:16px">አንድ የመዝሙር መስመር ይታይሃል — የሚመጣውን መስመር ከ4 ምርጫዎች ምረጥ።<br />You will see one lyric line — tap the line that comes next.</p>
+      <div class="name-row">
+        <input id="playerName" maxlength="24" placeholder="ስምህን ጻፍ · Your name" autocomplete="off" />
+      </div>
+      <div class="row">
+        <button class="btn" id="btnStart" type="button">▶ ጨዋታ ጀምር<span class="en">START GAME</span></button>
+      </div>
+      <div class="board" id="boardStart">
+        <h3>🏆 የውድድር ሰሌዳ<small>LEADERBOARD · THIS DEVICE</small></h3>
+        <ol id="boardListStart"><li class="empty">እስካሁን ውጤት የለም · No scores yet — be the first!</li></ol>
+      </div>
+    </section>
+
+    <!-- ROUND -->
+    <section id="screen-round" class="card hidden">
+      <div class="hud">
+        <span class="pill">ዙር <b id="hudRound">1</b>/10</span>
+        <span class="pill">ነጥብ <b id="hudScore">0</b></span>
+        <span class="pill streak">🔥 <b id="hudStreak">0</b></span>
+      </div>
+      <p class="song-tag" id="songTag"></p>
+      <p class="prompt-label">ይህ መስመር ከተጠናቀቀ በኋላ ምን ይመጣል? · What line comes after this one?</p>
+      <div class="lyric-line" id="promptLine"></div>
+      <div class="q">የሚቀጥለውን መስመር ምረጥ<small>TAP THE NEXT LINE</small></div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="row">
+        <button class="hint-btn" id="btnHint" type="button">🎧 ፍንጭ፡ ዘፈኑን ስማ<span class="en">HINT: PLAY THE SONG</span></button>
+      </div>
+    </section>
+
+    <!-- FINAL -->
+    <section id="screen-final" class="card hidden">
+      <p class="prompt-label">🎉 ጨዋታው አልቋል! · Game over!</p>
+      <div class="score-big"><span id="finalScore">0</span></div>
+      <p class="score-sub"><span id="finalName"></span> · <span id="finalDetail"></span></p>
+      <div class="row">
+        <button class="btn" id="btnSave" type="button">💾 ውጤቱን መዝግብ<span class="en">SAVE SCORE</span></button>
+        <button class="btn ghost" id="btnAgain" type="button">🔁 እንደገና<span class="en">PLAY AGAIN</span></button>
+      </div>
+      <div class="row">
+        <button class="btn ghost" id="btnNextPlayer" type="button">👥 ቀጣይ ተጫዋች<span class="en">NEXT PLAYER</span></button>
+      </div>
+      <div class="board">
+        <h3>🏆 የውድድር ሰሌዳ<small>LEADERBOARD · THIS DEVICE</small></h3>
+        <ol id="boardList"></ol>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-back" id="hintModal">
+    <div class="modal">
+      <h3>🎧 ዘፈኑን ስማ · Listen to the song</h3>
+      <div class="video-wrap"><iframe id="hintFrame" title="Song hint video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      <div class="row"><button class="btn ghost" id="btnCloseHint" type="button">ዝጋ · Close</button></div>
+    </div>
+  </div>
+
+  <script>
+    "use strict";
+    const ROUNDS = 10;
+    let SONGS = [];
+    let QUALIFIED = [];   // songs with >=3 usable lines
+    let LINES = [];       // all usable lines across qualified songs: {text, song}
+    let board = [];
+    let playerCount = 0;
+
+    const $ = id => document.getElementById(id);
+    const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const pick = a => a[Math.floor(Math.random() * a.length)];
+
+    function usableLines(song) {
+      return song.lyrics.split("\n").map(s => s.trim()).filter(s => s.length >= 8);
+    }
+
+    async function loadSongs() {
+      const res = await fetch("songs.json");
+      SONGS = await res.json();
+      QUALIFIED = [];
+      LINES = [];
+      SONGS.forEach((s, idx) => {
+        const ls = usableLines(s);
+        if (ls.length >= 3) {
+          QUALIFIED.push({ song: s, idx, lines: ls });
+          ls.forEach(t => LINES.push({ text: t, songIdx: idx }));
+        }
+      });
+    }
+
+    function show(id) {
+      ["screen-start", "screen-round", "screen-final"].forEach(s => $(s).classList.add("hidden"));
+      $(id).classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderBoard() {
+      const html = board.length
+        ? board.map((e, i) => `<li><span>${i + 1}. ${escapeHtml(e.name)}</span><span class="sc">${e.score}</span></li>`).join("")
+        : `<li class="empty">እስካሁን ውጤት የለም · No scores yet — be the first!</li>`;
+      $("boardList").innerHTML = html;
+      $("boardListStart").innerHTML = html;
+    }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    // ---- game state ----
+    let g = null;
+    function newGame(name) {
+      g = {
+        name: name || ("ተጫዋች " + (++playerCount)),
+        round: 0, score: 0, streak: 0, best: 0,
+        used: new Set(), current: null, locked: false, saved: false
+      };
+      show("screen-round");
+      nextRound();
+    }
+
+    function nextRound() {
+      if (g.round >= ROUNDS) return endGame();
+      g.round++;
+      g.locked = false;
+
+      const pool = QUALIFIED.filter(q => !g.used.has(q.idx));
+      const q = pick(pool.length ? pool : QUALIFIED);
+      g.used.add(q.idx);
+      const L = q.lines;
+      const i = 1 + Math.floor(Math.random() * (L.length - 2)); // not first, not last
+      const answer = L[i + 1];
+
+      const distract = [];
+      const tried = new Set();
+      let guard = 0;
+      while (distract.length < 3 && guard++ < 400) {
+        const c = pick(LINES);
+        if (c.songIdx === q.idx || c.text === answer || tried.has(c.text)) continue;
+        tried.add(c.text);
+        distract.push(c.text);
+      }
+      const options = shuffle([answer, ...distract]);
+      g.current = { song: q.song, answer, options, prompt: L[i] };
+
+      $("hudRound").textContent = g.round;
+      $("hudScore").textContent = g.score;
+      $("hudStreak").textContent = g.streak;
+      $("songTag").textContent = "🎵 " + q.song.artist + " — " + q.song.title;
+      $("promptLine").textContent = "\u201C" + L[i] + "\u201D";
+      $("feedback").textContent = "";
+      $("feedback").className = "feedback";
+      const box = $("options");
+      box.innerHTML = "";
+      options.forEach(text => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "opt";
+        b.textContent = text;
+        b.addEventListener("click", () => choose(b, text));
+        box.appendChild(b);
+      });
+    }
+
+    function choose(btn, text) {
+      if (g.locked) return;
+      g.locked = true;
+      const ok = text === g.current.answer;
+      const btns = [...$("options").children];
+      btns.forEach(b => {
+        b.disabled = true;
+        if (b.textContent === g.current.answer) b.classList.add("correct");
+        else if (b === btn) b.classList.add("wrong");
+        else b.classList.add("dim");
+      });
+      const fb = $("feedback");
+      if (ok) {
+        g.streak++;
+        g.best = Math.max(g.best, g.streak);
+        const pts = 10 + (g.streak - 1) * 2;
+        g.score += pts;
+        fb.textContent = "✅ ልክ ነው! +" + pts + " · Correct!";
+        fb.className = "feedback good";
+      } else {
+        g.streak = 0;
+        fb.textContent = "❌ ልክ ያልሆነ · Not quite — the answer is highlighted";
+        fb.className = "feedback bad";
+      }
+      $("hudScore").textContent = g.score;
+      $("hudStreak").textContent = g.streak;
+      setTimeout(nextRound, 1900);
+    }
+
+    function endGame() {
+      g.saved = false;
+      $("finalScore").textContent = g.score;
+      $("finalName").textContent = g.name;
+      $("finalDetail").textContent = "ምርጥ ተከታታይ " + g.best + " · Best streak " + g.best;
+      $("btnSave").disabled = false;
+      renderBoard();
+      show("screen-final");
+    }
+
+    // ---- hint modal ----
+    $("btnHint").addEventListener("click", () => {
+      if (!g || !g.current) return;
+      $("hintFrame").src = "https://www.youtube.com/embed/" + g.current.song.video_id + "?autoplay=1&rel=0";
+      $("hintModal").classList.add("open");
+    });
+    function closeHint() {
+      $("hintFrame").src = "";
+      $("hintModal").classList.remove("open");
+    }
+    $("btnCloseHint").addEventListener("click", closeHint);
+    $("hintModal").addEventListener("click", e => { if (e.target === $("hintModal")) closeHint(); });
+
+    // ---- wiring ----
+    $("btnStart").addEventListener("click", () => {
+      const name = $("playerName").value.trim();
+      if (name) playerCount++;
+      newGame(name || null);
+    });
+    $("playerName").addEventListener("keydown", e => { if (e.key === "Enter") $("btnStart").click(); });
+    $("btnSave").addEventListener("click", () => {
+      if (!g || g.saved) return;
+      g.saved = true;
+      board.push({ name: g.name, score: g.score });
+      board.sort((a, b) => b.score - a.score);
+      board = board.slice(0, 10);
+      $("btnSave").disabled = true;
+      renderBoard();
+    });
+    $("btnAgain").addEventListener("click", () => newGame(g.name));
+    $("btnNextPlayer").addEventListener("click", () => {
+      $("playerName").value = "";
+      renderBoard();
+      show("screen-start");
+      $("playerName").focus();
+    });
+
+    // ---- boot ----
+    loadSongs().then(() => {
+      $("loading").classList.add("hidden");
+      renderBoard();
+      show("screen-start");
+    }).catch(() => {
+      $("loading").textContent = "መዝሙሮቹን መጫን አልተቻለም · Could not load songs. Please reload.";
+    });
+  </script>
+</body>
+</html>
