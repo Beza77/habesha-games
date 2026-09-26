@@ -118,7 +118,7 @@
       </div>
 
       <div class="answer" id="answer" hidden>
-        <div><p class="answer-label">The answer</p><h2 id="answerTitle"></h2><p class="artist" id="answerArtist"></p><a class="video-link" id="youtubeLink" href="#" target="_blank" rel="noopener">Open this song on YouTube ↗</a></div>
+        <div><p class="answer-label">The answer</p><h2 id="answerTitle"></h2><p class="artist" id="answerArtist"></p></div>
       </div>
 
       <div class="play-controls" id="playControls" hidden>
@@ -202,7 +202,7 @@
   function revealSong(){
     if(!current||revealed)return;
     revealed=true;history[0].revealed=true;
-    $('answerTitle').textContent=current.title;$('answerArtist').textContent=current.artist;$('youtubeLink').href=current.url;
+    $('answerTitle').textContent=current.title;$('answerArtist').textContent=current.artist;
     $('mystery').hidden=true;$('answer').hidden=false;$('revealSong').disabled=true;$('drawSong').disabled=false;
     $('chooseWinner').disabled=false;renderHistory();
   }
