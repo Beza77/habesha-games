@@ -168,7 +168,7 @@
         <h1 id="welcome-title">Pick a game.<br>Play right away.</h1>
         <p lang="am">ይምረጡ፣ ይጫወቱ፣ በመዝናናት ይማሩ።</p>
       </div>
-      <div class="game-count" aria-label="2 games available"><div><strong>2</strong><small>games</small></div></div>
+      <div class="game-count" aria-label="3 games available"><div><strong>3</strong><small>games</small></div></div>
     </section>
 
     <section class="tool-row" aria-label="Game discovery controls">
@@ -185,7 +185,7 @@
     <p class="site-intro">Habesha Games is a free arcade of Ethiopian-themed games that play right in your browser — no downloads, no sign-up. Test your worship song knowledge: hear a clip and guess the title before time runs out, or fill your card in Worship Song Bingo. New games join the library as they are ready.</p>
 
     <section aria-labelledby="play-title">
-      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">2 games</span></div>
+      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">3 games</span></div>
       <div class="games" id="gameGrid">
 
         <button class="game-card secondary" type="button" data-title="Guess the Song መዝሙር" data-category="music" data-src="games/guess-the-game/" aria-label="Play Guess the Song">
@@ -199,6 +199,12 @@
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
                   <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Worship Song Bingo</h3><p lang="am">የመዝሙር ብንጎ — ካርድህን ሙላ፤ ብንጎ ብለህ ጩኸት! Mark each song as it plays and shout bingo when your card is full.</p></span>
                 </button>
+        <button class="game-card secondary" type="button" data-title="Guess from the Lyrics ከግጥሙ ገምት" data-category="music" data-src="games/guess-from-lyrics/" aria-label="Play Guess from the Lyrics">
+                  <span class="cover"><img src="assets/guess-from-lyrics.jpg" alt="Guess from the Lyrics game" /></span>
+                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess from the Lyrics</h3><p lang="am">ከግጥሙ ገምት — የግጥም ክፍል ተመልክት፤ መዝሙሩን ገምት፤ ከዚያ ስማው! Read a few lyric lines, guess the song, then hear it play.</p></span>
+                </button>
+
 
         <!-- HIDDEN by owner request 2026-09-26
 <button class="game-card secondary" type="button" data-title="Guess the Emoji" data-category="puzzle" data-src="games/guess-the-word-by-emoji/" aria-label="Play Guess the Emoji">
@@ -332,7 +338,7 @@
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20260924s';
+      var SITE_VERSION = '20260924t';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
