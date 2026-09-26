@@ -182,7 +182,7 @@
       </div>
     </section>
 
-    <p class="site-intro">Habesha Games is a free arcade of Ethiopian-themed games that play right in your browser — no downloads, no sign-up. Test your worship song knowledge: hear a clip and guess the title before time runs out, or fill your card in Worship Song Bingo. New games join the library as they are ready.</p>
+    <p class="site-intro">Free Ethiopian-themed games — no downloads, no sign-up. Play right in your browser.</p>
 
     <section aria-labelledby="play-title">
       <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">3 games</span></div>
@@ -191,18 +191,18 @@
         <button class="game-card secondary" type="button" data-title="Guess the Song መዝሙር" data-category="music" data-src="games/guess-the-game/" aria-label="Play Guess the Song">
                   <span class="cover"><img src="assets/guess-the-game.jpg" alt="Guess the Song" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess the Song</h3><p lang="am">መዝሙሩን ገምት — ፈጣኑ ያሸንፋል! Hear a worship song clip and guess the title before time runs out — faster answers score more.</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess the Song</h3><p lang="am">መዝሙሩን ገምት — Hear a clip, name the song.</p></span>
                 </button>
 
         <button class="game-card secondary" type="button" data-title="Worship Song Bingo" data-category="music" data-src="games/worship-song-bingo/" aria-label="Play Worship Song Bingo">
                   <span class="cover"><img src="assets/worship-song-bingo.jpg" alt="Worship Song Bingo game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Worship Song Bingo</h3><p lang="am">የመዝሙር ብንጎ — ካርድህን ሙላ፤ ብንጎ ብለህ ጩኸት! Mark each song as it plays and shout bingo when your card is full.</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Worship Song Bingo</h3><p lang="am">የመዝሙር ብንጎ — Mark each song, shout bingo!</p></span>
                 </button>
         <button class="game-card secondary" type="button" data-title="Guess from the Lyrics ከግጥሙ ገምት" data-category="music" data-src="games/guess-from-lyrics/" aria-label="Play Guess from the Lyrics">
                   <span class="cover"><img src="assets/guess-from-lyrics.jpg" alt="Guess from the Lyrics game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess from the Lyrics</h3><p lang="am">ከግጥሙ ገምት — የግጥም ክፍል ተመልክት፤ መዝሙሩን ገምት፤ ከዚያ ስማው! Read a few lyric lines, guess the song, then hear it play.</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess from the Lyrics</h3><p lang="am">ከግጥሙ ገምት — Read the lines, guess the song.</p></span>
                 </button>
 
 
@@ -338,7 +338,7 @@
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20260924v';
+      var SITE_VERSION = '20260924w';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
