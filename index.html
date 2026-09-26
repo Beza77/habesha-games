@@ -194,15 +194,15 @@
                   <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess the Song</h3><p lang="am">መዝሙሩን ገምት — Hear a clip, name the song.</p></span>
                 </button>
 
-        <button class="game-card secondary" type="button" data-title="Worship Song Bingo" data-category="music" data-src="games/worship-song-bingo/" aria-label="Play Worship Song Bingo">
-                  <span class="cover"><img src="assets/worship-song-bingo.jpg" alt="Worship Song Bingo game" /></span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Worship Song Bingo</h3><p lang="am">የመዝሙር ብንጎ — Mark each song, shout bingo!</p></span>
-                </button>
         <button class="game-card secondary" type="button" data-title="Guess from the Lyrics ከግጥሙ ገምት" data-category="music" data-src="games/guess-from-lyrics/" aria-label="Play Guess from the Lyrics">
                   <span class="cover"><img src="assets/guess-from-lyrics.jpg" alt="Guess from the Lyrics game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
                   <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess from the Lyrics</h3><p lang="am">ከግጥሙ ገምት — Read the lines, guess the song.</p></span>
+                </button>
+        <button class="game-card secondary" type="button" data-title="Worship Song Bingo" data-category="music" data-src="games/worship-song-bingo/" aria-label="Play Worship Song Bingo">
+                  <span class="cover"><img src="assets/worship-song-bingo.jpg" alt="Worship Song Bingo game" /></span>
+                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Worship Song Bingo</h3><p lang="am">የመዝሙር ብንጎ — Mark each song, shout bingo!</p></span>
                 </button>
 
 
@@ -338,7 +338,7 @@
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20260924w';
+      var SITE_VERSION = '20260924x';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
