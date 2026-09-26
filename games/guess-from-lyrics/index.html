@@ -55,6 +55,7 @@ button:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
 .choice:disabled{cursor:default;opacity:.75}
 .choice.right{border:2px solid var(--good);opacity:1}
 .choice.wrong{border:2px solid var(--bad);opacity:.55}
+.choice-artist{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-top:3px}
 .play-controls{display:flex;justify-content:center;gap:8px;margin-top:12px}
 .play-controls[hidden]{display:none}
 .small-btn{min-height:42px;border:1px solid var(--line);background:transparent;color:var(--ink);padding:7px 14px;border-radius:11px;font-weight:800}
@@ -256,7 +257,7 @@ button:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
     playerHost.innerHTML = '';
     stopPlayer();
     snippet.textContent = snip;
-    snippetHint.textContent = 'by ' + entry.artist;
+    snippetHint.textContent = '';
     prompt.hidden = false;
     var opts = [entry];
     var pool = shuffle(DATA.filter(function(s){ return s.title !== entry.title || s.artist !== entry.artist; }));
@@ -270,7 +271,14 @@ button:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'choice';
-      b.textContent = o.title;
+      b.innerHTML = '';
+      var tSpan = document.createElement('span');
+      tSpan.textContent = o.title;
+      var aSpan = document.createElement('span');
+      aSpan.className = 'choice-artist';
+      aSpan.textContent = o.artist;
+      b.appendChild(tSpan);
+      b.appendChild(aSpan);
       b.dataset.title = o.title;
       b.dataset.artist = o.artist;
       b.addEventListener('click', function(){ guess(b, o); });
