@@ -127,6 +127,10 @@ input[type=text].name{text-transform:none}
     <div class="eq hidden" id="host-eq"><i></i><i></i><i></i><i></i><i></i></div>
     <div id="yt-holder" style="position:absolute;width:2px;height:2px;opacity:0;overflow:hidden;pointer-events:none"></div>
     <button class="btn teal" id="btn-play-clip">▶ Play the clip</button>
+    <div id="clip-ctrls" class="hidden" style="display:flex;gap:10px">
+      <button class="btn teal" id="btn-clip-pause" style="flex:1">⏸ Pause</button>
+      <button class="btn ghost" id="btn-clip-restart" style="flex:1">↺ Restart</button>
+    </div>
     <p class="count" id="host-clip-msg">tap play — everyone listens, then picks the song</p>
     <p class="count" id="host-answers">0 answered</p>
     <div id="host-reveal" class="hidden">
@@ -345,6 +349,7 @@ function startRoundWith(n, song){
   $("host-reveal").classList.add("hidden");
   $("btn-reveal").classList.remove("hidden"); $("btn-next").classList.add("hidden");
   $("btn-play-clip").classList.remove("hidden");
+  $("clip-ctrls").classList.add("hidden"); clipState=null;
   $("host-eq").classList.add("hidden");
   $("host-clip-msg").textContent="tap play \u2014 everyone listens, then picks the song";
   show("scr-host-game");
@@ -353,6 +358,7 @@ function startRoundWith(n, song){
 }
 /* ---------- audio clip ---------- */
 let ytPlayer=null, ytReady=false, clipTries=0;
+let clipState=null, clipPlayStart=0, clipRemaining=0, clipStartSec=0; // clipState: playing | paused
 function ensureYT(cb){
   if(ytReady) return cb();
   const t=setInterval(()=>{ if(window.YT&&YT.Player){ clearInterval(t); ytReady=true; cb(); } },250);
@@ -363,7 +369,10 @@ function playClip(){
   if(!round) return;
   ensureYT(()=>{
     const s=round.song, start=15+rnd(40);
+    clipStartSec=start; clipState="playing"; clipPlayStart=Date.now();
     $("btn-play-clip").classList.add("hidden");
+    $("clip-ctrls").classList.remove("hidden");
+    $("btn-clip-pause").textContent="⏸ Pause";
     $("host-eq").classList.remove("hidden");
     $("host-clip-msg").textContent="\u{1F50A} Playing\u2026 listen carefully!";
     send({k:"playing",rid:round.rid});
@@ -380,8 +389,40 @@ function playClip(){
     roundTimer=setTimeout(doReveal, ROUND_SECS*1000);
   });
 }
+$("btn-clip-pause").onclick=()=>{
+  if(!round||!ytPlayer) return;
+  if(clipState==="playing"){
+    try{ ytPlayer.pauseVideo(); }catch(e){}
+    clipRemaining=Math.max(1,Math.round(ROUND_SECS-(Date.now()-clipPlayStart)/1000));
+    clearTimeout(roundTimer);
+    clipState="paused";
+    $("btn-clip-pause").textContent="▶ Resume";
+    $("host-clip-msg").textContent="⏸ Paused — tap Resume to continue";
+    send({k:"pause",rid:round.rid});
+  }else if(clipState==="paused"){
+    try{ ytPlayer.playVideo(); }catch(e){}
+    clipPlayStart=Date.now()-(ROUND_SECS-clipRemaining)*1000;
+    clearTimeout(roundTimer);
+    roundTimer=setTimeout(doReveal, clipRemaining*1000);
+    clipState="playing";
+    $("btn-clip-pause").textContent="⏸ Pause";
+    $("host-clip-msg").textContent="🔊 Playing… listen carefully!";
+    send({k:"resume",rid:round.rid,remaining:clipRemaining});
+  }
+};
+$("btn-clip-restart").onclick=()=>{
+  if(!round||!ytPlayer) return;
+  try{ ytPlayer.seekTo(clipStartSec,true); ytPlayer.playVideo(); }catch(e){}
+  clipPlayStart=Date.now(); clipState="playing";
+  $("btn-clip-pause").textContent="⏸ Pause";
+  $("host-clip-msg").textContent="🔊 Playing… listen carefully!";
+  clearTimeout(roundTimer);
+  roundTimer=setTimeout(doReveal, ROUND_SECS*1000);
+  send({k:"playing",rid:round.rid}); // players restart their countdown fresh
+};
 function onClipError(){
-  stopClip();
+  stopClip(); clipState=null;
+  $("clip-ctrls").classList.add("hidden");
   if(clipTries<2){
     clipTries++;
     const pool=poolSongs().filter(s=>s.video_id!==round.song.video_id);
@@ -395,7 +436,8 @@ $("btn-reveal").onclick=doReveal;
 function doReveal(){
   if(!round||$("host-reveal")&&!$("host-reveal").classList.contains("hidden")) return;
   clearTimeout(roundTimer);
-  stopClip();
+  stopClip(); clipState=null;
+  $("clip-ctrls").classList.add("hidden");
   $("host-eq").classList.add("hidden");
   const gained={};
   Object.keys(answers).forEach(p=>{
@@ -452,6 +494,8 @@ $("btn-do-join").onclick=()=>{
     }
     if(m.k==="round") onPlayerRound(m);
     if(m.k==="playing") onPlaying(m);
+    if(m.k==="pause") onClipPause(m);
+    if(m.k==="resume") onClipResume(m);
     if(m.k==="reveal") onPlayerReveal(m);
     if(m.k==="end") onPlayerEnd(m);
   };
@@ -486,6 +530,19 @@ function onPlaying(m){
   $("player-snippet").textContent="\u{1F3A7} Now playing\u2026 pick your answer!";
   const bar=$("player-timer"); let left=ROUND_SECS;
   bar.style.width="100%";
+  playerTimerInt=setInterval(()=>{ left--; bar.style.width=(left/ROUND_SECS*100)+"%"; if(left<=0) clearInterval(playerTimerInt); },1000);
+}
+function onClipPause(m){
+  if(m.rid!==window._rid) return;
+  clearInterval(playerTimerInt);
+  $("player-snippet").textContent="⏸ Paused…";
+}
+function onClipResume(m){
+  if(m.rid!==window._rid) return;
+  clearInterval(playerTimerInt);
+  $("player-snippet").textContent="🎧 Now playing… pick your answer!";
+  let left=m.remaining||ROUND_SECS; const bar=$("player-timer");
+  bar.style.width=(left/ROUND_SECS*100)+"%";
   playerTimerInt=setInterval(()=>{ left--; bar.style.width=(left/ROUND_SECS*100)+"%"; if(left<=0) clearInterval(playerTimerInt); },1000);
 }
 function onPlayerReveal(m){
