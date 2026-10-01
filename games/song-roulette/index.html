@@ -67,6 +67,11 @@ h1{font-size:28px;margin:4px 0;text-align:center}
       <button class="btn ghost" id="btn-mode">📖 Verse by verse</button>
       <button class="btn ghost" id="btn-yt">▶ YouTube</button>
     </div>
+    <div id="yt-wrap" class="hidden" style="margin:10px 0">
+      <div style="position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;background:#000">
+        <iframe id="yt-frame" title="Song video" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+    </div>
     <div class="lyrics" id="lyrics"></div>
     <div class="stanza hidden" id="stanza"></div>
     <div class="verse-nav hidden" id="verse-nav">
@@ -112,7 +117,18 @@ function openSong(s){
   $("lyrics").classList.remove("hidden");
   $("stanza").classList.add("hidden"); $("verse-nav").classList.add("hidden"); $("verse-count").classList.add("hidden");
   $("btn-mode").textContent="📖 Verse by verse";
-  $("btn-yt").onclick=()=>{ if(s.video_id) window.open("https://www.youtube.com/watch?v="+s.video_id,"_blank"); };
+  $("yt-frame").src="about:blank"; $("yt-wrap").classList.add("hidden");
+  $("btn-yt").textContent="▶ YouTube"; $("btn-yt").disabled=!s.video_id;
+  $("btn-yt").onclick=()=>{
+    if(!s.video_id) return;
+    const w=$("yt-wrap"), f=$("yt-frame");
+    if(w.classList.contains("hidden")){
+      f.src="https://www.youtube.com/embed/"+s.video_id+"?autoplay=1&rel=0";
+      w.classList.remove("hidden"); $("btn-yt").textContent="⏹ Close player";
+    }else{
+      f.src="about:blank"; w.classList.add("hidden"); $("btn-yt").textContent="▶ YouTube";
+    }
+  };
   show("scr-song");
 }
 $("btn-mode").onclick=()=>{
