@@ -90,6 +90,13 @@
     @media(max-width:760px){.layout{grid-template-columns:1fr}.mystery,.answer{min-height:280px}.side{box-shadow:none}.topline{align-items:flex-start}.deck-count{font-size:10px}.history{max-height:230px}}
     @media(max-width:460px){.shell{padding-top:10px}.topline h1{font-size:25px}.topline p{font-size:12px}.controls{grid-template-columns:1fr}.mystery,.answer{min-height:255px}.winner-form{grid-template-columns:1fr}.award{min-height:48px}.disc{width:80px;height:80px}.listen-title{font-size:26px}.side{padding:15px}}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.mystery.playing .disc,.mystery.playing .wave i{animation:none}.toast{transition:none}}
+    .filter{margin:0 0 14px;background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 16px}
+    .filter h3{font-size:14px;margin:0 0 8px}
+    .filter h3 .hint{font-weight:400;font-size:12px;color:var(--muted)}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{border:0;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;background:#0f766e;color:#fff}
+    .chip.off{background:#e8ddc2;color:#7a6a58}
+    .pool-count{font-size:12px;color:var(--muted);margin:8px 0 0}
   </style>
 </head>
 <body>
@@ -101,6 +108,12 @@
     </div>
     <span class="deck-count"><span id="songTotal">—</span> playable songs</span>
   </header>
+
+  <section class="filter" aria-label="Singer filter">
+    <h3>Singers <span class="hint">— all selected, tap to remove one you don't want</span></h3>
+    <div class="chips" id="cat-artists"></div>
+    <p class="pool-count" id="pool-count"></p>
+  </section>
 
   <div class="layout">
     <section class="stage" aria-label="Leader draw">
@@ -171,7 +184,33 @@
   function esc(value){return String(value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function notify(message){clearTimeout(toastTimer);$('toast').textContent=message;$('toast').classList.add('show');toastTimer=setTimeout(function(){$('toast').classList.remove('show');},1800);}
   function setPlaying(on){$('mystery').classList.toggle('playing',!!on);$('playPause').textContent=on?'Pause':'Play';}
-  function updateCounts(){$('songTotal').textContent=all.length.toLocaleString();$('roundNumber').textContent=round;$('remainingCount').textContent=deck.length.toLocaleString();}
+  function updateCounts(){$('songTotal').textContent=poolSongs().length.toLocaleString();$('roundNumber').textContent=round;$('remainingCount').textContent=deck.length.toLocaleString();}
+
+  /* ---------- singer filter: all selected, tap to remove ---------- */
+  var fExcluded={};
+  function poolSongs(){return all.filter(function(s){return !fExcluded[s.artist];});}
+  function refreshPool(){
+    var pool=poolSongs(),n=pool.length,tag='';
+    var removed=Object.keys(fExcluded).filter(function(k){return fExcluded[k];});
+    if(removed.length){tag=' · without '+removed.slice(0,3).join(', ')+(removed.length>3?'…':'');}
+    $('pool-count').textContent='🎵 '+n+' songs in this playlist'+tag;
+    deck=shuffle(pool);updateCounts();
+  }
+  function buildCats(){
+    var counts={};
+    all.forEach(function(s){counts[s.artist]=(counts[s.artist]||0)+1;});
+    var host=$('cat-artists');host.innerHTML='';
+    Object.keys(counts).filter(function(a){return counts[a]>=4;}).sort().forEach(function(a){
+      var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=a;
+      b.onclick=function(){
+        if(fExcluded[a]){delete fExcluded[a];b.classList.remove('off');}
+        else{fExcluded[a]=true;b.classList.add('off');}
+        refreshPool();
+      };
+      host.appendChild(b);
+    });
+    refreshPool();
+  }
 
   window.onYouTubeIframeAPIReady=function(){ytReady=true;preparePlayer();};
   function preparePlayer(){
@@ -191,7 +230,7 @@
 
   function drawSong(){
     resetArmed=false;$('resetGame').textContent='Reset game';
-    if(!deck.length){notify('Every song has been played. Reset to start again.');return;}
+    if(!deck.length){notify(poolSongs().length?'Every song has been played. Reset to start again.':'Playlist is empty — tap a singer to add them back.');return;}
     current=deck.pop();round+=1;revealed=false;awarded=false;
     history.unshift({round:round,song:current,revealed:false,winner:''});
     $('mystery').hidden=false;$('answer').hidden=true;$('listenTitle').textContent='Song '+round+' is playing';$('listenSub').textContent='Listen closely — call out your answer first.';
@@ -233,7 +272,7 @@
   }
   function resetGame(){
     if(!resetArmed){resetArmed=true;$('resetGame').textContent='Tap again to reset';setTimeout(function(){resetArmed=false;$('resetGame').textContent='Reset game';},2600);return;}
-    stopPlayer();deck=shuffle(all);current=null;round=0;revealed=false;awarded=false;scores={};history=[];resetArmed=false;
+    stopPlayer();deck=shuffle(poolSongs());current=null;round=0;revealed=false;awarded=false;scores={};history=[];resetArmed=false;
     $('resetGame').textContent='Reset game';$('mystery').hidden=false;$('answer').hidden=true;$('listenTitle').textContent='Ready for the first song?';$('listenSub').textContent='The title stays hidden until you reveal it.';
     $('drawSong').disabled=false;$('drawSong').textContent='Draw & play a song';$('revealSong').disabled=true;$('playControls').hidden=true;$('chooseWinner').disabled=true;$('winnerForm').hidden=true;$('winnerName').value='';$('winnerName').disabled=true;$('awardPoint').disabled=true;$('awardPoint').textContent='Award point';
     updateCounts();renderScores();renderHistory();notify('New game ready.');
@@ -241,7 +280,7 @@
   $('drawSong').addEventListener('click',drawSong);$('revealSong').addEventListener('click',revealSong);$('chooseWinner').addEventListener('click',chooseWinner);$('awardPoint').addEventListener('click',awardPoint);$('winnerName').addEventListener('keydown',function(e){if(e.key==='Enter')awardPoint();});$('resetGame').addEventListener('click',resetGame);
   $('playPause').addEventListener('click',function(){if(!player||!player.getPlayerState){notify('Player is still loading.');return;}if(player.getPlayerState()===YT.PlayerState.PLAYING){player.pauseVideo();}else{player.playVideo();}});
   $('restartSong').addEventListener('click',function(){if(player&&player.seekTo){player.seekTo(0,true);player.playVideo();}});
-  deck=shuffle(all);updateCounts();
+  buildCats();
   if(!all.length){$('drawSong').disabled=true;$('listenTitle').textContent='Song catalog unavailable';$('listenSub').textContent='The playable song list could not be loaded.';}else{
     $('drawSong').disabled=true;$('drawSong').textContent='Loading player…';
     if(window.YT&&YT.Player){ytReady=true;preparePlayer();}
