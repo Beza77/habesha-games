@@ -119,7 +119,7 @@ function nextRound(){
       btns[correctIdx].classList.add("correct");
       if(idx===correctIdx){ score++; streak++; } else { b.classList.add("wrong"); streak=0; }
       $("score").textContent=score; $("streak").textContent=streak;
-      $("songline").textContent="🎵 "+song.title+" — "+song.artist;
+      $("songline").textContent="🎵 "+song.artist+" — "+song.title;
       $("prog").style.width=(round/ROUNDS*100)+"%";
       const nb=$("btn-next"); nb.classList.remove("hidden");
       nb.textContent = round>=ROUNDS ? "See results →" : "Next →";
