@@ -363,7 +363,7 @@ function playClip(){
           playerVars:{autoplay:1,start:start,rel:0,controls:0,disablekb:1},
           events:{onError:onClipError,
             onReady:kickAudio,
-            onStateChange:(e)=>{ if(e&&e.data===5) kickAudio(); }}});
+            onStateChange:(e)=>{ if(e&&e.data===5&&clipState==="playing") kickAudio(); }}});
       }catch(e){ onClipError(); }
     };
     if(!ytPlayer) mk();
