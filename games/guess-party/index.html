@@ -103,9 +103,14 @@ input[type=text].name{text-transform:none}
     <div class="roomcode" id="host-code">····</div>
     <div class="players" id="host-players"><span class="chip">waiting…</span></div>
     <button class="btn teal" id="btn-start" disabled>Start game</button>
-    <p class="count" style="margin-top:16px">Optional: pick a category</p>
-    <div class="players" id="host-cats" style="justify-content:center"></div>
-    <select id="host-artist" style="width:100%;font-family:inherit;font-size:16px;font-weight:700;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);margin:4px 0 8px"></select>
+    <p class="count" style="margin-top:16px">Optional: build your playlist</p>
+    <p class="count">Decade</p>
+    <div class="players" id="cat-decades" style="justify-content:center"></div>
+    <p class="count">Singers <span style="font-weight:400">— tap to remove ones you don't know</span></p>
+    <div class="players" id="cat-artists"></div>
+    <p class="count">Albums <span style="font-weight:400">— tap to remove</span></p>
+    <div class="players" id="cat-albums"></div>
+    <p class="count" id="pool-count"></p>
     <button class="btn ghost" id="btn-host-back">Back</button>
     <p class="status" id="host-status"></p>
   </section>
@@ -226,40 +231,55 @@ function mqttEnd(){ try{client&&client.end(true);}catch(e){} client=null; }
 /* ---------- load songs ---------- */
 fetch(SONGS_URL).then(r=>r.json()).then(d=>{ SONGS=d.filter(s=>lyricLines(s).length>=4); buildCats(); });
 
-/* ---------- categories ---------- */
-let catFilter={type:"all"}; // {type:'all'|'decade'|'artist', value}
+/* ---------- playlist builder ---------- */
+let fDecade=null;            // null = all decades
+const fArtists=new Set(), fAlbums=new Set();  // excluded singers / albums; empty = all included
 function poolSongs(){
-  if(catFilter.type==="decade") return SONGS.filter(s=>s.year&&Math.floor(s.year/10)*10===catFilter.value);
-  if(catFilter.type==="artist") return SONGS.filter(s=>s.artist===catFilter.value);
-  return SONGS;
+  return SONGS.filter(s=>{
+    if(fDecade && !(s.year && Math.floor(s.year/10)*10===fDecade)) return false;
+    if(fArtists.has(s.artist)) return false;
+    if((s.albums||[]).some(a=>fAlbums.has(a))) return false;
+    return true;
+  }).filter(s=>lyricLines(s).length>=4);
+}
+function toggleChip(el,set,key){
+  if(set.has(key)){ set.delete(key); el.style.background="#0f766e"; el.style.color="#fff"; }
+  else { set.add(key); el.style.background="#e8ddc2"; el.style.color="#7a6a58"; }
+  updatePoolCount();
+}
+function updatePoolCount(){
+  const n=poolSongs().length;
+  $("pool-count").textContent="🎵 "+n+" songs in this playlist";
+  const ok=n>=4;
+  if(!Object.keys(players).length) $("btn-start").disabled=true; else $("btn-start").disabled=!ok;
+  if(!ok) $("pool-count").textContent+=" — pick more to play (need 4+)";
 }
 function buildCats(){
-  const box=$("host-cats"); box.innerHTML="";
-  const decades=[["all","🎶 All songs"]];
-  [2000,2010,2020].forEach(d=>{ if(SONGS.some(s=>s.year&&Math.floor(s.year/10)*10===d)) decades.push(["dec:"+d,d+"s"]); });
-  decades.forEach(([k,label])=>{
+  const db=$("cat-decades"); db.innerHTML="";
+  [["all","🎶 All"]].concat([2000,2010,2020].filter(d=>SONGS.some(s=>s.year&&Math.floor(s.year/10)*10===d)).map(d=>["d"+d,d+"s"]))
+  .forEach(([k,label])=>{
+    const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0"; b.textContent=label;
+    b.onclick=()=>{ fDecade = k==="all" ? null : parseInt(k.slice(1));
+      db.querySelectorAll(".chip").forEach(c=>{c.style.background="#e8ddc2";c.style.color="#7a6a58";});
+      b.style.background="#0f766e"; b.style.color="#fff"; updatePoolCount(); };
+    if(k==="all"){ b.style.background="#0f766e"; b.style.color="#fff"; }
+    db.appendChild(b);
+  });
+  const ac={}, alc={};
+  SONGS.forEach(s=>{ ac[s.artist]=(ac[s.artist]||0)+1; (s.albums||[]).forEach(a=>alc[a]=(alc[a]||0)+1); });
+  const ab=$("cat-artists"); ab.innerHTML="";
+  Object.keys(ac).filter(a=>ac[a]>=4).sort().forEach(a=>{
     const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0";
-    b.textContent=label; b.dataset.k=k;
-    b.onclick=()=>{ $("host-artist").value="";
-      catFilter = k==="all" ? {type:"all"} : {type:"decade",value:parseInt(k.slice(4))};
-      paintCats(); };
-    box.appendChild(b);
+    b.style.background="#0f766e"; b.style.color="#fff"; b.textContent=a;
+    b.onclick=()=>toggleChip(b,fArtists,a); ab.appendChild(b);
   });
-  const counts={}; SONGS.forEach(s=>counts[s.artist]=(counts[s.artist]||0)+1);
-  const sel=$("host-artist");
-  sel.innerHTML='<option value="">🎤 …or pick an artist</option>';
-  Object.keys(counts).filter(a=>counts[a]>=6).sort().forEach(a=>{
-    const o=document.createElement("option"); o.value=a; o.textContent=a+" ("+counts[a]+")"; sel.appendChild(o);
+  const lb=$("cat-albums"); lb.innerHTML="";
+  Object.keys(alc).filter(a=>alc[a]>=3).sort().forEach(a=>{
+    const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0";
+    b.style.background="#0f766e"; b.style.color="#fff"; b.textContent=a;
+    b.onclick=()=>toggleChip(b,fAlbums,a); lb.appendChild(b);
   });
-  sel.onchange=()=>{ catFilter = sel.value ? {type:"artist",value:sel.value} : {type:"all"}; paintCats(); };
-  paintCats();
-}
-function paintCats(){
-  $("host-cats").querySelectorAll(".chip").forEach(c=>{
-    const k=c.dataset.k;
-    const active=(k==="all"&&catFilter.type==="all")||(k.startsWith("dec:")&&catFilter.type==="decade"&&parseInt(k.slice(4))===catFilter.value);
-    c.style.background=active?"#0f766e":"#e8f4f1"; c.style.color=active?"#fff":"#0b4f4a";
-  });
+  updatePoolCount();
 }
 
 /* ================= HOST ================= */
@@ -295,7 +315,7 @@ function renderLobby(){
   const list=Object.values(players);
   if(!list.length) box.innerHTML='<span class="chip">waiting…</span>';
   list.forEach(p=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=p.name; box.appendChild(c); });
-  $("btn-start").disabled = list.length===0;
+  updatePoolCount();
 }
 $("btn-start").onclick=()=>{ hostScores={}; Object.keys(players).forEach(p=>hostScores[p]=0); startRound(1); };
 function startRound(n){
