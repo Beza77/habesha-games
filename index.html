@@ -104,6 +104,8 @@
     .site-footer nav a:hover { color:var(--ink); text-decoration:underline; }
 
     .games { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:14px; }
+    .section-title { font-size:1.15rem; font-weight:800; margin:26px 0 12px; letter-spacing:-.01em; }
+    .section-title span { font-weight:400; color:var(--muted); font-size:.95rem; }
     .game-card {
       --card-accent: var(--cyan);
       position:relative; min-height:225px; overflow:hidden; border:0; border-radius:20px; padding:0; background:var(--panel); color:var(--ink); box-shadow:var(--shadow); cursor:pointer; text-align:left;
@@ -183,7 +185,8 @@
 
     <section aria-labelledby="play-title">
       <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">3 games</span></div>
-      <div class="games" id="gameGrid">
+      <h2 class="section-title" id="groupTitle">👥 Group games <span lang="am">· የቡድን ጨዋታዎች</span></h2>
+      <div class="games" id="groupGrid">
 
         <button class="game-card secondary" type="button" data-title="Guess Party የቡድን ጨዋታ" data-category="music" data-src="games/guess-party/" aria-label="Play Guess Party">
                   <span class="cover" style="background:linear-gradient(135deg,#0f766e,#f6c548);display:flex;align-items:center;justify-content:center;font-size:64px;">🎉</span>
@@ -195,6 +198,10 @@
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
                   <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Listen Party</h3><p lang="am">አድምጠው ገምት — hear the song clip, pick the answer!</p></span>
                 </button>
+      </div>
+
+      <h2 class="section-title" id="soloTitle">🙋 Solo games <span lang="am">· የግል ጨዋታዎች</span></h2>
+      <div class="games" id="soloGrid">
 
         <button class="game-card secondary" type="button" data-title="Guess the Song መዝሙር" data-category="music" data-src="games/guess-the-game/" aria-label="Play Guess the Song">
                   <span class="cover"><img src="assets/guess-the-game.jpg" alt="Guess the Song" /></span>
@@ -355,7 +362,7 @@
       if (badgeCount) badgeCount.textContent = cards.length;
       if (badge) badge.setAttribute('aria-label', cards.length + ' games available');
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20261001i';
+      var SITE_VERSION = '20261001j';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
@@ -369,6 +376,13 @@
         });
         count.textContent = visible + (visible === 1 ? ' game' : ' games');
         empty.style.display = visible ? 'none' : 'block';
+        [['groupGrid','groupTitle'],['soloGrid','soloTitle']].forEach(function (pair) {
+          var grid = document.getElementById(pair[0]);
+          var head = document.getElementById(pair[1]);
+          var any = Array.prototype.some.call(grid.querySelectorAll('.game-card'), function (c) { return !c.hidden; });
+          grid.style.display = any ? '' : 'none';
+          head.style.display = any ? '' : 'none';
+        });
       }
 
       filters.forEach(function (button) {
