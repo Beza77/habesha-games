@@ -7,7 +7,6 @@
 <link rel="icon" href="data:," />
 <title>የቡድን ጨዋታ · Finish the Lyrics Party</title>
 <script src="https://unpkg.com/mqtt@5/dist/mqtt.min.js"></script>
-<script src="../shared/latin2am.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;600;700;800&display=swap');
 :root{
@@ -353,7 +352,7 @@ function doReveal(){
     } else gained[p]=0;
   });
   const scores=Object.keys(players).map(p=>({pid:p,name:players[p].name,pts:hostScores[p]||0})).sort((a,b)=>b.pts-a.pts);
-  const songLabel=latinToAmharic(round.song.artist)+" — "+latinToAmharic(round.song.title);
+  const songLabel=round.song.artist+" — "+round.song.title;
   send({k:"reveal",rid:round.rid,correctIdx:round.correctIdx,gained,scores,songLabel:songLabel,correct:round.correct});
   $("host-correct").innerHTML="✅ \u201c"+esc(round.correct)+"\u201d<br><small style=\"font-weight:600\">🎵 "+esc(songLabel)+"</small>";
   const tb=$("host-board"); tb.innerHTML="<tr><th>Player</th><th>Points</th></tr>";
