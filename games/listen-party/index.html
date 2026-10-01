@@ -368,7 +368,7 @@ $("btn-play-clip").onclick=()=>{ playClip(); };
 function playClip(){
   if(!round) return;
   ensureYT(()=>{
-    const s=round.song, start=15+rnd(40);
+    const s=round.song, start=0; // clip always starts at the very beginning
     clipStartSec=start; clipState="playing"; clipPlayStart=Date.now();
     $("btn-play-clip").classList.add("hidden");
     $("clip-ctrls").classList.remove("hidden");
