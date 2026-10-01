@@ -102,6 +102,9 @@ input[type=text].name{text-transform:none}
     <p class="count">Players — open this page on your phone, tap <b>Join</b> and enter:</p>
     <div class="roomcode" id="host-code">····</div>
     <div class="players" id="host-players"><span class="chip">waiting…</span></div>
+    <p class="count" style="margin-top:14px">Pick a category</p>
+    <div class="players" id="host-cats" style="justify-content:center"></div>
+    <select id="host-artist" style="width:100%;font-family:inherit;font-size:16px;font-weight:700;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);margin:4px 0 8px"></select>
     <button class="btn teal" id="btn-start" disabled>Start game</button>
     <button class="btn ghost" id="btn-host-back">Back</button>
     <p class="status" id="host-status"></p>
@@ -221,7 +224,43 @@ function send(msg){ if(client&&client.connected&&topic){ client.publish(topic, J
 function mqttEnd(){ try{client&&client.end(true);}catch(e){} client=null; }
 
 /* ---------- load songs ---------- */
-fetch(SONGS_URL).then(r=>r.json()).then(d=>{ SONGS=d.filter(s=>lyricLines(s).length>=4); });
+fetch(SONGS_URL).then(r=>r.json()).then(d=>{ SONGS=d.filter(s=>lyricLines(s).length>=4); buildCats(); });
+
+/* ---------- categories ---------- */
+let catFilter={type:"all"}; // {type:'all'|'decade'|'artist', value}
+function poolSongs(){
+  if(catFilter.type==="decade") return SONGS.filter(s=>s.year&&Math.floor(s.year/10)*10===catFilter.value);
+  if(catFilter.type==="artist") return SONGS.filter(s=>s.artist===catFilter.value);
+  return SONGS;
+}
+function buildCats(){
+  const box=$("host-cats"); box.innerHTML="";
+  const decades=[["all","🎶 All songs"]];
+  [2000,2010,2020].forEach(d=>{ if(SONGS.some(s=>s.year&&Math.floor(s.year/10)*10===d)) decades.push(["dec:"+d,d+"s"]); });
+  decades.forEach(([k,label])=>{
+    const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0";
+    b.textContent=label; b.dataset.k=k;
+    b.onclick=()=>{ $("host-artist").value="";
+      catFilter = k==="all" ? {type:"all"} : {type:"decade",value:parseInt(k.slice(4))};
+      paintCats(); };
+    box.appendChild(b);
+  });
+  const counts={}; SONGS.forEach(s=>counts[s.artist]=(counts[s.artist]||0)+1);
+  const sel=$("host-artist");
+  sel.innerHTML='<option value="">🎤 …or pick an artist</option>';
+  Object.keys(counts).filter(a=>counts[a]>=6).sort().forEach(a=>{
+    const o=document.createElement("option"); o.value=a; o.textContent=a+" ("+counts[a]+")"; sel.appendChild(o);
+  });
+  sel.onchange=()=>{ catFilter = sel.value ? {type:"artist",value:sel.value} : {type:"all"}; paintCats(); };
+  paintCats();
+}
+function paintCats(){
+  $("host-cats").querySelectorAll(".chip").forEach(c=>{
+    const k=c.dataset.k;
+    const active=(k==="all"&&catFilter.type==="all")||(k.startsWith("dec:")&&catFilter.type==="decade"&&parseInt(k.slice(4))===catFilter.value);
+    c.style.background=active?"#0f766e":"#e8f4f1"; c.style.color=active?"#fff":"#0b4f4a";
+  });
+}
 
 /* ================= HOST ================= */
 let roomCode=null, players={}, answers={}, round=null, roundTimer=null, hostScores={};
@@ -260,9 +299,10 @@ function renderLobby(){
 }
 $("btn-start").onclick=()=>{ hostScores={}; Object.keys(players).forEach(p=>hostScores[p]=0); startRound(1); };
 function startRound(n){
-  const song=SONGS[rnd(SONGS.length)];
+  const pool=poolSongs().filter(s=>lyricLines(s).length>=4);
+  const song=pool[rnd(pool.length)];
   const snippet=pickSnippet(song)||lyricLines(song).slice(0,3).join("\n");
-  const others=shuffle(SONGS.filter(s=>s.title!==song.title)).slice(0,3);
+  const others=shuffle(pool.filter(s=>s.title!==song.title)).slice(0,3);
   const choices=shuffle([{title:song.title,artist:song.artist}].concat(others.map(s=>({title:s.title,artist:s.artist}))));
   const correctIdx=choices.findIndex(c=>c.title===song.title);
   round={rid:"r"+Date.now()+n, n, song, snippet, choices, correctIdx};
