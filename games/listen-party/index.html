@@ -377,15 +377,24 @@ function playClip(){
     $("host-eq").classList.remove("hidden");
     $("host-clip-msg").textContent="\u{1F50A} Playing\u2026 listen carefully!";
     send({k:"playing",rid:round.rid});
+    // Mobile browsers often load the clip silently until playback is explicitly
+    // kicked — this is why the first play had no sound until restart.
+    const kickAudio=()=>{
+      try{ ytPlayer.unMute(); }catch(e){}
+      try{ ytPlayer.setVolume(100); }catch(e){}
+      try{ ytPlayer.playVideo(); }catch(e){}
+    };
     const mk=()=>{
       try{
         ytPlayer=new YT.Player("yt-holder",{height:"2",width:"2",videoId:s.video_id,
           playerVars:{autoplay:1,start:start,rel:0,controls:0,disablekb:1},
-          events:{onError:onClipError}});
+          events:{onError:onClipError,
+            onReady:kickAudio,
+            onStateChange:(e)=>{ if(e&&e.data===5) kickAudio(); }}});
       }catch(e){ onClipError(); }
     };
     if(!ytPlayer) mk();
-    else { try{ ytPlayer.loadVideoById({videoId:s.video_id,startSeconds:start}); }catch(e){ onClipError(); return; } }
+    else { try{ ytPlayer.loadVideoById({videoId:s.video_id,startSeconds:start}); kickAudio(); }catch(e){ onClipError(); return; } }
     clearTimeout(roundTimer);
     roundTimer=setTimeout(doReveal, ROUND_SECS*1000);
   });
@@ -401,6 +410,7 @@ $("btn-clip-pause").onclick=()=>{
     $("host-clip-msg").textContent="⏸ Paused — tap Resume to continue";
     send({k:"pause",rid:round.rid});
   }else if(clipState==="paused"){
+    try{ ytPlayer.unMute(); }catch(e){}
     try{ ytPlayer.playVideo(); }catch(e){}
     clipPlayStart=Date.now()-(ROUND_SECS-clipRemaining)*1000;
     clearTimeout(roundTimer);
@@ -413,7 +423,7 @@ $("btn-clip-pause").onclick=()=>{
 };
 $("btn-clip-restart").onclick=()=>{
   if(!round||!ytPlayer) return;
-  try{ ytPlayer.seekTo(clipStartSec,true); ytPlayer.playVideo(); }catch(e){}
+  try{ ytPlayer.seekTo(clipStartSec,true); ytPlayer.unMute(); ytPlayer.playVideo(); }catch(e){}
   clipPlayStart=Date.now(); clipState="playing";
   $("btn-clip-pause").textContent="⏸ Pause";
   $("host-clip-msg").textContent="🔊 Playing… listen carefully!";
