@@ -265,7 +265,7 @@ function updatePoolCount(){
 }
 function buildCats(){
   const db=$("cat-decades"); db.innerHTML="";
-  [["all","🎶 All"]].concat([2000,2010,2020].filter(d=>SONGS.some(s=>s.year&&Math.floor(s.year/10)*10===d)).map(d=>["d"+d,d+"s"]))
+  [["all","🎶 All"]].concat([1990,2000,2010,2020].filter(d=>SONGS.some(s=>s.year&&Math.floor(s.year/10)*10===d)).map(d=>["d"+d,d+"s"]))
   .forEach(([k,label])=>{
     const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0"; b.textContent=label;
     b.onclick=()=>{ fDecade = k==="all" ? null : parseInt(k.slice(1));
