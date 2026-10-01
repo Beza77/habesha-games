@@ -206,6 +206,17 @@
                 </button>
 
 
+        <button class="game-card secondary" type="button" data-title="Guess Party የቡድን ጨዋታ" data-category="music" data-src="games/guess-party/" aria-label="Play Guess Party">
+                  <span class="cover" style="background:linear-gradient(135deg,#0f766e,#f6c548);display:flex;align-items:center;justify-content:center;font-size:64px;">🎉</span>
+                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Guess Party</h3><p lang="am">የቡድን ጨዋታ — host on a big screen, everyone plays on their phone!</p></span>
+                </button>
+        <button class="game-card secondary" type="button" data-title="Song Roulette የመዝሙር ሩሌት" data-category="music" data-src="games/song-roulette/" aria-label="Play Song Roulette">
+                  <span class="cover" style="background:linear-gradient(135deg,#0d2b26,#14a89c);display:flex;align-items:center;justify-content:center;font-size:64px;">🎡</span>
+                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Song Roulette</h3><p lang="am">የመዝሙር ሩሌት — spin the wheel for your next worship song.</p></span>
+                </button>
+
         <!-- HIDDEN by owner request 2026-09-26
 <button class="game-card secondary" type="button" data-title="Guess the Emoji" data-category="puzzle" data-src="games/guess-the-word-by-emoji/" aria-label="Play Guess the Emoji">
           <span class="cover"><img src="assets/emoji-word.jpg" alt="Smiling orange game tile with a cream puzzle piece" /></span>
@@ -296,13 +307,11 @@
 -->
 
 
-        <!-- HIDDEN until perfected: Finish the Lyrics
 <button class="game-card secondary" type="button" data-title="Finish the Lyrics" data-category="music" data-src="games/finish-the-lyrics/" aria-label="Play Finish the Lyrics">
                   <span class="cover"><img src="assets/finish-the-lyrics.jpg" alt="Finish the Lyrics game" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
                   <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Finish the Lyrics</h3><p lang="am">የመዝሙሩን ቀጣይ መስመር ምረጥ፤ ነጥብ ሰብስብ።</p></span>
                 </button>
--->
 
       </div>
       <div class="empty" id="emptyState"><strong>No games found</strong>Try another search or category.</div>
@@ -338,7 +347,7 @@
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20260924z';
+      var SITE_VERSION = '20261001a';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
