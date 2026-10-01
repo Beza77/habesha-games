@@ -111,12 +111,8 @@ input[type=text].name{text-transform:none}
     <div class="players" id="host-players"><span class="chip">waiting…</span></div>
     <button class="btn teal" id="btn-start" disabled>Start game</button>
     <p class="count" style="margin-top:16px">Optional: build your playlist</p>
-    <p class="count">Decade</p>
-    <div class="players" id="cat-decades" style="justify-content:center"></div>
-    <p class="count">Singers <span style="font-weight:400">— tap to add the ones you know</span></p>
+    <p class="count">Singers <span style="font-weight:400">— all selected, tap to remove one you don't want</span></p>
     <div class="players" id="cat-artists"></div>
-    <p class="count">Albums <span style="font-weight:400">— tap to add</span></p>
-    <div class="players" id="cat-albums"></div>
     <p class="count" id="pool-count"></p>
     <button class="btn ghost" id="btn-host-back">Back</button>
     <p class="status" id="host-status"></p>
@@ -246,54 +242,32 @@ function mqttEnd(){ try{client&&client.end(true);}catch(e){} client=null; }
 fetch(SONGS_URL).then(r=>r.json()).then(d=>{ SONGS=d.filter(s=>s.video_id&&s.vid_conf==="high"&&!s.vid_pv); buildCats(); });
 
 /* ---------- playlist builder ---------- */
-let fDecade=null;            // null = all decades
-const fArtists=new Set(), fAlbums=new Set();  // tapped singers / albums; empty = all included
+const fExcluded=new Set();   // tapped singers are EXCLUDED; empty = everyone included
 function poolSongs(){
-  return SONGS.filter(s=>{
-    if(fDecade && !(s.year && Math.floor(s.year/10)*10===fDecade)) return false;
-    if(fArtists.size===0 && fAlbums.size===0) return true;
-    return fArtists.has(s.artist) || (s.albums||[]).some(a=>fAlbums.has(a));
-  });
+  return SONGS.filter(s=>!fExcluded.has(s.artist));
 }
-function toggleChip(el,set,key){
-  if(set.has(key)){ set.delete(key); el.style.background="#e8ddc2"; el.style.color="#7a6a58"; }
-  else { set.add(key); el.style.background="#0f766e"; el.style.color="#fff"; }
+function toggleChip(el,key){
+  if(fExcluded.has(key)){ fExcluded.delete(key); el.style.background="#0f766e"; el.style.color="#fff"; }
+  else { fExcluded.add(key); el.style.background="#e8ddc2"; el.style.color="#7a6a58"; }
   updatePoolCount();
 }
 function updatePoolCount(){
   const n=poolSongs().length;
   let tag="";
-  if(fArtists.size) tag+=" · only "+[...fArtists].slice(0,3).join(", ")+(fArtists.size>3?"…":"");
-  if(fAlbums.size) tag+=" · albums: "+[...fAlbums].slice(0,3).join(", ")+(fAlbums.size>3?"…":"");
+  if(fExcluded.size) tag+=" · without "+[...fExcluded].slice(0,3).join(", ")+(fExcluded.size>3?"…":"");
   $("pool-count").textContent="🎵 "+n+" songs in this playlist"+tag;
   const ok=n>=4;
   if(!Object.keys(players).length) $("btn-start").disabled=true; else $("btn-start").disabled=!ok;
   if(!ok) $("pool-count").textContent+=" — pick more to play (need 4+)";
 }
 function buildCats(){
-  const db=$("cat-decades"); db.innerHTML="";
-  [["all","🎶 All"]].concat([1990,2000,2010,2020].filter(d=>SONGS.some(s=>s.year&&Math.floor(s.year/10)*10===d)).map(d=>["d"+d,d+"s"]))
-  .forEach(([k,label])=>{
-    const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0"; b.textContent=label;
-    b.onclick=()=>{ fDecade = k==="all" ? null : parseInt(k.slice(1));
-      db.querySelectorAll(".chip").forEach(c=>{c.style.background="#e8ddc2";c.style.color="#7a6a58";});
-      b.style.background="#0f766e"; b.style.color="#fff"; updatePoolCount(); };
-    if(k==="all"){ b.style.background="#0f766e"; b.style.color="#fff"; }
-    db.appendChild(b);
-  });
-  const ac={}, alc={};
-  SONGS.forEach(s=>{ ac[s.artist]=(ac[s.artist]||0)+1; (s.albums||[]).forEach(a=>alc[a]=(alc[a]||0)+1); });
+  const ac={};
+  SONGS.forEach(s=>{ ac[s.artist]=(ac[s.artist]||0)+1; });
   const ab=$("cat-artists"); ab.innerHTML="";
   Object.keys(ac).filter(a=>ac[a]>=4).sort().forEach(a=>{
     const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0";
-    b.style.background="#e8ddc2"; b.style.color="#7a6a58"; b.textContent=a;
-    b.onclick=()=>toggleChip(b,fArtists,a); ab.appendChild(b);
-  });
-  const lb=$("cat-albums"); lb.innerHTML="";
-  Object.keys(alc).filter(a=>alc[a]>=3).sort().forEach(a=>{
-    const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0";
-    b.style.background="#e8ddc2"; b.style.color="#7a6a58"; b.textContent=a;
-    b.onclick=()=>toggleChip(b,fAlbums,a); lb.appendChild(b);
+    b.style.background="#0f766e"; b.style.color="#fff"; b.textContent=a;   // default: selected
+    b.onclick=()=>toggleChip(b,a); ab.appendChild(b);
   });
   updatePoolCount();
 }
