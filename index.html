@@ -76,15 +76,15 @@
     }
     button, input { font: inherit; }
     button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-    .page { width: min(1180px, 100%); margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) clamp(16px, 4vw, 42px) max(44px, env(safe-area-inset-bottom)); }
+    .page { width: min(1180px, 100%); margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) clamp(16px, 4vw, 42px) max(44px, env(safe-area-inset-bottom)); }
 
-    .topline { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 12px; }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 8px; }
     .welcome { min-width: 0; }
-    .welcome h1 { margin: 0; color: var(--navy); font-size: clamp(1.35rem, 3vw, 2.2rem); line-height: 1; letter-spacing: -.03em; max-width: 760px; text-wrap: balance; }
-    .welcome p { margin: 6px 0 0; color: var(--muted); font-size: clamp(.85rem, 1.6vw, 1rem); font-family: "Noto Sans Ethiopic", sans-serif; line-height: 1.45; }
-    .game-count { flex: 0 0 auto; display: grid; place-items: center; width: 60px; height: 60px; border-radius: 50%; background: var(--yellow); color: #352700; box-shadow: 0 5px 0 color-mix(in srgb, var(--orange) 72%, #8b3c00); transform: rotate(5deg); }
-    .game-count strong { display:block; font-size: 1.3rem; line-height: .8; text-align:center; }
-    .game-count small { display:block; font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; margin-top:5px; }
+    .welcome h1 { margin: 0; color: var(--navy); font-size: clamp(1.05rem, 2.4vw, 1.5rem); line-height: 1.1; letter-spacing: -.03em; max-width: 760px; text-wrap: balance; }
+    .welcome p { margin: 3px 0 0; color: var(--muted); font-size: clamp(.8rem, 1.5vw, .92rem); font-family: "Noto Sans Ethiopic", sans-serif; line-height: 1.4; }
+    .game-count { flex: 0 0 auto; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--yellow); color: #352700; box-shadow: 0 4px 0 color-mix(in srgb, var(--orange) 72%, #8b3c00); transform: rotate(5deg); }
+    .game-count strong { display:block; font-size: 1.05rem; line-height: .8; text-align:center; }
+    .game-count small { display:block; font-size:.56rem; text-transform:uppercase; letter-spacing:.08em; margin-top:3px; }
 
     .tool-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
     .search { flex: 1; position: relative; }
@@ -141,8 +141,7 @@
 
     @media (max-width:760px) {
       .page { padding-inline:14px; }
-      .topline { align-items:flex-start; }
-      .game-count { width:65px; height:65px; }
+      .topline { align-items:center; }
       .tool-row { align-items:stretch; flex-direction:column; }
       .filters { display:grid; grid-template-columns:repeat(4,1fr); }
       .filter { min-width:0; padding-inline:8px; }
@@ -153,9 +152,7 @@
       .fullscreen-btn { display:none; }
     }
     @media (max-width:390px) {
-      .welcome h1 { font-size:1.3rem; }
-      .game-count { width:58px; height:58px; }
-      .game-count strong { font-size:1.4rem; }
+      .welcome h1 { font-size:1.05rem; }
       .game-card, .game-card.featured { min-height:175px; }
     }
     @media (prefers-reduced-motion:reduce) { *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; } }
@@ -165,10 +162,10 @@
   <main class="page">
     <section class="topline" aria-labelledby="welcome-title">
       <div class="welcome">
-        <h1 id="welcome-title">Pick a game.<br>Play right away.</h1>
+        <h1 id="welcome-title">Pick a game. Play right away.</h1>
         <p lang="am">ይምረጡ፣ ይጫወቱ፣ በመዝናናት ይማሩ።</p>
       </div>
-      <div class="game-count" aria-label="3 games available"><div><strong>3</strong><small>games</small></div></div>
+      <div class="game-count" id="gameCountBadge" aria-label="6 games available"><div><strong id="badgeCount">6</strong><small>games</small></div></div>
     </section>
 
     <section class="tool-row" aria-label="Game discovery controls">
@@ -346,6 +343,11 @@
       var frame = document.getElementById('gameFrame');
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
+      // Badge shows the total library size and stays correct as games are added.
+      var badgeCount = document.getElementById('badgeCount');
+      var badge = document.getElementById('gameCountBadge');
+      if (badgeCount) badgeCount.textContent = cards.length;
+      if (badge) badge.setAttribute('aria-label', cards.length + ' games available');
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
       var SITE_VERSION = '20261001b';
 
