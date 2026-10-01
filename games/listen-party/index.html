@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="am">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>አድምጠው ገምት · Listen Party</title>
+<script src="https://unpkg.com/mqtt@5/dist/mqtt.min.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;600;700;800&display=swap');
+:root{
+  color-scheme:light dark;
+  --bg:#12233b; --bg2:#0b1728; --panel:#fffdf6; --panel2:#f6efdd;
+  --ink:#1d2a3a; --muted:#7a6a58; --gold:#f6c548; --gold2:#d99a1f;
+  --teal:#0f766e; --green:#1e8a5a; --red:#c0392b; --line:#e6d3a8;
+  --shadow:0 18px 45px rgba(8,18,35,.35);
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0; font-family:"Baloo 2","Noto Sans Ethiopic",system-ui,sans-serif;
+  background:radial-gradient(1200px 600px at 20% -10%, #1d3a5f 0%, var(--bg) 45%, var(--bg2) 100%);
+  color:#fdf6e3; display:flex; justify-content:center; padding:18px 14px 40px;
+}
+.wrap{width:100%;max-width:640px}
+.card{
+  background:var(--panel); color:var(--ink); border-radius:22px;
+  box-shadow:var(--shadow); padding:26px 22px; margin-top:14px;
+}
+h1{font-size:30px;margin:6px 0 2px;text-align:center}
+.sub{text-align:center;color:#cdbf9f;margin:0 0 8px;font-size:15px}
+h2{margin:0 0 10px;font-size:22px}
+p{line-height:1.55}
+.hidden{display:none!important}
+.btn{
+  display:block;width:100%;border:0;border-radius:16px;cursor:pointer;
+  font-family:inherit;font-weight:800;font-size:18px;padding:15px 18px;margin:10px 0;
+  background:linear-gradient(180deg,var(--gold),var(--gold2));color:#3a2a08;
+  box-shadow:0 6px 0 #a86f14, 0 10px 22px rgba(0,0,0,.25);
+}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #a86f14}
+.btn.ghost{background:var(--panel2);color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.btn.teal{background:linear-gradient(180deg,#14a89c,#0f766e);color:#fff;box-shadow:0 6px 0 #0a544e,0 10px 22px rgba(0,0,0,.25)}
+.btn:disabled{opacity:.45;cursor:default}
+input[type=text]{
+  width:100%;font-family:inherit;font-size:20px;font-weight:700;text-align:center;
+  padding:14px;border-radius:14px;border:2px solid var(--line);background:#fff;color:var(--ink);
+  margin:8px 0; text-transform:uppercase;
+}
+input[type=text].name{text-transform:none}
+.roomcode{
+  font-size:56px;font-weight:800;letter-spacing:14px;text-align:center;color:#0f766e;
+  background:var(--panel2);border:3px dashed var(--gold2);border-radius:18px;padding:10px;margin:12px 0;
+}
+.players{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{background:#e8f4f1;color:#0b4f4a;font-weight:800;border-radius:999px;padding:8px 14px;font-size:15px}
+.snippet{
+  background:#12233b;color:#ffe9a8;border-radius:16px;padding:18px;font-size:19px;
+  line-height:1.9;text-align:center;white-space:pre-line;margin:12px 0;min-height:110px;
+}
+.choices{display:grid;gap:10px;margin:12px 0}
+.choice{
+  border:0;border-radius:14px;padding:15px;font-family:inherit;font-size:17px;font-weight:700;
+  background:var(--panel2);color:var(--ink);cursor:pointer;box-shadow:inset 0 0 0 2px var(--line);
+  text-align:left;
+}
+.choice small{display:block;font-weight:600;color:var(--muted);font-size:13px;margin-top:2px}
+.choice.correct{background:#d9f5e5;box-shadow:inset 0 0 0 3px var(--green)}
+.choice.wrong{background:#fbe3df;box-shadow:inset 0 0 0 3px var(--red)}
+.choice:disabled{cursor:default}
+.timerbar{height:10px;background:#e8ddc2;border-radius:99px;overflow:hidden;margin:6px 0 12px}
+.timerbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#ff8a3d);width:100%;transition:width 1s linear}
+.board{width:100%;border-collapse:collapse;margin:10px 0;font-size:16px}
+.board td,.board th{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left}
+.board td:last-child,.board th:last-child{text-align:right;font-weight:800}
+.board tr.me td{background:#fff3cf}
+.status{font-size:13px;color:#cdbf9f;text-align:center;min-height:18px}
+.note{background:#12233b;color:#ffe9a8;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.6;margin:10px 0}
+.kbd{background:#00000033;border-radius:6px;padding:1px 8px;font-weight:800}
+.big{font-size:20px;font-weight:800;text-align:center}
+.count{font-size:15px;font-weight:700;color:var(--muted);text-align:center}
+.winner{font-size:44px;text-align:center;margin:4px 0}
+.eq{display:flex;gap:6px;justify-content:center;align-items:flex-end;height:54px;margin:6px 0 12px}
+.eq i{width:10px;background:linear-gradient(180deg,var(--gold),#ff8a3d);border-radius:6px;animation:eq .9s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.15s}.eq i:nth-child(3){animation-delay:.3s}
+.eq i:nth-child(4){animation-delay:.45s}.eq i:nth-child(5){animation-delay:.6s}
+@keyframes eq{0%,100%{height:14px}50%{height:50px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HOME -->
+  <section class="card" id="scr-home">
+    <h1>🎧 አድምጠው ገምት</h1>
+    <p class="sub">Listen Party — hear the song, pick the answer</p>
+    <button class="btn teal" id="btn-host">📺 Host a game <small style="display:block;font-size:13px;font-weight:600">show this screen on a TV or laptop</small></button>
+    <button class="btn" id="btn-join">📱 Join a game <small style="display:block;font-size:13px;font-weight:600">play on your phone</small></button>
+    <div class="note">How it works: the <b>host</b> opens this page on a big screen and gets a 4-letter room code. <b>Players</b> open this same page on their phones, tap <b>Join</b>, enter the code and their name. The host plays a short clip of a song — everyone races to pick the right title. Fastest correct answer wins the most points!</div>
+    <p class="status" id="home-status"></p>
+  </section>
+
+  <!-- HOST LOBBY -->
+  <section class="card hidden" id="scr-host-lobby">
+    <h2>📺 Host lobby</h2>
+    <p class="count">Players — open this page on your phone, tap <b>Join</b> and enter:</p>
+    <div class="roomcode" id="host-code">····</div>
+    <div class="players" id="host-players"><span class="chip">waiting…</span></div>
+    <button class="btn teal" id="btn-start" disabled>Start game</button>
+    <p class="count" style="margin-top:16px">Optional: build your playlist</p>
+    <p class="count">Decade</p>
+    <div class="players" id="cat-decades" style="justify-content:center"></div>
+    <p class="count">Singers <span style="font-weight:400">— tap to remove ones you don't know</span></p>
+    <div class="players" id="cat-artists"></div>
+    <p class="count">Albums <span style="font-weight:400">— tap to remove</span></p>
+    <div class="players" id="cat-albums"></div>
+    <p class="count" id="pool-count"></p>
+    <button class="btn ghost" id="btn-host-back">Back</button>
+    <p class="status" id="host-status"></p>
+  </section>
+
+  <!-- HOST GAME -->
+  <section class="card hidden" id="scr-host-game">
+    <h2 id="host-round-title">Round 1 / 10</h2>
+    <div class="eq hidden" id="host-eq"><i></i><i></i><i></i><i></i><i></i></div>
+    <div id="yt-holder" style="position:absolute;width:2px;height:2px;opacity:0;overflow:hidden;pointer-events:none"></div>
+    <button class="btn teal" id="btn-play-clip">▶ Play the clip</button>
+    <p class="count" id="host-clip-msg">tap play — everyone listens, then picks the song</p>
+    <p class="count" id="host-answers">0 answered</p>
+    <div id="host-reveal" class="hidden">
+      <p class="big" id="host-correct"></p>
+      <table class="board" id="host-board"></table>
+    </div>
+    <button class="btn" id="btn-reveal">Reveal answers</button>
+    <button class="btn teal hidden" id="btn-next">Next round →</button>
+    <p class="status" id="host-game-status"></p>
+  </section>
+
+  <!-- HOST END -->
+  <section class="card hidden" id="scr-host-end">
+    <div class="winner">🏆</div>
+    <h2 style="text-align:center" id="host-winner">Winner</h2>
+    <table class="board" id="host-final"></table>
+    <button class="btn teal" id="btn-again">Play again</button>
+    <button class="btn ghost" id="btn-host-home">Home</button>
+  </section>
+
+  <!-- JOIN -->
+  <section class="card hidden" id="scr-join">
+    <h2>📱 Join a game</h2>
+    <p class="count">Enter the 4-letter code from the host's screen</p>
+    <input type="text" id="join-code" maxlength="4" placeholder="CODE" autocomplete="off" />
+    <input type="text" id="join-name" class="name" maxlength="12" placeholder="Your name" autocomplete="off" />
+    <button class="btn teal" id="btn-do-join">Join</button>
+    <button class="btn ghost" id="btn-join-back">Back</button>
+    <p class="status" id="join-status"></p>
+  </section>
+
+  <!-- PLAYER LOBBY -->
+  <section class="card hidden" id="scr-player-lobby">
+    <h2>You're in! 🎶</h2>
+    <p class="count" id="player-lobby-msg">Waiting for the host to start…</p>
+    <div class="players" id="player-list"></div>
+    <p class="status" id="player-status"></p>
+  </section>
+
+  <!-- PLAYER ROUND -->
+  <section class="card hidden" id="scr-player-round">
+    <h2 id="player-round-title">Round 1 / 10</h2>
+    <div class="timerbar"><i id="player-timer"></i></div>
+    <div class="snippet" id="player-snippet">🎧 Listen…</div>
+    <div class="choices" id="player-choices"></div>
+    <p class="count" id="player-locked" ></p>
+  </section>
+
+  <!-- PLAYER REVEAL -->
+  <section class="card hidden" id="scr-player-reveal">
+    <h2 id="reveal-title">Round over</h2>
+    <p class="big" id="reveal-result"></p>
+    <p class="count" id="reveal-song"></p>
+    <table class="board" id="player-board"></table>
+  </section>
+
+  <!-- PLAYER END -->
+  <section class="card hidden" id="scr-player-end">
+    <div class="winner">🏆</div>
+    <h2 style="text-align:center" id="player-winner">Winner</h2>
+    <table class="board" id="player-final"></table>
+    <button class="btn ghost" id="btn-player-home">Home</button>
+  </section>
+
+</div>
+<script>
+"use strict";
+/* ---------- utils ---------- */
+const $ = id => document.getElementById(id);
+const SONGS_URL = "../finish-the-lyrics/songs.json";
+const ROUNDS = 10, ROUND_SECS = 20;
+let SONGS = [];
+const rnd = n => Math.floor(Math.random()*n);
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];} return a; };
+const pid = "p"+Math.random().toString(36).slice(2,9);
+function show(id){ document.querySelectorAll("section.card").forEach(s=>s.classList.add("hidden")); $(id).classList.remove("hidden"); window.scrollTo(0,0); }
+function cleanLine(s){ return (s||"").replace(/\([^)]*\)/g," ").replace(/\s+/g," ").trim(); }
+function lyricLines(song){
+  return (song.lyrics||"").split("\n").map(cleanLine).filter(l=>l.length>3);
+}
+function pickSnippet(song){
+  const lines = lyricLines(song);
+  if(lines.length<4) return null;
+  const start = rnd(Math.max(1, Math.min(lines.length-3, Math.floor(lines.length*0.6))));
+  return lines.slice(start, start+3).join("\n");
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---------- MQTT ---------- */
+const BROKERS = ["wss://broker.emqx.io:8084/mqtt","wss://test.mosquitto.org:8081/mqtt"];
+let client=null, topic=null, msgHandler=null, brokerIdx=0;
+function mqttConnect(code, onOk, onFail){
+  brokerIdx=0; tryNext();
+  function tryNext(){
+    if(brokerIdx>=BROKERS.length){ onFail("Could not reach the game network. Check your connection and retry."); return; }
+    const url=BROKERS[brokerIdx++];
+    try{
+      client = mqtt.connect(url,{connectTimeout:8000, reconnectPeriod:0});
+    }catch(e){ tryNext(); return; }
+    const to=setTimeout(()=>{ try{client.end(true);}catch(e){} tryNext(); },9000);
+    client.on("connect",()=>{ clearTimeout(to); topic="habesha-listen-party/v1/"+code;
+      client.subscribe(topic,{qos:0},err=>{ if(err){tryNext();} else onOk(); });
+    });
+    client.on("message",(t,buf)=>{ if(t===topic&&msgHandler){ try{msgHandler(JSON.parse(buf.toString()));}catch(e){} } });
+    client.on("error",()=>{});
+  }
+}
+function send(msg){ if(client&&client.connected&&topic){ client.publish(topic, JSON.stringify(msg), {qos:0,retain:false}); } }
+function mqttEnd(){ try{client&&client.end(true);}catch(e){} client=null; }
+
+/* ---------- load songs ---------- */
+fetch(SONGS_URL).then(r=>r.json()).then(d=>{ SONGS=d.filter(s=>s.video_id&&s.vid_conf==="high"&&!s.vid_pv); buildCats(); });
+
+/* ---------- playlist builder ---------- */
+let fDecade=null;            // null = all decades
+const fArtists=new Set(), fAlbums=new Set();  // excluded singers / albums; empty = all included
+function poolSongs(){
+  return SONGS.filter(s=>{
+    if(fDecade && !(s.year && Math.floor(s.year/10)*10===fDecade)) return false;
+    if(fArtists.has(s.artist)) return false;
+    if((s.albums||[]).some(a=>fAlbums.has(a))) return false;
+    return true;
+  });
+}
+function toggleChip(el,set,key){
+  if(set.has(key)){ set.delete(key); el.style.background="#0f766e"; el.style.color="#fff"; }
+  else { set.add(key); el.style.background="#e8ddc2"; el.style.color="#7a6a58"; }
+  updatePoolCount();
+}
+function updatePoolCount(){
+  const n=poolSongs().length;
+  $("pool-count").textContent="🎵 "+n+" songs in this playlist";
+  const ok=n>=4;
+  if(!Object.keys(players).length) $("btn-start").disabled=true; else $("btn-start").disabled=!ok;
+  if(!ok) $("pool-count").textContent+=" — pick more to play (need 4+)";
+}
+function buildCats(){
+  const db=$("cat-decades"); db.innerHTML="";
+  [["all","🎶 All"]].concat([2000,2010,2020].filter(d=>SONGS.some(s=>s.year&&Math.floor(s.year/10)*10===d)).map(d=>["d"+d,d+"s"]))
+  .forEach(([k,label])=>{
+    const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0"; b.textContent=label;
+    b.onclick=()=>{ fDecade = k==="all" ? null : parseInt(k.slice(1));
+      db.querySelectorAll(".chip").forEach(c=>{c.style.background="#e8ddc2";c.style.color="#7a6a58";});
+      b.style.background="#0f766e"; b.style.color="#fff"; updatePoolCount(); };
+    if(k==="all"){ b.style.background="#0f766e"; b.style.color="#fff"; }
+    db.appendChild(b);
+  });
+  const ac={}, alc={};
+  SONGS.forEach(s=>{ ac[s.artist]=(ac[s.artist]||0)+1; (s.albums||[]).forEach(a=>alc[a]=(alc[a]||0)+1); });
+  const ab=$("cat-artists"); ab.innerHTML="";
+  Object.keys(ac).filter(a=>ac[a]>=4).sort().forEach(a=>{
+    const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0";
+    b.style.background="#0f766e"; b.style.color="#fff"; b.textContent=a;
+    b.onclick=()=>toggleChip(b,fArtists,a); ab.appendChild(b);
+  });
+  const lb=$("cat-albums"); lb.innerHTML="";
+  Object.keys(alc).filter(a=>alc[a]>=3).sort().forEach(a=>{
+    const b=document.createElement("button"); b.className="chip"; b.style.cursor="pointer"; b.style.border="0";
+    b.style.background="#0f766e"; b.style.color="#fff"; b.textContent=a;
+    b.onclick=()=>toggleChip(b,fAlbums,a); lb.appendChild(b);
+  });
+  updatePoolCount();
+}
+
+/* ================= HOST ================= */
+let roomCode=null, players={}, answers={}, round=null, roundTimer=null, hostScores={};
+$("btn-host").onclick=()=>{
+  if(!SONGS.length){ $("home-status").textContent="Loading songs… try again in a moment."; return; }
+  const ABC="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  roomCode=""; for(let i=0;i<4;i++) roomCode+=ABC[rnd(ABC.length)];
+  players={}; hostScores={};
+  $("host-code").textContent=roomCode;
+  $("host-status").textContent="Connecting…";
+  show("scr-host-lobby");
+  mqttConnect(roomCode, ()=>{
+    $("host-status").textContent="Connected ✓ — waiting for players";
+    $("btn-start").disabled=false; renderLobby();
+  }, (err)=>{ $("host-status").textContent=err; });
+  msgHandler=m=>{
+    if(m.k==="join"&&m.pid&&m.name){
+      players[m.pid]={name:String(m.name).slice(0,12),pid:m.pid};
+      hostScores[m.pid]=hostScores[m.pid]||0;
+      send({k:"lobby",players:Object.values(players)});
+      renderLobby();
+    }
+    if(m.k==="answer"&&round&&m.rid===round.rid&&m.pid&&!(m.pid in answers)){
+      answers[m.pid]={choice:m.choice,ms:Math.min(m.ms||20000,ROUND_SECS*1000)};
+      $("host-answers").textContent=Object.keys(answers).length+" / "+Object.keys(players).length+" answered";
+      if(Object.keys(answers).length>=Math.max(1,Object.keys(players).length)) doReveal();
+    }
+  };
+};
+function renderLobby(){
+  const box=$("host-players"); box.innerHTML="";
+  const list=Object.values(players);
+  if(!list.length) box.innerHTML='<span class="chip">waiting…</span>';
+  list.forEach(p=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=p.name; box.appendChild(c); });
+  updatePoolCount();
+}
+$("btn-start").onclick=()=>{ hostScores={}; Object.keys(players).forEach(p=>hostScores[p]=0); startRound(1); };
+function startRound(n){
+  const pool=poolSongs();
+  startRoundWith(n, pool[rnd(pool.length)]);
+}
+function startRoundWith(n, song){
+  const pool=poolSongs();
+  const others=shuffle(pool.filter(s=>s.title!==song.title)).slice(0,3);
+  const choices=shuffle([{title:song.title,artist:song.artist}].concat(others.map(s=>({title:s.title,artist:s.artist}))));
+  const correctIdx=choices.findIndex(c=>c.title===song.title);
+  round={rid:"r"+Date.now()+n, n, song, choices, correctIdx};
+  answers={}; clipTries=0;
+  $("host-round-title").textContent="Round "+n+" / "+ROUNDS;
+  $("host-answers").textContent="0 / "+Object.keys(players).length+" answered";
+  $("host-reveal").classList.add("hidden");
+  $("btn-reveal").classList.remove("hidden"); $("btn-next").classList.add("hidden");
+  $("btn-play-clip").classList.remove("hidden");
+  $("host-eq").classList.add("hidden");
+  $("host-clip-msg").textContent="tap play \u2014 everyone listens, then picks the song";
+  show("scr-host-game");
+  send({k:"round",rid:round.rid,n,total:ROUNDS,choices});
+  clearTimeout(roundTimer);
+}
+/* ---------- audio clip ---------- */
+let ytPlayer=null, ytReady=false, clipTries=0;
+function ensureYT(cb){
+  if(ytReady) return cb();
+  const t=setInterval(()=>{ if(window.YT&&YT.Player){ clearInterval(t); ytReady=true; cb(); } },250);
+  setTimeout(()=>{ clearInterval(t); if(!ytReady) $("host-clip-msg").textContent="Couldn't load audio \u2014 check your connection."; },9000);
+}
+$("btn-play-clip").onclick=()=>{ playClip(); };
+function playClip(){
+  if(!round) return;
+  ensureYT(()=>{
+    const s=round.song, start=15+rnd(40);
+    $("btn-play-clip").classList.add("hidden");
+    $("host-eq").classList.remove("hidden");
+    $("host-clip-msg").textContent="\u{1F50A} Playing\u2026 listen carefully!";
+    send({k:"playing",rid:round.rid});
+    const mk=()=>{
+      try{
+        ytPlayer=new YT.Player("yt-holder",{height:"2",width:"2",videoId:s.video_id,
+          playerVars:{autoplay:1,start:start,rel:0,controls:0,disablekb:1},
+          events:{onError:onClipError}});
+      }catch(e){ onClipError(); }
+    };
+    if(!ytPlayer) mk();
+    else { try{ ytPlayer.loadVideoById({videoId:s.video_id,startSeconds:start}); }catch(e){ onClipError(); return; } }
+    clearTimeout(roundTimer);
+    roundTimer=setTimeout(doReveal, ROUND_SECS*1000);
+  });
+}
+function onClipError(){
+  stopClip();
+  if(clipTries<2){
+    clipTries++;
+    const pool=poolSongs().filter(s=>s.video_id!==round.song.video_id);
+    if(pool.length){ startRoundWith(round.n, pool[rnd(pool.length)]); playClip(); return; }
+  }
+  $("host-eq").classList.add("hidden");
+  $("host-clip-msg").textContent="This clip won't play \u2014 tap Reveal to skip it.";
+}
+function stopClip(){ try{ ytPlayer&&ytPlayer.stopVideo(); }catch(e){} }
+$("btn-reveal").onclick=doReveal;
+function doReveal(){
+  if(!round||$("host-reveal")&&!$("host-reveal").classList.contains("hidden")) return;
+  clearTimeout(roundTimer);
+  stopClip();
+  $("host-eq").classList.add("hidden");
+  const gained={};
+  Object.keys(answers).forEach(p=>{
+    const a=answers[p];
+    if(a.choice===round.correctIdx){
+      const pts=Math.max(100, 1000-Math.floor(a.ms/100));
+      hostScores[p]=(hostScores[p]||0)+pts; gained[p]=pts;
+    } else gained[p]=0;
+  });
+  const scores=Object.keys(players).map(p=>({pid:p,name:players[p].name,pts:hostScores[p]||0})).sort((a,b)=>b.pts-a.pts);
+  send({k:"reveal",rid:round.rid,correctIdx:round.correctIdx,gained,scores});
+  $("host-correct").textContent="✅ "+round.song.title+" — "+round.song.artist;
+  const tb=$("host-board"); tb.innerHTML="<tr><th>Player</th><th>Points</th></tr>";
+  scores.forEach(s=>{ const g=gained[s.pid]||0;
+    tb.innerHTML+="<tr><td>"+esc(s.name)+(g?" (+"+g+")":"")+"</td><td>"+s.pts+"</td></tr>"; });
+  $("host-reveal").classList.remove("hidden");
+  $("btn-reveal").classList.add("hidden");
+  const nb=$("btn-next"); nb.classList.remove("hidden");
+  if(round.n>=ROUNDS){ nb.textContent="🏆 See winner"; } else { nb.textContent="Next round →"; }
+}
+$("btn-next").onclick=()=>{
+  if(round.n>=ROUNDS){
+    const scores=Object.keys(players).map(p=>({pid:p,name:players[p].name,pts:hostScores[p]||0})).sort((a,b)=>b.pts-a.pts);
+    send({k:"end",scores});
+    $("host-winner").textContent=scores.length?("🏆 "+scores[0].name+" wins!"):"No players";
+    const tb=$("host-final"); tb.innerHTML="<tr><th>Player</th><th>Points</th></tr>";
+    scores.forEach(s=>tb.innerHTML+="<tr><td>"+esc(s.name)+"</td><td>"+s.pts+"</td></tr>");
+    show("scr-host-end"); round=null;
+  } else startRound(round.n+1);
+};
+$("btn-again").onclick=()=>{ Object.keys(players).forEach(p=>hostScores[p]=0); show("scr-host-lobby"); renderLobby(); send({k:"lobby",players:Object.values(players)}); };
+$("btn-host-home").onclick=()=>{ mqttEnd(); show("scr-home"); };
+$("btn-host-back").onclick=()=>{ mqttEnd(); show("scr-home"); };
+
+/* ================= PLAYER ================= */
+let myName="", myPid=pid, myCode="", roundStart=0, playerTimerInt=null, myScores=[];
+$("btn-join").onclick=()=>{ show("scr-join"); $("join-status").textContent=""; };
+$("btn-join-back").onclick=()=>show("scr-home");
+$("btn-do-join").onclick=()=>{
+  myCode=$("join-code").value.trim().toUpperCase();
+  myName=$("join-name").value.trim().slice(0,12)||("Player"+rnd(99));
+  if(myCode.length!==4){ $("join-status").textContent="Enter the 4-letter code."; return; }
+  $("join-status").textContent="Connecting…";
+  mqttConnect(myCode, ()=>{
+    send({k:"join",pid:myPid,name:myName});
+    show("scr-player-lobby");
+    $("player-lobby-msg").textContent="Waiting for the host to start…";
+    const to=setTimeout(()=>{ if($("scr-player-lobby").classList.contains("hidden")===false && $("player-list").children.length===0){$("player-status").textContent="No response — check the code and retry.";} },8000);
+  }, (err)=>{ $("join-status").textContent=err; });
+  msgHandler=m=>{
+    if(m.k==="lobby"&&m.players){
+      const box=$("player-list"); box.innerHTML="";
+      m.players.forEach(p=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=p.name; box.appendChild(c); });
+    }
+    if(m.k==="round") onPlayerRound(m);
+    if(m.k==="playing") onPlaying(m);
+    if(m.k==="reveal") onPlayerReveal(m);
+    if(m.k==="end") onPlayerEnd(m);
+  };
+};
+function onPlayerRound(m){
+  clearInterval(playerTimerInt);
+  $("player-round-title").textContent="Round "+m.n+" / "+m.total;
+  $("player-snippet").textContent="\u{1F3A7} Listen to the song\u2026";
+  $("player-locked").textContent="";
+  $("player-timer").style.width="100%";
+  const box=$("player-choices"); box.innerHTML="";
+  m.choices.forEach((c,i)=>{
+    const b=document.createElement("button"); b.className="choice";
+    b.innerHTML=esc(c.title)+"<small>"+esc(c.artist)+"</small>";
+    b.onclick=()=>{
+      const ms=Date.now()-roundStart;
+      send({k:"answer",pid:myPid,name:myName,rid:m.rid,choice:i,ms});
+      box.querySelectorAll("button").forEach(x=>x.disabled=true);
+      b.style.boxShadow="inset 0 0 0 3px var(--teal)";
+      $("player-locked").textContent="Locked in! ⏳";
+      clearInterval(playerTimerInt);
+    };
+    box.appendChild(b);
+  });
+  show("scr-player-round");
+  window._rid=m.rid; window._choices=m.choices;
+}
+function onPlaying(m){
+  if(m.rid!==window._rid) return;
+  roundStart=Date.now();
+  clearInterval(playerTimerInt);
+  $("player-snippet").textContent="\u{1F3A7} Now playing\u2026 pick your answer!";
+  const bar=$("player-timer"); let left=ROUND_SECS;
+  bar.style.width="100%";
+  playerTimerInt=setInterval(()=>{ left--; bar.style.width=(left/ROUND_SECS*100)+"%"; if(left<=0) clearInterval(playerTimerInt); },1000);
+}
+function onPlayerReveal(m){
+  clearInterval(playerTimerInt);
+  const btns=$("player-choices").querySelectorAll("button");
+  const mine=[...btns].findIndex(b=>b.style.boxShadow.includes("teal"));
+  btns.forEach((b,i)=>{ b.disabled=true;
+    if(i===m.correctIdx) b.classList.add("correct");
+    else if(i===mine) b.classList.add("wrong");
+  });
+  const g=(m.gained&&m.gained[myPid])||0;
+  $("reveal-title").textContent = g>0 ? "✅ Correct!" : (mine>=0?"❌ Not quite":"⏰ Too slow");
+  $("reveal-result").textContent = g>0 ? "+"+g+" points" : "+0 points";
+  $("reveal-song").textContent = window._choices[m.correctIdx].title+" — "+window._choices[m.correctIdx].artist;
+  renderBoard($("player-board"), m.scores);
+  show("scr-player-reveal");
+}
+function renderBoard(tb, scores){
+  tb.innerHTML="<tr><th>Player</th><th>Points</th></tr>";
+  (scores||[]).forEach(s=>{ tb.innerHTML+='<tr class="'+(s.pid===myPid?"me":"")+'"><td>'+esc(s.name)+"</td><td>"+s.pts+"</td></tr>"; });
+}
+function onPlayerEnd(m){
+  const s=(m.scores||[]);
+  $("player-winner").textContent=s.length?("🏆 "+s[0].name+" wins!"):"Game over";
+  renderBoard($("player-final"), s);
+  show("scr-player-end");
+}
+$("btn-player-home").onclick=()=>{ mqttEnd(); show("scr-home"); };
+</script>
+</body>
+</html>
