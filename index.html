@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+Ethiopic:wght@500;600;700&display=swap" rel="stylesheet">
-  <title>Habesha Games</title>
+  <title>Habesha Games — Ethiopian games. Play together.</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -60,7 +60,7 @@
       }
     }
     * { box-sizing: border-box; }
-    html { min-height: 100%; background: var(--bg); }
+    html { min-height: 100%; background: var(--bg); scroll-behavior: smooth; }
     body {
       margin: 0;
       min-height: 100vh;
@@ -76,263 +76,164 @@
     }
     button, input { font: inherit; }
     button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-    .page { width: min(1180px, 100%); margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) clamp(16px, 4vw, 42px) max(44px, env(safe-area-inset-bottom)); }
 
-    .topline { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 8px; }
-    .welcome { min-width: 0; }
-    .welcome h1 { margin: 0; color: var(--navy); font-size: clamp(1.05rem, 2.4vw, 1.5rem); line-height: 1.1; letter-spacing: -.03em; max-width: 760px; text-wrap: balance; }
-    .welcome p { margin: 3px 0 0; color: var(--muted); font-size: clamp(.8rem, 1.5vw, .92rem); font-family: "Noto Sans Ethiopic", sans-serif; line-height: 1.4; }
-    .game-count { flex: 0 0 auto; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--yellow); color: #352700; box-shadow: 0 4px 0 color-mix(in srgb, var(--orange) 72%, #8b3c00); transform: rotate(5deg); }
-    .game-count strong { display:block; font-size: 1.05rem; line-height: .8; text-align:center; }
-    .game-count small { display:block; font-size:.56rem; text-transform:uppercase; letter-spacing:.08em; margin-top:3px; }
+    .topbar { width: min(1180px, 100%); margin: 0 auto; padding: max(10px, env(safe-area-inset-top)) clamp(16px, 4vw, 42px) 2px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-weight: 700; font-size: 1.05rem; letter-spacing: .04em; color: var(--navy); text-decoration: none; }
+    .brand span { color: var(--orange); }
+    .icon-btn { width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); display: grid; place-items: center; cursor: pointer; box-shadow: 0 6px 16px rgba(23,50,77,.08); }
+    .icon-btn svg { width: 20px; height: 20px; }
 
-    .tool-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .search { flex: 1; position: relative; }
-    .search svg { position:absolute; left:16px; top:50%; transform:translateY(-50%); width:21px; color:var(--muted); pointer-events:none; }
-    .search input { width:100%; min-height:44px; border:2px solid var(--line); border-radius:14px; padding: 9px 16px 9px 47px; color:var(--ink); background:var(--panel); box-shadow:0 8px 20px rgba(23,50,77,.08); }
-    .search input::placeholder { color:var(--muted); opacity:1; }
-    .filters { display:flex; gap:8px; }
-    .filter { border:1px solid var(--line); border-radius:999px; min-height:38px; padding: 6px 13px; background:var(--panel); color:var(--ink); font-weight:600; cursor:pointer; font-size:.88rem; }
-    .filter[aria-pressed="true"] { background:var(--navy); color:var(--bg); border-color:var(--navy); }
+    .page { width: min(1180px, 100%); margin: 0 auto; padding: 6px clamp(16px, 4vw, 42px) max(44px, env(safe-area-inset-bottom)); }
 
-    .section-head { display:flex; align-items:end; justify-content:space-between; margin: 6px 0 10px; gap:16px; }
-    .section-head h2 { margin:0; font-size:clamp(1.05rem,2.4vw,1.35rem); color:var(--navy); }
-    .section-head span { color:var(--muted); font-size:.9rem; }
-    .site-intro { color:var(--muted); max-width:780px; margin:2px 0 16px; line-height:1.6; font-size:.95rem; }
-    .site-footer { display:flex; justify-content:space-between; align-items:center; gap:10px 18px; flex-wrap:wrap; width:min(1180px,100%); margin:30px auto 0; padding:20px clamp(16px,4vw,42px) 10px; color:var(--muted); font-size:.85rem; border-top:1px solid var(--line); }
-    .site-footer nav a { color:var(--muted); margin-left:18px; text-decoration:none; font-weight:600; }
-    .site-footer nav a:hover { color:var(--ink); text-decoration:underline; }
+    .hero h1 { margin: 8px 0 0; color: var(--navy); font-size: clamp(1.7rem, 6.4vw, 2.6rem); line-height: 1.05; letter-spacing: -.03em; text-wrap: balance; }
+    .hero-sub { margin: 6px 0 14px; color: var(--muted); font-size: clamp(.9rem, 2.6vw, 1.02rem); font-family: "Noto Sans Ethiopic", sans-serif; line-height: 1.5; }
 
-    .games { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:14px; }
-    .section-title { font-size:1.15rem; font-weight:800; margin:26px 0 12px; letter-spacing:-.01em; }
-    .section-title span { font-weight:400; color:var(--muted); font-size:.95rem; }
+    .search { position: relative; display: block; }
+    .search svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 21px; color: var(--muted); pointer-events: none; }
+    .search input { width: 100%; min-height: 48px; border: 2px solid var(--line); border-radius: 16px; padding: 9px 16px 9px 47px; color: var(--ink); background: var(--panel); box-shadow: 0 8px 20px rgba(23,50,77,.08); }
+    .search input::placeholder { color: var(--muted); opacity: 1; }
+
+    .pills { display: flex; gap: 8px; overflow-x: auto; padding: 10px 2px 4px; scrollbar-width: none; }
+    .pills::-webkit-scrollbar { display: none; }
+    .pill { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 999px; min-height: 40px; padding: 8px 18px; background: var(--panel); color: var(--ink); font-weight: 600; cursor: pointer; font-size: .92rem; }
+    .pill[aria-pressed="true"] { background: var(--navy); color: var(--bg); border-color: var(--navy); }
+
+    .count-row { margin: 10px 0 0; }
+    .count-pill { border: 0; border-radius: 999px; padding: 9px 18px; background: var(--yellow); color: #352700; font-weight: 700; font-size: .9rem; cursor: pointer; box-shadow: 0 3px 0 rgba(139,60,0,.35); }
+
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 28px 0 12px; }
+    .section-head h2 { margin: 0; font-size: clamp(1.15rem, 3vw, 1.4rem); color: var(--navy); letter-spacing: -.015em; }
+    .section-head h2 .am { font-weight: 500; color: var(--muted); font-size: .85em; }
+    .section-head > span.sub { color: var(--muted); font-size: .88rem; text-align: right; }
+
+    .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
     .game-card {
-      --card-accent: var(--cyan);
-      position:relative; min-height:225px; overflow:hidden; border:0; border-radius:20px; padding:0; background:var(--panel); color:var(--ink); box-shadow:var(--shadow); cursor:pointer; text-align:left;
+      border: 0; border-radius: 20px; overflow: hidden; padding: 0; background: var(--panel); color: var(--ink);
+      box-shadow: var(--shadow); cursor: pointer; text-align: left; display: flex; flex-direction: column;
       transition: transform .18s ease, box-shadow .18s ease;
     }
-    .game-card:hover { transform:translateY(-4px); box-shadow:0 24px 52px rgba(23,50,77,.22); }
-    .game-card:active { transform:translateY(1px); }
-    .game-card.featured { min-height:225px; }
-    .cover { position:absolute; inset:0; }
-    .cover img { width:100%; height:100%; display:block; object-fit:cover; transition:transform .35s ease; }
-    .game-card:hover .cover img { transform:scale(1.025); }
-    .cover::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 34%, rgba(6,22,32,.28) 56%, rgba(7,22,34,.93) 100%); }
-    .card-body { position:absolute; z-index:2; inset:auto 0 0; padding:12px 14px; color:#fff; }
-    .tags { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
-    .tag { border:1px solid rgba(255,255,255,.42); background:rgba(7,22,34,.42); border-radius:999px; padding:3px 8px; font-size:.64rem; letter-spacing:.02em; }
-    .card-body h3 { margin:0; font-size:clamp(1rem,2.2vw,1.35rem); line-height:1.05; letter-spacing:-.02em; }
-    .card-body p { margin:5px 0 0; color:#d8edf2; font-family:"Noto Sans Ethiopic", sans-serif; line-height:1.4; font-size:.78rem; max-width:42ch; }
-    .play-badge { position:absolute; z-index:3; top:12px; right:12px; width:42px; height:42px; border:0; border-radius:50%; background:var(--yellow); color:#392900; display:grid; place-items:center; box-shadow:0 5px 0 rgba(111,64,0,.52); }
-    .play-badge svg { width:17px; margin-left:3px; }
-    .secondary { align-self:stretch; }
-    .empty { display:none; padding:48px 18px; text-align:center; color:var(--muted); border:2px dashed var(--line); border-radius:20px; background:color-mix(in srgb, var(--panel) 70%, transparent); }
-    .empty strong { display:block; color:var(--ink); font-size:1.2rem; margin-bottom:5px; }
-    .library-note { margin-top:20px; padding:18px 20px; display:flex; align-items:center; gap:14px; border-top:1px solid var(--line); color:var(--muted); font-family:"Noto Sans Ethiopic", sans-serif; line-height:1.5; }
-    .plus { flex:0 0 auto; width:38px; height:38px; display:grid; place-items:center; border-radius:12px 12px 17px 12px; background:var(--panel-2); color:var(--cyan-dark); font:700 1.5rem/1 "Fredoka", sans-serif; }
+    .game-card:hover { transform: translateY(-4px); box-shadow: 0 24px 52px rgba(23,50,77,.22); }
+    .game-card:active { transform: translateY(1px); }
+    .cover { display: block; aspect-ratio: 16 / 10; overflow: hidden; background: var(--panel-2); }
+    .cover img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .35s ease; }
+    .game-card:hover .cover img { transform: scale(1.04); }
+    .card-body { padding: 12px 14px 15px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag { background: var(--panel-2); color: var(--muted); border-radius: 999px; padding: 3px 10px; font-size: .7rem; font-weight: 600; }
+    .card-body h3 { margin: 0; font-size: 1.06rem; letter-spacing: -.01em; color: var(--navy); line-height: 1.15; }
+    .card-body .desc { margin: 0; color: var(--muted); font-size: .86rem; line-height: 1.45; flex: 1; }
+    .play-btn { margin-top: 5px; align-self: flex-start; background: var(--yellow); color: #352700; font-weight: 700; border-radius: 999px; padding: 9px 24px; font-size: .92rem; box-shadow: 0 3px 0 rgba(139,60,0,.35); }
 
-    .player { position:fixed; inset:0; z-index:20; display:none; background:#0d1923; }
-    .player.open { display:block; }
-    .player-bar { position:absolute; z-index:2; top:max(10px, env(safe-area-inset-top)); left:10px; right:10px; height:50px; display:flex; align-items:center; justify-content:space-between; gap:12px; pointer-events:none; }
-    .back-btn, .fullscreen-btn { pointer-events:auto; min-height:44px; border:1px solid rgba(255,255,255,.25); border-radius:14px; padding:8px 14px; color:#fff; background:rgba(10,24,35,.86); font-weight:700; box-shadow:0 8px 24px rgba(0,0,0,.22); cursor:pointer; }
-    .back-btn { display:flex; align-items:center; gap:8px; }
-    .back-btn svg, .fullscreen-btn svg { width:20px; height:20px; }
-    .player-title { color:white; text-shadow:0 2px 8px rgba(0,0,0,.6); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .game-frame { position:absolute; left:0; right:0; top:calc(max(10px, env(safe-area-inset-top)) + 58px); width:100%; height:calc(100% - (max(10px, env(safe-area-inset-top)) + 58px)); border:0; background:#fff; display:block; }
-    .player.open .game-card.secondary { display:none; }
+    .featured { flex-direction: row; align-items: stretch; }
+    .featured .cover { flex: 1 1 56%; aspect-ratio: auto; min-height: 230px; }
+    .featured .card-body { flex: 1 1 44%; justify-content: center; padding: 24px; gap: 10px; }
+    .featured .card-body h3 { font-size: clamp(1.35rem, 3.4vw, 1.9rem); }
+    .featured .card-body .desc { font-size: 1rem; }
+    .featured .play-btn { font-size: 1.05rem; padding: 12px 34px; }
 
-    @media (max-width:760px) {
-      .page { padding-inline:14px; }
-      .topline { align-items:center; }
-      .tool-row { align-items:stretch; flex-direction:column; }
-      .filters { display:grid; grid-template-columns:repeat(4,1fr); }
-      .filter { min-width:0; padding-inline:8px; }
-      .games { grid-template-columns:repeat(2, 1fr); gap:10px; }
-      .game-card, .game-card.featured { min-height:195px; }
-      .library-note { padding-inline:4px; }
-      .player-bar { height:46px; }
-      .fullscreen-btn { display:none; }
+    .recent-row { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; }
+    .recent-row::-webkit-scrollbar { display: none; }
+    .recent-card { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); background: var(--panel); border-radius: 16px; padding: 8px 16px 8px 8px; cursor: pointer; color: var(--ink); box-shadow: 0 8px 20px rgba(23,50,77,.08); text-align: left; }
+    .recent-card img { width: 62px; height: 62px; border-radius: 12px; object-fit: cover; }
+    .recent-card .t { font-weight: 700; font-size: .9rem; line-height: 1.2; }
+    .recent-card .s { font-size: .76rem; color: var(--cyan-dark); font-weight: 600; margin-top: 3px; }
+
+    .together-banner { margin-top: 16px; border-radius: 22px; padding: 24px clamp(18px, 4vw, 30px); background: linear-gradient(135deg, #17324d 0%, #0a788b 100%); color: #fff; box-shadow: var(--shadow); }
+    .together-banner h3 { margin: 0 0 8px; font-size: clamp(1.15rem, 3vw, 1.4rem); letter-spacing: -.01em; }
+    .together-banner p { margin: 0 0 16px; color: #dceef3; font-size: .93rem; line-height: 1.55; max-width: 60ch; }
+    .together-banner p .step { font-weight: 700; color: #fff; }
+    .cta { border: 0; background: var(--yellow); color: #352700; font-weight: 700; border-radius: 999px; padding: 13px 30px; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 0 rgba(0,0,0,.22); }
+    .cta:active { transform: translateY(2px); box-shadow: none; }
+
+    .empty { display: none; padding: 48px 18px; text-align: center; color: var(--muted); border: 2px dashed var(--line); border-radius: 20px; background: color-mix(in srgb, var(--panel) 70%, transparent); }
+    .empty strong { display: block; color: var(--ink); font-size: 1.2rem; margin-bottom: 5px; }
+
+    .site-intro { color: var(--muted); max-width: 780px; margin: 34px auto 0; line-height: 1.6; font-size: .88rem; text-align: center; }
+    .site-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px 18px; flex-wrap: wrap; width: min(1180px, 100%); margin: 26px auto 0; padding: 20px clamp(16px, 4vw, 42px) 10px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); }
+    .site-footer nav a { color: var(--muted); margin-left: 18px; text-decoration: none; font-weight: 600; }
+    .site-footer nav a:hover { color: var(--ink); text-decoration: underline; }
+
+    .player { position: fixed; inset: 0; z-index: 20; display: none; background: #0d1923; }
+    .player.open { display: block; }
+    .player-bar { position: absolute; z-index: 2; top: max(10px, env(safe-area-inset-top)); left: 10px; right: 10px; height: 50px; display: flex; align-items: center; justify-content: space-between; gap: 12px; pointer-events: none; }
+    .back-btn, .fullscreen-btn { pointer-events: auto; min-height: 44px; border: 1px solid rgba(255,255,255,.25); border-radius: 14px; padding: 8px 14px; color: #fff; background: rgba(10,24,35,.86); font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,.22); cursor: pointer; }
+    .back-btn { display: flex; align-items: center; gap: 8px; }
+    .back-btn svg, .fullscreen-btn svg { width: 20px; height: 20px; }
+    .player-title { color: white; text-shadow: 0 2px 8px rgba(0,0,0,.6); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .game-frame { position: absolute; left: 0; right: 0; top: calc(max(10px, env(safe-area-inset-top)) + 58px); width: 100%; height: calc(100% - (max(10px, env(safe-area-inset-top)) + 58px)); border: 0; background: #fff; display: block; }
+
+    @media (max-width: 760px) {
+      .page { padding-inline: 14px; }
+      .games { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .card-body h3 { font-size: .98rem; }
+      .card-body .desc { font-size: .8rem; }
+      .play-btn { padding: 8px 20px; font-size: .85rem; }
+      .player-bar { height: 46px; }
+      .fullscreen-btn { display: none; }
     }
-    @media (max-width:390px) {
-      .welcome h1 { font-size:1.05rem; }
-      .game-card, .game-card.featured { min-height:175px; }
+    @media (max-width: 640px) {
+      .featured { flex-direction: column; }
+      .featured .cover { aspect-ratio: 16 / 9; min-height: 0; }
+      .featured .card-body { padding: 16px; }
     }
-    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
   </style>
 </head>
 <body>
-  <main class="page">
-    <section class="topline" aria-labelledby="welcome-title">
-      <div class="welcome">
-        <h1 id="welcome-title">Pick a game. Play right away.</h1>
-        <p lang="am">ይምረጡ፣ ይጫወቱ፣ በመዝናናት ይማሩ።</p>
-      </div>
-      <div class="game-count" id="gameCountBadge" aria-label="6 games available"><div><strong id="badgeCount">6</strong><small>games</small></div></div>
-    </section>
+  <header class="topbar">
+    <a class="brand" href="./">🎮 HABESHA <span>GAMES</span></a>
+    <button class="icon-btn" id="searchToggle" type="button" aria-label="Search games">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+    </button>
+  </header>
 
-    <section class="tool-row" aria-label="Game discovery controls">
+  <main class="page">
+    <section class="hero" aria-labelledby="hero-title">
+      <h1 id="hero-title">Pick a game.<br />Play right away.</h1>
+      <p class="hero-sub" lang="am">የኢትዮጵያ ጨዋታዎች — አብረን እንጫወት።</p>
       <label class="search">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
-        <input id="search" type="search" placeholder="Find a game…" autocomplete="off" />
+        <input id="search" type="search" placeholder="Search games…" autocomplete="off" />
       </label>
-      <div class="filters" role="group" aria-label="Filter games">
-        <button class="filter" type="button" data-filter="all" aria-pressed="true">All</button>
-        <button class="filter" type="button" data-filter="music" aria-pressed="false">Music</button>
+      <div class="pills" role="group" aria-label="Filter games">
+        <button class="pill" type="button" data-filter="all" aria-pressed="true">All</button>
+        <button class="pill" type="button" data-filter="solo" aria-pressed="false">👤 Solo</button>
+        <button class="pill" type="button" data-filter="group" aria-pressed="false">👥 Group</button>
+        <button class="pill" type="button" data-filter="music" aria-pressed="false">🎵 Music</button>
+      </div>
+      <div class="count-row"><button class="count-pill" id="countPill" type="button"></button></div>
+    </section>
+
+    <section id="popularSec" aria-labelledby="popularTitle">
+      <div class="section-head"><h2 id="popularTitle">🔥 Popular <span class="am" lang="am">· ተወዳጅ</span></h2></div>
+      <div id="popularGrid"></div>
+    </section>
+
+    <section id="recentSec" aria-labelledby="recentTitle" hidden>
+      <div class="section-head"><h2 id="recentTitle">👋 Welcome back <span class="am" lang="am">· እንኳን ደህና መጡ</span></h2></div>
+      <div class="recent-row" id="recentRow"></div>
+    </section>
+
+    <section id="togetherSec" aria-labelledby="togetherTitle">
+      <div class="section-head">
+        <h2 id="togetherTitle">👥 Play Together <span class="am" lang="am">· የቡድን ጨዋታዎች</span></h2>
+        <span class="sub">One host. Everyone plays on their phone!</span>
+      </div>
+      <div class="games" id="togetherGrid"></div>
+      <div class="together-banner" id="togetherBanner">
+        <h3>One phone. Everyone plays.</h3>
+        <p><span class="step">Create a game →</span> Share the code → <span class="step">Everyone joins on their phone.</span><br />No downloads, no sign-up — the big screen is optional.</p>
+        <button class="cta" id="startGroup" type="button">👥 Start a Group Game</button>
       </div>
     </section>
 
-    <p class="site-intro">Free Ethiopian-themed games — no downloads, no sign-up. Play right in your browser.</p>
-
-    <section aria-labelledby="play-title">
-      <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">3 games</span></div>
-      <h2 class="section-title" id="groupTitle">👥 Group games <span lang="am">· የቡድን ጨዋታዎች</span></h2>
-      <div class="games" id="groupGrid">
-
-        <button class="game-card secondary" type="button" data-title="Listen &amp; Guess the Song አድምጠው ገምት" data-category="music" data-src="games/listen-party/" aria-label="Play Listen and Guess the Song">
-                  <span class="cover" style="background:linear-gradient(135deg,#3b1d5e,#f6c548);display:flex;align-items:center;justify-content:center;font-size:64px;">🎧</span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Listen &amp; Guess the Song</h3><p lang="am">አድምጠው ገምት — hear the song clip, pick the answer!</p></span>
-                </button>
-        <button class="game-card secondary" type="button" data-title="Guess Song Fast የቡድን ጨዋታ" data-category="music" data-src="games/guess-party/" aria-label="Play Guess Song Fast">
-                  <span class="cover" style="background:linear-gradient(135deg,#0f766e,#f6c548);display:flex;align-items:center;justify-content:center;font-size:64px;">🎉</span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Guess Song Fast</h3><p lang="am">የቡድን ጨዋታ — one host, everyone plays on their phone!</p></span>
-                </button>
-        <button class="game-card secondary" type="button" data-title="Finish the Lyrics Party የቡድን ጨዋታ" data-category="music" data-src="games/finish-lyrics-party/" aria-label="Play Finish the Lyrics Party">
-                  <span class="cover" style="background:linear-gradient(135deg,#7a2d12,#f6c548);display:flex;align-items:center;justify-content:center;font-size:64px;">🎤</span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Finish the Lyrics Party</h3><p lang="am">የቡድን ጨዋታ — finish the missing line before everyone else!</p></span>
-                </button>
-      </div>
-
-      <h2 class="section-title" id="soloTitle">🙋 Solo games <span lang="am">· የግል ጨዋታዎች</span></h2>
-      <div class="games" id="soloGrid">
-
-        <button class="game-card secondary" type="button" data-title="Guess the Song መዝሙር" data-category="music" data-src="games/guess-the-game/" aria-label="Play Guess the Song">
-                  <span class="cover"><img src="assets/guess-the-game.jpg" alt="Guess the Song" /></span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess the Song</h3><p lang="am">መዝሙሩን ገምት — Hear a clip, name the song.</p></span>
-                </button>
-
-        <button class="game-card secondary" type="button" data-title="Guess from the Lyrics ከግጥሙ ገምት" data-category="music" data-src="games/guess-from-lyrics/" aria-label="Play Guess from the Lyrics">
-                  <span class="cover"><img src="assets/guess-from-lyrics.jpg" alt="Guess from the Lyrics game" /></span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Guess from the Lyrics</h3><p lang="am">ከግጥሙ ገምት — Read the lines, guess the song.</p></span>
-                </button>
-        <button class="game-card secondary" type="button" data-title="Worship Song Bingo" data-category="music" data-src="games/worship-song-bingo/" aria-label="Play Worship Song Bingo">
-                  <span class="cover"><img src="assets/worship-song-bingo.jpg" alt="Worship Song Bingo game" /></span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Worship Song Bingo</h3><p lang="am">የመዝሙር ብንጎ — Mark each song, shout bingo!</p></span>
-                </button>
-
-
-        <button class="game-card secondary" type="button" data-title="Song Roulette የመዝሙር ሩሌት" data-category="music" data-src="games/song-roulette/" aria-label="Play Song Roulette">
-                  <span class="cover" style="background:linear-gradient(135deg,#0d2b26,#14a89c);display:flex;align-items:center;justify-content:center;font-size:64px;">🎡</span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Song Roulette</h3><p lang="am">የመዝሙር ሩሌት — spin the wheel for your next worship song.</p></span>
-                </button>
-
-        <!-- HIDDEN by owner request 2026-09-26
-<button class="game-card secondary" type="button" data-title="Guess the Emoji" data-category="puzzle" data-src="games/guess-the-word-by-emoji/" aria-label="Play Guess the Emoji">
-          <span class="cover"><img src="assets/emoji-word.jpg" alt="Smiling orange game tile with a cream puzzle piece" /></span>
-          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">60 riddles</span></span><h3>Guess the Emoji</h3><p lang="am">ኢሞጂዎቹን ተመልክተው ቃሉን ይገምቱ። ምድብ ይምረጡና ፈጣን ጨዋታ ይጀምሩ። Read the emoji clues, guess the hidden word, and clear all 60 riddles.</p></span>
-        </button>
--->
-
-        <!-- HIDDEN by owner request 2026-09-26
-<button class="game-card secondary" type="button" data-title="Buna Run Jebena Sini Coffee Runner" data-category="action" data-src="games/buna-run/" aria-label="Play Buna Run">
-          <span class="cover"><img src="assets/buna-run.jpg" alt="Stylized jebena character ready to run" /></span>
-          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">Endless runner</span></span><h3>Buna Run</h3><p>Run and jump as a jebena, collect sini cups, and keep your coffee streak alive. Tap to jump over obstacles — how long can you keep the run going?</p></span>
-        </button>
--->
-
-        <!-- HIDDEN by owner request 2026-09-26
-<button class="game-card secondary" type="button" data-title="Injera Stack Sefed Stacking" data-category="puzzle" data-src="games/injera-stack/" aria-label="Play Injera Stack">
-          <span class="cover"><img src="assets/injera-stack.jpg" alt="A tall stack of porous injera layers" /></span>
-          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">Stacking</span></span><h3>Injera Stack</h3><p>Time each drop and build a tall, steady stack of injera on the woven sefed. One wobbly landing and the whole stack tumbles.</p></span>
-        </button>
--->
-
-        <!-- HIDDEN by owner request 2026-09-26
-<button class="game-card secondary" type="button" data-title="Taxi Addis Blue Taxi Bole Meskel Square Kazanchis Sidist Kilo Piassa Minibus Bajaj" data-category="action" data-src="games/taxi-addis/" aria-label="Play Taxi Addis">
-          <span class="cover"><img src="assets/taxi-addis.jpg" alt="Taxi Addis driving game on a city road" /></span>
-          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">Arcade drive</span></span><h3>Taxi Addis</h3><p>Weave a blue taxi through Bole, Meskel Square, Kazanchis, Sidist Kilo, and Piassa. Dodge traffic, grab fares, and see how far across Addis you can drive.</p></span>
-        </button>
--->
-
-        <!-- HIDDEN by owner request 2026-09-26
-<button class="game-card secondary" type="button" data-title="Memory Match" data-category="puzzle" data-src="games/memory-match/" aria-label="Play Memory Match">
-                  <span class="cover"><img src="assets/memory-match.jpg" alt="Memory Match card game" /></span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Puzzles</span></span><h3>Memory Match</h3><p lang="am">ካርዶቹን ገልብጡ፤ ተመሳሳይ ጥንዶችን ያግኙ። Flip the cards and find every matching pair in as few moves as you can.</p></span>
-                </button>
--->
-
-        <!-- HIDDEN by owner request 2026-09-26
-<button class="game-card secondary" type="button" data-title="Copy Me" data-category="learning" data-src="games/simon-says-amharic/" aria-label="Play Copy Me">
-                  <span class="cover"><img src="assets/simon-says-amharic.jpg" alt="Copy Me game" /></span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Learning</span></span><h3>Copy Me</h3><p lang="am">ቅደም ተከተሉን ይድገሙ፤ የአማርኛ ቃላትን ይማሩ። Watch the sequence, repeat it back, and learn Amharic colors, numbers, and animals along the way.</p></span>
-                </button>
--->
-
-        <!-- HIDDEN by owner request 2026-09-26
-<button class="game-card secondary" type="button" data-title="Yadon's Addis Drive Megenagna CMC Gurd Shola Salite Mihret driving" data-category="action" data-src="games/yadons-addis-drive/" aria-label="Play Yadon's Addis Drive">
-                  <span class="cover"><img src="assets/yadons-drive.jpg" alt="Yadon's Addis Drive game" /></span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">❤ For Yadon</span></span><h3>Yadon's Addis Drive</h3><p lang="am">ከመገናኛ እስከ ሲኤምሲ — መኪናውን ንዳ! Drive from Megenagna to CMC through Gurd Shola and Salite Mihret.</p></span>
-                </button>
--->
-
-        <!-- HIDDEN by owner request 2026-09-26
-<button class="game-card secondary" type="button" data-title="Salem's Playground Quest jumping math playground" data-category="action" data-src="games/salems-playground-quest/" aria-label="Play Salem's Playground Quest">
-                  <span class="cover"><img src="assets/salems-playground-quest.jpg" alt="Salem's Playground Quest game" /></span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">❤ For Salem</span></span><h3>Salem's Playground Quest</h3><p lang="am">ዝላይ፤ ምታ፤ ሂሳብ ስሪ! Jump across the playground and solve quick math challenges to move ahead.</p></span>
-                </button>
--->
-
-        <!-- HIDDEN by owner request 2026-09-26
-<button class="game-card secondary" type="button" data-title="The Floor Is Lava jumping toy rooms" data-category="action" data-src="games/barbie-floor-is-lava/" aria-label="Play The Floor Is Lava">
-                  <span class="cover"><img src="assets/barbie-floor-is-lava.jpg" alt="The Floor Is Lava jumping game" /></span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Action</span><span class="tag">❤ For the girls</span></span><h3>The Floor Is Lava</h3><p>The floor is lava — don't touch it! Jump between toys across three rooms and collect hearts.</p></span>
-                </button>
--->
-
-        <!-- HIDDEN until perfected: Fidel Fall
-<button class="game-card featured" type="button" data-title="Fidel Fall ፊደል" data-category="learning" data-src="games/fidel-fall/" aria-label="Play Fidel Fall">
-          <span class="cover"><img src="assets/fidel-fall.jpg" alt="Golden Amharic letter falling toward a blue block" /></span>
-          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <span class="card-body"><span class="tags"><span class="tag">Learning</span><span class="tag">Action</span></span><h3>Fidel Fall</h3><p lang="am">ትክክለኛውን ፊደል ይያዙ፤ ድምፁን ያዳምጡ፤ ተከታታይነቱን ይማሩ።</p></span>
-        </button>
--->
-
-
-        <!-- HIDDEN until perfected: Anebabero
-<button class="game-card secondary" type="button" data-title="Anebabero Injera Kibe Berbere Stacking" data-category="puzzle" data-src="games/anebabero/" aria-label="Play Anebabero">
-          <span class="cover"><img src="assets/anebabero.jpg" alt="Injera layers topped with golden seasoned butter" /></span>
-          <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-          <span class="card-body"><span class="tags"><span class="tag">Puzzle</span><span class="tag">Three-step stack</span></span><h3>Anebabero</h3><p>Land the injera, center the kibe, and sprinkle berbere to complete every layer.</p></span>
-        </button>
--->
-
-
-<button class="game-card secondary" type="button" data-title="Finish the Lyrics" data-category="music" data-src="games/finish-the-lyrics/" aria-label="Play Finish the Lyrics">
-                  <span class="cover"><img src="assets/finish-the-lyrics.jpg" alt="Finish the Lyrics game" /></span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span></span><h3>Finish the Lyrics</h3><p lang="am">የመዝሙሩን ቀጣይ መስመር ምረጥ፤ ነጥብ ሰብስብ።</p></span>
-                </button>
-
-      </div>
+    <section id="allSec" aria-labelledby="allTitle">
+      <div class="section-head"><h2 id="allTitle">🎮 All Games <span class="am" lang="am">· ሁሉም ጨዋታዎች</span></h2><span class="sub" id="resultCount"></span></div>
+      <div class="games" id="allGrid"></div>
       <div class="empty" id="emptyState"><strong>No games found</strong>Try another search or category.</div>
     </section>
 
-    <aside class="library-note"><span class="plus">+</span><span>More games can join this library as they are ready.</span></aside>
+    <p class="site-intro">Free Ethiopian-themed games — no downloads, no sign-up. Play right in your browser.</p>
   </main>
 
   <footer class="site-footer">
@@ -350,62 +251,163 @@
     <iframe class="game-frame" id="gameFrame" title="Game" allow="autoplay; fullscreen" src="about:blank"></iframe>
   </section>
 
+  <!--
+    Games hidden by owner request (2026-09-26) or not yet perfected live in games/<dir>/.
+    To bring one back, add an entry to the GAMES array below with its art in assets/cards/.
+    Hidden: guess-the-word-by-emoji, buna-run, injera-stack, taxi-addis, memory-match,
+    simon-says-amharic, yadons-addis-drive, salems-playground-quest, barbie-floor-is-lava,
+    fidel-fall, anebabero.
+  -->
   <script>
     (function () {
+      // Single source of truth for the game library. mode: 'solo' | 'group'.
+      var GAMES = [
+        { src: 'games/listen-party/', title: 'Listen & Guess the Song', am: 'አድምጠው ገምት', desc: 'Hear the song clip, pick the answer!', mode: 'group', img: 'assets/cards/listen-party.jpg', featured: true },
+        { src: 'games/guess-party/', title: 'Guess Song Fast', am: 'የቡድን ጨዋታ', desc: 'One host, everyone plays on their phone!', mode: 'group', img: 'assets/cards/guess-party.jpg' },
+        { src: 'games/finish-lyrics-party/', title: 'Finish the Lyrics Party', am: 'የቡድን ጨዋታ', desc: 'Finish the missing line before everyone else!', mode: 'group', img: 'assets/cards/finish-lyrics-party.jpg' },
+        { src: 'games/guess-the-game/', title: 'Guess the Song', am: 'መዝሙር', desc: 'Hear a clip, name the song.', mode: 'solo', img: 'assets/cards/guess-the-game.jpg' },
+        { src: 'games/guess-from-lyrics/', title: 'Guess from the Lyrics', am: 'ከግጥሙ ገምት', desc: 'Read the lines, guess the song.', mode: 'solo', img: 'assets/cards/guess-from-lyrics.jpg' },
+        { src: 'games/worship-song-bingo/', title: 'Worship Song Bingo', am: 'የመዝሙር ብንጎ', desc: 'Mark each song, shout bingo!', mode: 'solo', img: 'assets/cards/worship-song-bingo.jpg' },
+        { src: 'games/song-roulette/', title: 'Song Roulette', am: 'የመዝሙር ሩሌት', desc: 'Spin the wheel for your next worship song.', mode: 'solo', img: 'assets/cards/song-roulette.jpg' },
+        { src: 'games/finish-the-lyrics/', title: 'Finish the Lyrics', am: 'የመዝሙሩን ቀጣይ መስመር', desc: 'Pick the next line, collect points.', mode: 'solo', img: 'assets/cards/finish-the-lyrics.jpg' }
+      ];
+      var bySrc = {};
+      GAMES.forEach(function (g) { bySrc[g.src] = g; });
+
+      function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+      function modeTag(mode) { return mode === 'group' ? '👥 Group' : '👤 Solo'; }
+
+      function cardHTML(g, featured) {
+        return '<button class="game-card' + (featured ? ' featured' : '') + '" type="button"' +
+          ' data-src="' + g.src + '" data-title="' + esc(g.title + ' ' + g.am) + '" data-mode="' + g.mode + '"' +
+          ' aria-label="Play ' + esc(g.title) + '">' +
+          '<span class="cover"><img src="' + g.img + '" alt="' + esc(g.title) + ' artwork" loading="lazy" /></span>' +
+          '<span class="card-body"><span class="tags"><span class="tag">🎵 Music</span><span class="tag">' + modeTag(g.mode) + '</span></span>' +
+          '<h3>' + esc(g.title) + '</h3>' +
+          '<p class="desc">' + esc(g.desc) + '</p>' +
+          '<span class="play-btn">▶ ' + (featured ? 'PLAY NOW' : 'PLAY') + '</span></span></button>';
+      }
+
+      // Render sections from the data.
+      document.getElementById('popularGrid').innerHTML = GAMES.filter(function (g) { return g.featured; }).map(function (g) { return cardHTML(g, true); }).join('');
+      document.getElementById('togetherGrid').innerHTML = GAMES.filter(function (g) { return g.mode === 'group'; }).map(function (g) { return cardHTML(g, false); }).join('');
+      document.getElementById('allGrid').innerHTML = GAMES.map(function (g) { return cardHTML(g, false); }).join('');
+
       var cards = Array.prototype.slice.call(document.querySelectorAll('.game-card'));
-      var filters = Array.prototype.slice.call(document.querySelectorAll('.filter'));
+      var pills = Array.prototype.slice.call(document.querySelectorAll('.pill'));
       var search = document.getElementById('search');
       var count = document.getElementById('resultCount');
       var empty = document.getElementById('emptyState');
       var player = document.getElementById('player');
       var frame = document.getElementById('gameFrame');
       var title = document.getElementById('playerTitle');
+      var recentSec = document.getElementById('recentSec');
+      var recentRow = document.getElementById('recentRow');
       var activeFilter = 'all';
-      // Badge shows the total library size and stays correct as games are added.
-      var badgeCount = document.getElementById('badgeCount');
-      var badge = document.getElementById('gameCountBadge');
-      if (badgeCount) badgeCount.textContent = cards.length;
-      if (badge) badge.setAttribute('aria-label', cards.length + ' games available');
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20261001u';
+      var SITE_VERSION = '20261001v';
 
-      function updateGames() {
-        var query = search.value.trim().toLocaleLowerCase();
+      var groupCount = GAMES.filter(function (g) { return g.mode === 'group'; }).length;
+      var countPill = document.getElementById('countPill');
+      countPill.textContent = GAMES.length + ' games · ' + groupCount + ' multiplayer →';
+      countPill.addEventListener('click', function () {
+        document.getElementById('allSec').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      function setFilter(name) {
+        activeFilter = name;
+        pills.forEach(function (item) { item.setAttribute('aria-pressed', item.dataset.filter === name ? 'true' : 'false'); });
+        updateGames();
+      }
+      pills.forEach(function (button) {
+        button.addEventListener('click', function () { setFilter(button.dataset.filter); });
+      });
+      document.getElementById('startGroup').addEventListener('click', function () {
+        setFilter('group');
+        document.getElementById('togetherSec').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      document.getElementById('searchToggle').addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        search.focus({ preventScroll: true });
+      });
+
+      function matches(card, query) {
+        var modeOk = activeFilter === 'all' ||
+          (activeFilter === 'music') ||
+          card.dataset.mode === activeFilter;
+        var textOk = !query || card.dataset.title.toLocaleLowerCase().indexOf(query) !== -1;
+        return modeOk && textOk;
+      }
+
+      function filterGrid(gridId, query) {
+        var grid = document.getElementById(gridId);
         var visible = 0;
-        cards.forEach(function (card) {
-          var categoryMatch = activeFilter === 'all' || card.dataset.category === activeFilter;
-          var textMatch = !query || card.dataset.title.toLocaleLowerCase().indexOf(query) !== -1;
-          var show = categoryMatch && textMatch;
+        Array.prototype.forEach.call(grid.querySelectorAll('.game-card'), function (card) {
+          var show = matches(card, query);
           card.hidden = !show;
           if (show) visible += 1;
         });
-        count.textContent = visible + (visible === 1 ? ' game' : ' games');
-        empty.style.display = visible ? 'none' : 'block';
-        [['groupGrid','groupTitle'],['soloGrid','soloTitle']].forEach(function (pair) {
-          var grid = document.getElementById(pair[0]);
-          var head = document.getElementById(pair[1]);
-          var any = Array.prototype.some.call(grid.querySelectorAll('.game-card'), function (c) { return !c.hidden; });
-          grid.style.display = any ? '' : 'none';
-          head.style.display = any ? '' : 'none';
+        return visible;
+      }
+
+      function updateGames() {
+        var query = search.value.trim().toLocaleLowerCase();
+        var searching = query.length > 0 || activeFilter !== 'all';
+
+        var popularVisible = filterGrid('popularGrid', query);
+        document.getElementById('popularSec').style.display = popularVisible ? '' : 'none';
+
+        var togetherVisible = filterGrid('togetherGrid', query);
+        document.getElementById('togetherSec').style.display = togetherVisible ? '' : 'none';
+
+        var allVisible = filterGrid('allGrid', query);
+        count.textContent = allVisible + (allVisible === 1 ? ' game' : ' games');
+        empty.style.display = allVisible ? 'none' : 'block';
+
+        renderRecent(searching);
+      }
+      search.addEventListener('input', updateGames);
+
+      // ---- Recently played (localStorage, no account needed) ----
+      var RECENT_KEY = 'hg_recent_v1';
+      var RECENT_MAX = 6;
+      function readRecent() {
+        try {
+          var list = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+          return Array.isArray(list) ? list.filter(function (src) { return bySrc[src]; }) : [];
+        } catch (e) { return []; }
+      }
+      function recordRecent(src) {
+        var list = readRecent().filter(function (s) { return s !== src; });
+        list.unshift(src);
+        try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX))); } catch (e) {}
+        renderRecent(false);
+      }
+      function renderRecent(searching) {
+        var list = readRecent();
+        if (!list.length || searching) { recentSec.hidden = true; return; }
+        recentSec.hidden = false;
+        recentRow.innerHTML = list.map(function (src) {
+          var g = bySrc[src];
+          return '<button class="recent-card" type="button" data-src="' + g.src + '" aria-label="Play ' + esc(g.title) + ' again">' +
+            '<img src="' + g.img + '" alt="" loading="lazy" />' +
+            '<span><span class="t">' + esc(g.title) + '</span><br /><span class="s">▶ Play again</span></span></button>';
+        }).join('');
+        Array.prototype.forEach.call(recentRow.querySelectorAll('.recent-card'), function (btn) {
+          btn.addEventListener('click', function () { openGame(bySrc[btn.dataset.src]); });
         });
       }
 
-      filters.forEach(function (button) {
-        button.addEventListener('click', function () {
-          activeFilter = button.dataset.filter;
-          filters.forEach(function (item) { item.setAttribute('aria-pressed', item === button ? 'true' : 'false'); });
-          updateGames();
-        });
-      });
-      search.addEventListener('input', updateGames);
-
-      function openGame(card) {
-        title.textContent = card.querySelector('h3').textContent;
-        frame.src = card.dataset.src + '?v=' + SITE_VERSION;
+      function openGame(game) {
+        var g = typeof game === 'string' ? bySrc[game] : game;
+        if (!g) return;
+        title.textContent = g.title;
+        frame.src = g.src + '?v=' + SITE_VERSION;
         player.classList.add('open');
         player.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
         document.getElementById('closePlayer').focus();
+        recordRecent(g.src);
       }
       function closeGame() {
         player.classList.remove('open');
@@ -413,12 +415,16 @@
         frame.src = 'about:blank';
         document.body.style.overflow = '';
       }
-      cards.forEach(function (card) { card.addEventListener('click', function () { openGame(card); }); });
+      cards.forEach(function (card) {
+        card.addEventListener('click', function () { openGame(bySrc[card.dataset.src]); });
+      });
       document.getElementById('closePlayer').addEventListener('click', closeGame);
       document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && player.classList.contains('open')) closeGame(); });
       document.getElementById('fullScreen').addEventListener('click', function () {
         if (player.requestFullscreen) player.requestFullscreen();
       });
+
+      updateGames();
     }());
   </script>
 </body>
