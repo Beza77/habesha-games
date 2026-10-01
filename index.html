@@ -136,7 +136,7 @@
     .back-btn { display:flex; align-items:center; gap:8px; }
     .back-btn svg, .fullscreen-btn svg { width:20px; height:20px; }
     .player-title { color:white; text-shadow:0 2px 8px rgba(0,0,0,.6); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .game-frame { position:absolute; inset:0; width:100%; height:100%; border:0; background:#fff; display:block; }
+    .game-frame { position:absolute; left:0; right:0; top:calc(max(10px, env(safe-area-inset-top)) + 58px); width:100%; height:calc(100% - (max(10px, env(safe-area-inset-top)) + 58px)); border:0; background:#fff; display:block; }
     .player.open .game-card.secondary { display:none; }
 
     @media (max-width:760px) {
@@ -347,7 +347,7 @@
       var title = document.getElementById('playerTitle');
       var activeFilter = 'all';
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20261001a';
+      var SITE_VERSION = '20261001b';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
