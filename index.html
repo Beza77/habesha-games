@@ -260,16 +260,19 @@
   -->
   <script>
     (function () {
+      // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
+      // Card art URLs carry it too, so a fresh deploy can never show a stale cached miss.
+      var SITE_VERSION = '20261001w';
       // Single source of truth for the game library. mode: 'solo' | 'group'.
       var GAMES = [
-        { src: 'games/listen-party/', title: 'Listen & Guess the Song', am: 'አድምጠው ገምት', desc: 'Hear the song clip, pick the answer!', mode: 'group', img: 'assets/cards/listen-party.jpg', featured: true },
-        { src: 'games/guess-party/', title: 'Guess Song Fast', am: 'የቡድን ጨዋታ', desc: 'One host, everyone plays on their phone!', mode: 'group', img: 'assets/cards/guess-party.jpg' },
-        { src: 'games/finish-lyrics-party/', title: 'Finish the Lyrics Party', am: 'የቡድን ጨዋታ', desc: 'Finish the missing line before everyone else!', mode: 'group', img: 'assets/cards/finish-lyrics-party.jpg' },
-        { src: 'games/guess-the-game/', title: 'Guess the Song', am: 'መዝሙር', desc: 'Hear a clip, name the song.', mode: 'solo', img: 'assets/cards/guess-the-game.jpg' },
-        { src: 'games/guess-from-lyrics/', title: 'Guess from the Lyrics', am: 'ከግጥሙ ገምት', desc: 'Read the lines, guess the song.', mode: 'solo', img: 'assets/cards/guess-from-lyrics.jpg' },
-        { src: 'games/worship-song-bingo/', title: 'Worship Song Bingo', am: 'የመዝሙር ብንጎ', desc: 'Mark each song, shout bingo!', mode: 'solo', img: 'assets/cards/worship-song-bingo.jpg' },
-        { src: 'games/song-roulette/', title: 'Song Roulette', am: 'የመዝሙር ሩሌት', desc: 'Spin the wheel for your next worship song.', mode: 'solo', img: 'assets/cards/song-roulette.jpg' },
-        { src: 'games/finish-the-lyrics/', title: 'Finish the Lyrics', am: 'የመዝሙሩን ቀጣይ መስመር', desc: 'Pick the next line, collect points.', mode: 'solo', img: 'assets/cards/finish-the-lyrics.jpg' }
+        { src: 'games/listen-party/', title: 'Listen & Guess the Song', am: 'አድምጠው ገምት', desc: 'Hear the song clip, pick the answer!', mode: 'group', img: 'assets/cards/listen-party.jpg?v=' + SITE_VERSION, featured: true },
+        { src: 'games/guess-party/', title: 'Guess Song Fast', am: 'የቡድን ጨዋታ', desc: 'One host, everyone plays on their phone!', mode: 'group', img: 'assets/cards/guess-party.jpg?v=' + SITE_VERSION },
+        { src: 'games/finish-lyrics-party/', title: 'Finish the Lyrics Party', am: 'የቡድን ጨዋታ', desc: 'Finish the missing line before everyone else!', mode: 'group', img: 'assets/cards/finish-lyrics-party.jpg?v=' + SITE_VERSION },
+        { src: 'games/guess-the-game/', title: 'Guess the Song', am: 'መዝሙር', desc: 'Hear a clip, name the song.', mode: 'solo', img: 'assets/cards/guess-the-game.jpg?v=' + SITE_VERSION },
+        { src: 'games/guess-from-lyrics/', title: 'Guess from the Lyrics', am: 'ከግጥሙ ገምት', desc: 'Read the lines, guess the song.', mode: 'solo', img: 'assets/cards/guess-from-lyrics.jpg?v=' + SITE_VERSION },
+        { src: 'games/worship-song-bingo/', title: 'Worship Song Bingo', am: 'የመዝሙር ብንጎ', desc: 'Mark each song, shout bingo!', mode: 'solo', img: 'assets/cards/worship-song-bingo.jpg?v=' + SITE_VERSION },
+        { src: 'games/song-roulette/', title: 'Song Roulette', am: 'የመዝሙር ሩሌት', desc: 'Spin the wheel for your next worship song.', mode: 'solo', img: 'assets/cards/song-roulette.jpg?v=' + SITE_VERSION },
+        { src: 'games/finish-the-lyrics/', title: 'Finish the Lyrics', am: 'የመዝሙሩን ቀጣይ መስመር', desc: 'Pick the next line, collect points.', mode: 'solo', img: 'assets/cards/finish-the-lyrics.jpg?v=' + SITE_VERSION }
       ];
       var bySrc = {};
       GAMES.forEach(function (g) { bySrc[g.src] = g; });
@@ -304,8 +307,7 @@
       var recentSec = document.getElementById('recentSec');
       var recentRow = document.getElementById('recentRow');
       var activeFilter = 'all';
-      // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20261001v';
+      // (SITE_VERSION is declared above, next to the GAMES array.)
 
       var groupCount = GAMES.filter(function (g) { return g.mode === 'group'; }).length;
       var countPill = document.getElementById('countPill');
