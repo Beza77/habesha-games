@@ -257,7 +257,10 @@ function toggleChip(el,set,key){
 }
 function updatePoolCount(){
   const n=poolSongs().length;
-  $("pool-count").textContent="🎵 "+n+" songs in this playlist";
+  let tag="";
+  if(fArtists.size) tag+=" · only "+[...fArtists].slice(0,3).join(", ")+(fArtists.size>3?"…":"");
+  if(fAlbums.size) tag+=" · albums: "+[...fAlbums].slice(0,3).join(", ")+(fAlbums.size>3?"…":"");
+  $("pool-count").textContent="🎵 "+n+" songs in this playlist"+tag;
   const ok=n>=4;
   if(!Object.keys(players).length) $("btn-start").disabled=true; else $("btn-start").disabled=!ok;
   if(!ok) $("pool-count").textContent+=" — pick more to play (need 4+)";
