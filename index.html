@@ -185,6 +185,17 @@
       <div class="section-head"><h2 id="play-title">Play now</h2><span id="resultCount">3 games</span></div>
       <div class="games" id="gameGrid">
 
+        <button class="game-card secondary" type="button" data-title="Guess Party የቡድን ጨዋታ" data-category="music" data-src="games/guess-party/" aria-label="Play Guess Party">
+                  <span class="cover" style="background:linear-gradient(135deg,#0f766e,#f6c548);display:flex;align-items:center;justify-content:center;font-size:64px;">🎉</span>
+                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Guess Party</h3><p lang="am">የቡድን ጨዋታ — host on a big screen, everyone plays on their phone!</p></span>
+                </button>
+        <button class="game-card secondary" type="button" data-title="Listen Party አድምጠው ገምት" data-category="music" data-src="games/listen-party/" aria-label="Play Listen Party">
+                  <span class="cover" style="background:linear-gradient(135deg,#3b1d5e,#f6c548);display:flex;align-items:center;justify-content:center;font-size:64px;">🎧</span>
+                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Listen Party</h3><p lang="am">አድምጠው ገምት — hear the song clip, pick the answer!</p></span>
+                </button>
+
         <button class="game-card secondary" type="button" data-title="Guess the Song መዝሙር" data-category="music" data-src="games/guess-the-game/" aria-label="Play Guess the Song">
                   <span class="cover"><img src="assets/guess-the-game.jpg" alt="Guess the Song" /></span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
@@ -203,11 +214,6 @@
                 </button>
 
 
-        <button class="game-card secondary" type="button" data-title="Guess Party የቡድን ጨዋታ" data-category="music" data-src="games/guess-party/" aria-label="Play Guess Party">
-                  <span class="cover" style="background:linear-gradient(135deg,#0f766e,#f6c548);display:flex;align-items:center;justify-content:center;font-size:64px;">🎉</span>
-                  <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Guess Party</h3><p lang="am">የቡድን ጨዋታ — host on a big screen, everyone plays on their phone!</p></span>
-                </button>
         <button class="game-card secondary" type="button" data-title="Song Roulette የመዝሙር ሩሌት" data-category="music" data-src="games/song-roulette/" aria-label="Play Song Roulette">
                   <span class="cover" style="background:linear-gradient(135deg,#0d2b26,#14a89c);display:flex;align-items:center;justify-content:center;font-size:64px;">🎡</span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
@@ -349,7 +355,7 @@
       if (badgeCount) badgeCount.textContent = cards.length;
       if (badge) badge.setAttribute('aria-label', cards.length + ' games available');
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20261001b';
+      var SITE_VERSION = '20261001c';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
