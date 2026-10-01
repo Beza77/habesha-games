@@ -350,7 +350,7 @@ function doReveal(){
   });
   const scores=Object.keys(players).map(p=>({pid:p,name:players[p].name,pts:hostScores[p]||0})).sort((a,b)=>b.pts-a.pts);
   send({k:"reveal",rid:round.rid,correctIdx:round.correctIdx,gained,scores});
-  $("host-correct").textContent="✅ "+round.song.title+" — "+round.song.artist;
+  $("host-correct").textContent="✅ "+round.song.artist+" — "+round.song.title;
   const tb=$("host-board"); tb.innerHTML="<tr><th>Player</th><th>Points</th></tr>";
   scores.forEach(s=>{ const g=gained[s.pid]||0;
     tb.innerHTML+="<tr><td>"+esc(s.name)+(g?" (+"+g+")":"")+"</td><td>"+s.pts+"</td></tr>"; });
@@ -407,7 +407,7 @@ function onPlayerRound(m){
   const box=$("player-choices"); box.innerHTML="";
   m.choices.forEach((c,i)=>{
     const b=document.createElement("button"); b.className="choice";
-    b.innerHTML=esc(c.title)+"<small>"+esc(c.artist)+"</small>";
+    b.innerHTML=esc(c.artist)+"<small>"+esc(c.title)+"</small>";
     b.onclick=()=>{
       const ms=Date.now()-roundStart;
       send({k:"answer",pid:myPid,name:myName,rid:m.rid,choice:i,ms});
@@ -435,7 +435,7 @@ function onPlayerReveal(m){
   const g=(m.gained&&m.gained[myPid])||0;
   $("reveal-title").textContent = g>0 ? "✅ Correct!" : (mine>=0?"❌ Not quite":"⏰ Too slow");
   $("reveal-result").textContent = g>0 ? "+"+g+" points" : "+0 points";
-  $("reveal-song").textContent = window._choices[m.correctIdx].title+" — "+window._choices[m.correctIdx].artist;
+  $("reveal-song").textContent = window._choices[m.correctIdx].artist+" — "+window._choices[m.correctIdx].title;
   renderBoard($("player-board"), m.scores);
   show("scr-player-reveal");
 }
