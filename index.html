@@ -188,15 +188,15 @@
       <h2 class="section-title" id="groupTitle">👥 Group games <span lang="am">· የቡድን ጨዋታዎች</span></h2>
       <div class="games" id="groupGrid">
 
-        <button class="game-card secondary" type="button" data-title="Guess Party የቡድን ጨዋታ" data-category="music" data-src="games/guess-party/" aria-label="Play Guess Party">
+        <button class="game-card secondary" type="button" data-title="Guess Song Fast የቡድን ጨዋታ" data-category="music" data-src="games/guess-party/" aria-label="Play Guess Song Fast">
                   <span class="cover" style="background:linear-gradient(135deg,#0f766e,#f6c548);display:flex;align-items:center;justify-content:center;font-size:64px;">🎉</span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Guess Party</h3><p lang="am">የቡድን ጨዋታ — host on a big screen, everyone plays on their phone!</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Guess Song Fast</h3><p lang="am">የቡድን ጨዋታ — host on a big screen, everyone plays on their phone!</p></span>
                 </button>
-        <button class="game-card secondary" type="button" data-title="Listen Party አድምጠው ገምት" data-category="music" data-src="games/listen-party/" aria-label="Play Listen Party">
+        <button class="game-card secondary" type="button" data-title="Listen &amp; Guess the Song አድምጠው ገምት" data-category="music" data-src="games/listen-party/" aria-label="Play Listen and Guess the Song">
                   <span class="cover" style="background:linear-gradient(135deg,#3b1d5e,#f6c548);display:flex;align-items:center;justify-content:center;font-size:64px;">🎧</span>
                   <span class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Listen Party</h3><p lang="am">አድምጠው ገምት — hear the song clip, pick the answer!</p></span>
+                  <span class="card-body"><span class="tags"><span class="tag">Music</span><span class="tag">Group</span></span><h3>Listen &amp; Guess the Song</h3><p lang="am">አድምጠው ገምት — hear the song clip, pick the answer!</p></span>
                 </button>
       </div>
 
@@ -362,7 +362,7 @@
       if (badgeCount) badgeCount.textContent = cards.length;
       if (badge) badge.setAttribute('aria-label', cards.length + ' games available');
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
-      var SITE_VERSION = '20261001j';
+      var SITE_VERSION = '20261001k';
 
       function updateGames() {
         var query = search.value.trim().toLocaleLowerCase();
