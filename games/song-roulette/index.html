@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="am">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>የመዝሙር ሩሌት · Song Roulette</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;600;700;800&display=swap');
+:root{
+  color-scheme:light dark;
+  --bg:#0d2b26; --bg2:#071a17; --panel:#fffdf6; --panel2:#f4eedd;
+  --ink:#1c2b26; --muted:#7a6a58; --gold:#f6c548; --gold2:#d99a1f;
+  --teal:#0f766e; --teal2:#0a544e; --line:#e6d3a8;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;font-family:"Baloo 2","Noto Sans Ethiopic",system-ui,sans-serif;
+  background:radial-gradient(1000px 520px at 50% -10%, #14524b 0%, var(--bg) 52%, var(--bg2) 100%);
+  color:#fdf3dd;display:flex;justify-content:center;padding:18px 14px 40px;
+}
+.wrap{width:100%;max-width:600px}
+.card{background:var(--panel);color:var(--ink);border-radius:22px;box-shadow:0 18px 45px rgba(0,0,0,.35);padding:26px 22px;margin-top:14px}
+h1{font-size:28px;margin:4px 0;text-align:center}
+.sub{text-align:center;color:var(--muted);margin:0 0 10px}
+.hidden{display:none!important}
+.wheel{
+  background:#0d2b26;border-radius:18px;padding:26px 16px;margin:12px 0;text-align:center;
+  border:3px solid var(--gold);
+}
+.wheel .spin-title{font-size:24px;font-weight:800;color:#ffe9a8;min-height:72px;display:flex;align-items:center;justify-content:center;line-height:1.4}
+.wheel .spin-artist{color:#9fc6bf;font-size:15px;min-height:22px}
+.btn{display:block;width:100%;border:0;border-radius:16px;cursor:pointer;font-family:inherit;font-weight:800;font-size:19px;padding:16px;margin:10px 0;background:linear-gradient(180deg,var(--gold),var(--gold2));color:#3a2a08;box-shadow:0 6px 0 #a86f14}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #a86f14}
+.btn.teal{background:linear-gradient(180deg,#14a89c,#0f766e);color:#fff;box-shadow:0 6px 0 var(--teal2)}
+.btn.ghost{background:var(--panel2);color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.songcard h2{margin:2px 0 0;font-size:24px;text-align:center}
+.songcard .artist{text-align:center;color:var(--muted);font-weight:700;margin:0 0 10px}
+.lyrics{background:var(--panel2);border-radius:14px;padding:18px;font-size:17px;line-height:2;white-space:pre-line;max-height:320px;overflow-y:auto;margin:10px 0}
+.stanza{background:var(--panel2);border-radius:14px;padding:22px;font-size:19px;line-height:2.1;white-space:pre-line;min-height:180px;margin:10px 0;text-align:center}
+.verse-nav{display:flex;gap:10px}
+.verse-nav .btn{margin:6px 0}
+.count{text-align:center;color:var(--muted);font-weight:700;font-size:14px}
+.row{display:flex;gap:10px}
+.row .btn{margin:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card" id="scr-home">
+    <h1>🎡 የመዝሙር ሩሌት</h1>
+    <p class="sub">Song Roulette — spin for your next worship song</p>
+    <div class="wheel">
+      <div class="spin-title" id="spin-title">?</div>
+      <div class="spin-artist" id="spin-artist"></div>
+    </div>
+    <button class="btn" id="btn-spin">SPIN 🎡</button>
+    <p style="text-align:center;color:var(--muted);font-size:14px">Perfect for family worship, youth group, or your quiet time — let the wheel choose.</p>
+  </section>
+
+  <section class="card songcard hidden" id="scr-song">
+    <h2 id="song-title"></h2>
+    <p class="artist" id="song-artist"></p>
+    <div class="row">
+      <button class="btn ghost" id="btn-mode">📖 Verse by verse</button>
+      <button class="btn ghost" id="btn-yt">▶ YouTube</button>
+    </div>
+    <div class="lyrics" id="lyrics"></div>
+    <div class="stanza hidden" id="stanza"></div>
+    <div class="verse-nav hidden" id="verse-nav">
+      <button class="btn ghost" id="btn-prev">← Prev</button>
+      <button class="btn ghost" id="btn-next-v">Next →</button>
+    </div>
+    <p class="count hidden" id="verse-count"></p>
+    <button class="btn teal" id="btn-respin">🎡 Spin again</button>
+  </section>
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const rnd=n=>Math.floor(Math.random()*n);
+const clean=s=>(s||"").replace(/\([^)]*\)/g," ").replace(/\s+/g," ").trim();
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+let SONGS=[], current=null, stanzas=[], stanzaIdx=0, verseMode=false, spinning=false;
+
+fetch("../finish-the-lyrics/songs.json").then(r=>r.json()).then(d=>{
+  SONGS=d.filter(s=>(s.lyrics||"").trim().length>50);
+});
+function show(id){document.querySelectorAll("section.card").forEach(s=>s.classList.add("hidden"));$(id).classList.remove("hidden");window.scrollTo(0,0);}
+
+$("btn-spin").onclick=()=>{
+  if(!SONGS.length||spinning) return;
+  spinning=true;
+  const target=SONGS[rnd(SONGS.length)];
+  let ticks=0; const total=14+rnd(8);
+  const iv=setInterval(()=>{
+    const s=SONGS[rnd(SONGS.length)];
+    $("spin-title").textContent=s.title; $("spin-artist").textContent=s.artist;
+    if(++ticks>=total){ clearInterval(iv); openSong(target); spinning=false; }
+  }, 90+Math.floor(ticks*0)); // constant tick; slowdown via total count
+};
+
+function openSong(s){
+  current=s; verseMode=false; stanzaIdx=0;
+  stanzas=(s.lyrics||"").split(/\n\s*\n/).map(b=>clean(b)).filter(b=>b.length>10);
+  if(!stanzas.length) stanzas=[clean(s.lyrics)];
+  $("song-title").textContent=s.title;
+  $("song-artist").textContent=s.artist;
+  $("lyrics").textContent=(s.lyrics||"").split("\n").map(clean).filter(l=>l).join("\n");
+  $("lyrics").classList.remove("hidden");
+  $("stanza").classList.add("hidden"); $("verse-nav").classList.add("hidden"); $("verse-count").classList.add("hidden");
+  $("btn-mode").textContent="📖 Verse by verse";
+  $("btn-yt").onclick=()=>{ if(s.video_id) window.open("https://www.youtube.com/watch?v="+s.video_id,"_blank"); };
+  show("scr-song");
+}
+$("btn-mode").onclick=()=>{
+  verseMode=!verseMode;
+  $("lyrics").classList.toggle("hidden",verseMode);
+  $("stanza").classList.toggle("hidden",!verseMode);
+  $("verse-nav").classList.toggle("hidden",!verseMode);
+  $("verse-count").classList.toggle("hidden",!verseMode);
+  $("btn-mode").textContent=verseMode?"📜 Full lyrics":"📖 Verse by verse";
+  if(verseMode){ stanzaIdx=0; renderStanza(); }
+};
+function renderStanza(){
+  $("stanza").textContent=stanzas[stanzaIdx];
+  $("verse-count").textContent="Verse "+(stanzaIdx+1)+" / "+stanzas.length;
+}
+$("btn-prev").onclick=()=>{ stanzaIdx=(stanzaIdx-1+stanzas.length)%stanzas.length; renderStanza(); };
+$("btn-next-v").onclick=()=>{ stanzaIdx=(stanzaIdx+1)%stanzas.length; renderStanza(); };
+$("btn-respin").onclick=()=>{ show("scr-home"); $("spin-title").textContent="?"; $("spin-artist").textContent=""; };
+</script>
+</body>
+</html>
