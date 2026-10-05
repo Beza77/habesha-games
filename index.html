@@ -263,11 +263,12 @@
     (function () {
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
       // Card art URLs carry it too, so a fresh deploy can never show a stale cached miss.
-      var SITE_VERSION = '20261001y';
+      var SITE_VERSION = '20261005a';
       // Single source of truth for the game library. mode: 'solo' | 'group'.
       var GAMES = [
         { src: 'games/listen-party/', title: 'Listen & Guess the Song', am: 'አድምጠው ገምት', desc: 'Hear the song clip, pick the answer!', mode: 'group', img: 'assets/cards/listen-party.jpg?v=' + SITE_VERSION, featured: true },
         { src: 'games/guess-party/', title: 'Guess Song Fast', am: 'የቡድን ጨዋታ', desc: 'One host, everyone plays on their phone!', mode: 'group', img: 'assets/cards/guess-party.jpg?v=' + SITE_VERSION },
+        { src: 'games/baby-shower-bingo/', title: 'Baby Shower Bingo', am: 'የሕፃን ሻወር ብንጎ', desc: 'Host calls the items, everyone marks their card — five in a row shouts BINGO!', mode: 'group', img: 'assets/cards/baby-shower-bingo.jpg?v=' + SITE_VERSION, featured: true },
         { src: 'games/finish-lyrics-party/', title: 'Finish the Lyrics Party', am: 'የቡድን ጨዋታ', desc: 'Finish the missing line before everyone else!', mode: 'group', img: 'assets/cards/finish-lyrics-party.jpg?v=' + SITE_VERSION },
         { src: 'games/guess-the-game/', title: 'Guess the Song', am: 'መዝሙር', desc: 'Hear a clip, name the song.', mode: 'solo', img: 'assets/cards/guess-the-game.jpg?v=' + SITE_VERSION },
         { src: 'games/guess-from-lyrics/', title: 'Guess from the Lyrics', am: 'ከግጥሙ ገምት', desc: 'Read the lines, guess the song.', mode: 'solo', img: 'assets/cards/guess-from-lyrics.jpg?v=' + SITE_VERSION },
