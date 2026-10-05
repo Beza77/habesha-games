@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="am">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>የሕፃን ሻወር ብንጎ · Baby Shower Bingo</title>
+<script src="https://unpkg.com/mqtt@5/dist/mqtt.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;600;700;800&display=swap');
+:root{
+  color-scheme:light dark;
+  --bg:#3b2b1e; --bg2:#241a10; --panel:#fffdf6; --panel2:#f8efdd;
+  --ink:#2c2118; --muted:#8a755d; --gold:#f6c548; --gold2:#d99a1f;
+  --teal:#0f766e; --green:#1e8a5a; --red:#c0392b; --line:#e6d3a8;
+  --shadow:0 18px 45px rgba(8,18,35,.35);
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0; font-family:"Baloo 2","Noto Sans Ethiopic",system-ui,sans-serif;
+  background:radial-gradient(1200px 600px at 20% -10%, #5a4429 0%, var(--bg) 45%, var(--bg2) 100%);
+  color:#fdf6e3; display:flex; justify-content:center; padding:18px 14px 40px;
+}
+.wrap{width:100%;max-width:640px}
+.card{
+  background:var(--panel); color:var(--ink); border-radius:22px;
+  box-shadow:var(--shadow); padding:26px 22px; margin-top:14px;
+}
+h1{font-size:30px;margin:6px 0 2px;text-align:center}
+h1 .en{display:block;font-family:"Baloo 2",sans-serif;font-size:15px;font-weight:700;color:var(--muted);margin-top:2px}
+.sub{text-align:center;color:#cdbf9f;margin:0 0 8px;font-size:15px}
+h2{margin:0 0 10px;font-size:22px}
+p{line-height:1.55}
+.hidden{display:none!important}
+.btn{
+  display:block;width:100%;border:0;border-radius:16px;cursor:pointer;
+  font-family:inherit;font-weight:800;font-size:18px;padding:15px 18px;margin:10px 0;
+  background:linear-gradient(180deg,var(--gold),var(--gold2));color:#3a2a08;
+  box-shadow:0 6px 0 #a86f14, 0 10px 22px rgba(0,0,0,.25);
+}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #a86f14}
+.btn.ghost{background:var(--panel2);color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.btn.teal{background:linear-gradient(180deg,#14a89c,#0f766e);color:#fff;box-shadow:0 6px 0 #0a544e,0 10px 22px rgba(0,0,0,.25)}
+.btn.big{font-size:22px;padding:18px}
+.btn:disabled{opacity:.45;cursor:default}
+input[type=text]{
+  width:100%;font-family:inherit;font-size:20px;font-weight:700;text-align:center;
+  padding:14px;border-radius:14px;border:2px solid var(--line);background:#fff;color:var(--ink);
+  margin:8px 0; text-transform:uppercase;
+}
+input[type=text].name{text-transform:none}
+.roomcode{
+  font-size:56px;font-weight:800;letter-spacing:14px;text-align:center;color:#0f766e;
+  background:var(--panel2);border:3px dashed var(--gold2);border-radius:18px;padding:10px;margin:12px 0;
+}
+.players{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{background:#e8f4f1;color:#0b4f4a;font-weight:800;border-radius:999px;padding:8px 14px;font-size:15px}
+.note{background:rgba(246,197,72,.14);border:1px solid rgba(246,197,72,.4);border-radius:14px;padding:12px 14px;font-size:14px;color:#e8d9b5;margin-top:14px;line-height:1.5}
+.status{min-height:22px;color:#ffb3a3;font-size:14px;text-align:center}
+.count{text-align:center;color:var(--muted);font-size:14px}
+/* bingo board */
+.bcall{
+  background:#3b2b1e;color:#ffe9a8;border-radius:16px;padding:16px;font-size:17px;
+  text-align:center;margin:12px 0;min-height:76px;display:flex;flex-direction:column;justify-content:center;gap:2px;
+}
+.bcall .am{font-size:26px;font-weight:800}
+.bcall .en{font-size:13px;font-weight:700;letter-spacing:2px;color:#d9b96a}
+.bcall .num{font-size:12px;color:#b9a06a}
+.board5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0}
+.cell{
+  aspect-ratio:1;border-radius:10px;border:2px solid var(--line);background:#fff;color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  padding:4px;cursor:default;user-select:none;-webkit-user-select:none;text-align:center;
+}
+.cell .am{font-size:12px;font-weight:800;line-height:1.15}
+.cell .en{font-size:7.5px;font-weight:700;letter-spacing:.4px;color:var(--muted);line-height:1.1}
+.cell.called{border-color:var(--gold2);background:#fff8e6;cursor:pointer}
+.cell.called:active{transform:scale(.95)}
+.cell.marked{background:var(--green);border-color:var(--green);color:#fff}
+.cell.marked .en{color:#dff3e6}
+.cell.free{background:var(--gold);border-color:var(--gold2);color:#3a2a08}
+.cell.win{animation:winpulse .7s ease-in-out infinite alternate}
+@keyframes winpulse{from{box-shadow:0 0 0 0 rgba(246,197,72,.7)}to{box-shadow:0 0 0 8px rgba(246,197,72,0)}}
+/* host called-items grid */
+.calledgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:10px 0}
+.cg{
+  border-radius:8px;background:#fff;border:1.5px solid var(--line);color:#b6a586;
+  font-size:9px;font-weight:800;padding:5px 2px;text-align:center;line-height:1.2;min-height:34px;
+  display:flex;align-items:center;justify-content:center;
+}
+.cg.hit{background:var(--teal);border-color:var(--teal);color:#fff}
+.winner-banner{
+  text-align:center;padding:22px 14px;border-radius:18px;margin:12px 0;
+  background:linear-gradient(180deg,#fff3d1,#ffe3a1);border:3px solid var(--gold2);
+}
+.winner-banner .trophy{font-size:52px}
+.winner-banner h2{margin:6px 0 2px;font-size:26px;color:#7a5410}
+.winner-banner p{margin:0;color:#8a6a25;font-weight:700}
+table.board{width:100%;border-collapse:collapse;margin:10px 0;font-size:15px}
+table.board td,table.board th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+table.board th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.pill{background:var(--panel2);border:2px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HOME -->
+  <section class="card" id="scr-home">
+    <h1>🍼 የሕፃን ሻወር ብንጎ<span class="en">BABY SHOWER BINGO</span></h1>
+    <p class="sub">አስተናጋጁ ዕቃዎችን ይጠራል · Everyone marks their card — first five in a row wins!</p>
+    <button class="btn teal" id="btn-host">📺 Host a game <small style="display:block;font-size:13px;font-weight:600">big screen is nice, your phone works too</small></button>
+    <button class="btn" id="btn-join">📱 Join a game <small style="display:block;font-size:13px;font-weight:600">play on your phone</small></button>
+    <div class="note">How it works: one person taps <b>Host a game</b> and gets a 4-letter room code (a big screen is nice but optional). <b>Players</b> open this same page on their phones, tap <b>Join</b>, enter the code and their name — each gets their own bingo card. The host calls baby items at random; tap each called item on your card. First to mark <b>five in a row</b> shouts BINGO! 🎉</div>
+    <p class="status" id="home-status"></p>
+  </section>
+
+  <!-- HOST LOBBY -->
+  <section class="card hidden" id="scr-host-lobby">
+    <h2>📺 Host lobby · <span style="font-size:15px;color:var(--muted)">አስተናጋጅ</span></h2>
+    <p class="count">Players — open this page on your phone, tap <b>Join</b> and enter:</p>
+    <div class="roomcode" id="host-code">····</div>
+    <div class="players" id="host-players"><span class="chip">waiting…</span></div>
+    <button class="btn teal big" id="btn-start" disabled>Start the game</button>
+    <button class="btn ghost" id="btn-host-back">Back</button>
+    <p class="status" id="host-status"></p>
+  </section>
+
+  <!-- HOST GAME -->
+  <section class="card hidden" id="scr-host-game">
+    <div class="topbar">
+      <span class="pill" id="host-room-pill">CODE ····</span>
+      <span class="pill" id="host-called-count">0 / 24 called</span>
+    </div>
+    <h2>📢 Calling · <span style="font-size:15px;color:var(--muted)">ጥሪ</span></h2>
+    <div id="host-winner-slot"></div>
+    <div class="bcall" id="host-current"><span class="am">ዝግጁ ነዎት?</span><span class="en">READY — TAP CALL</span></div>
+    <button class="btn teal big" id="btn-call">📢 Call next item</button>
+    <h2 style="font-size:18px;margin-top:14px">Called items</h2>
+    <div class="calledgrid" id="host-called-grid"></div>
+    <div class="players" id="host-game-players"></div>
+    <button class="btn ghost" id="btn-newgame">🔄 New game (new cards)</button>
+    <button class="btn ghost" id="btn-host-home">Home</button>
+    <p class="status" id="host-game-status"></p>
+  </section>
+
+  <!-- JOIN -->
+  <section class="card hidden" id="scr-join">
+    <h2>📱 Join a game · <span style="font-size:15px;color:var(--muted)">ተቀላቀል</span></h2>
+    <p class="count">Enter the 4-letter code from the host's screen</p>
+    <input type="text" id="join-code" maxlength="4" placeholder="CODE" autocomplete="off" />
+    <input type="text" id="join-name" class="name" maxlength="12" placeholder="Your name · ስምህ" autocomplete="off" />
+    <button class="btn teal" id="btn-do-join">Join</button>
+    <button class="btn ghost" id="btn-join-back">Back</button>
+    <p class="status" id="join-status"></p>
+  </section>
+
+  <!-- PLAYER LOBBY -->
+  <section class="card hidden" id="scr-player-lobby">
+    <h2>🎉 You're in, <span id="player-name-echo"></span>!</h2>
+    <p class="count" id="player-lobby-msg">Waiting for the host to start…</p>
+    <div class="players" id="player-lobby-list"></div>
+    <button class="btn ghost" id="btn-player-back">Leave</button>
+  </section>
+
+  <!-- PLAYER GAME -->
+  <section class="card hidden" id="scr-player-game">
+    <div class="topbar">
+      <span class="pill" id="player-room-pill">CODE ····</span>
+      <span class="pill" id="player-called-pill">0 called</span>
+    </div>
+    <h2>Your card · <span style="font-size:15px;color:var(--muted)">ካርድህ</span></h2>
+    <div id="player-winner-slot"></div>
+    <div class="bcall" id="player-lastcall"><span class="am">ጥሪውን ጠብቅ…</span><span class="en">WAIT FOR THE CALL</span></div>
+    <p class="count">Tap a called item to mark it ✏️ · Five in a row wins!</p>
+    <div class="board5" id="player-board"></div>
+    <button class="btn ghost" id="btn-player-home">Leave game</button>
+  </section>
+
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+function show(id){ document.querySelectorAll(".wrap > .card").forEach(s=>s.classList.add("hidden")); $(id).classList.remove("hidden"); window.scrollTo(0,0); }
+function rnd(n){ return Math.floor(Math.random()*n); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=rnd(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+</script>
+<script>
+"use strict";
+/* ================= ITEMS (from the party card) ================= */
+const ITEMS=[
+ {id:"teething-ring", am:"የጥርስ ቀለበት", en:"TEETHING RING"},
+ {id:"footprints", am:"የእግር አሻራ", en:"FOOTPRINTS"},
+ {id:"bib", am:"የምግብ ጨርቅ", en:"BIB"},
+ {id:"crib", am:"የአራስ አልጋ", en:"CRIB"},
+ {id:"rattle", am:"ጫጫታ", en:"RATTLE"},
+ {id:"formula", am:"ፎርሙላ ወተት", en:"FORMULA"},
+ {id:"car-seat", am:"የመኪና መቀመጫ", en:"CAR SEAT"},
+ {id:"clothes", am:"ልብስ", en:"CLOTHES"},
+ {id:"baby-powder", am:"የሕፃን ዱቄት", en:"BABY POWDER"},
+ {id:"wipes", am:"ማጽጃ ጨርቅ", en:"WIPES"},
+ {id:"bottle", am:"ጠርሙስ", en:"BOTTLE"},
+ {id:"lullaby", am:"የእንቅልፍ ዘፈን", en:"LULLABY"},
+ {id:"diaper-bag", am:"የዳይፐር ቦርሳ", en:"DIAPER BAG"},
+ {id:"rubber-duck", am:"የጎማ ዳክዬ", en:"RUBBER DUCK"},
+ {id:"stuffed-animal", am:"አሻንጉሊት", en:"STUFFED ANIMAL"},
+ {id:"mobile", am:"የሕፃን ማንጠልጠያ", en:"MOBILE"},
+ {id:"baby-lotion", am:"የሕፃን ሎሽን", en:"BABY LOTION"},
+ {id:"pacifier", am:"ፓሲፋየር", en:"PACIFIER"},
+ {id:"booties", am:"የሕፃን ጫማ", en:"BOOTIES"},
+ {id:"high-chair", am:"የሕፃን ወንበር", en:"HIGH CHAIR"},
+ {id:"diapers", am:"ዳይፐር", en:"DIAPERS"},
+ {id:"stroller", am:"የሕፃን ጋሪ", en:"STROLLER"},
+ {id:"burp-cloth", am:"የሕፃን ጨርቅ", en:"BURP CLOTH"},
+ {id:"baby-monitor", am:"የሕፃን መቆጣጠሪያ", en:"BABY MONITOR"},
+];
+const FREE={id:"free", am:"ነፃ ቦታ", en:"FREE SPACE"};
+const byId={}; ITEMS.forEach(it=>byId[it.id]=it);
+
+/* ---------- MQTT (same room-code network as the other party games) ---------- */
+const BROKERS=["wss://broker.emqx.io:8084/mqtt","wss://test.mosquitto.org:8081/mqtt"];
+let client=null, topic=null, msgHandler=null, brokerIdx=0;
+function mqttConnect(code,onOk,onFail){
+  brokerIdx=0; tryNext();
+  function tryNext(){
+    if(brokerIdx>=BROKERS.length){ onFail("Could not reach the game network. Check your connection and retry."); return; }
+    const url=BROKERS[brokerIdx++];
+    try{ client=mqtt.connect(url,{connectTimeout:8000,reconnectPeriod:0}); }
+    catch(e){ tryNext(); return; }
+    const to=setTimeout(()=>{ try{client.end(true);}catch(e){} tryNext(); },9000);
+    client.on("connect",()=>{ clearTimeout(to); topic="habesha-bingo/v1/"+code;
+      client.subscribe(topic,{qos:0},err=>{ if(err){tryNext();} else onOk(); }); });
+    client.on("message",(t,buf)=>{ if(t===topic&&msgHandler){ try{msgHandler(JSON.parse(buf.toString()));}catch(e){} } });
+    client.on("error",()=>{});
+  }
+}
+function send(msg){ if(client&&client.connected&&topic){ client.publish(topic,JSON.stringify(msg),{qos:0,retain:false}); } }
+function mqttEnd(){ try{client&&client.end(true);}catch(e){} client=null; }
+
+/* ================= HOST ================= */
+let roomCode=null, players={}, called=[], winner=null, gameNo=0;
+const ABC="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+$("btn-host").onclick=()=>{
+  roomCode=""; for(let i=0;i<4;i++) roomCode+=ABC[rnd(ABC.length)];
+  players={}; called=[]; winner=null; gameNo=0;
+  $("host-code").textContent=roomCode;
+  $("host-room-pill").textContent="CODE "+roomCode;
+  $("host-status").textContent="Connecting…";
+  show("scr-host-lobby");
+  mqttConnect(roomCode,()=>{
+    $("host-status").textContent="Connected ✓ — waiting for players";
+    $("btn-start").disabled=false; renderHostLobby();
+  },err=>{ $("host-status").textContent=err; });
+  msgHandler=m=>{
+    if(m.k==="join"&&m.pid&&m.name){
+      players[m.pid]=String(m.name).slice(0,12);
+      send({k:"lobby",players:Object.values(players)});
+      send({k:"state",gameNo,started:called.length>0||startedFlag,called,winner});
+      renderHostLobby(); renderHostPlayers();
+    }
+    if(m.k==="bingo"&&m.pid&&m.name&&!winner){
+      winner=String(m.name).slice(0,12);
+      send({k:"winner",name:winner});
+      renderHostWinner();
+    }
+  };
+};
+let startedFlag=false;
+function renderHostLobby(){
+  const box=$("host-players"); box.innerHTML="";
+  const list=Object.values(players);
+  if(!list.length) box.innerHTML='<span class="chip">waiting…</span>';
+  list.forEach(n=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=n; box.appendChild(c); });
+  $("btn-start").disabled=!list.length;
+}
+function renderHostPlayers(){
+  const box=$("host-game-players"); if(!box) return; box.innerHTML="";
+  Object.values(players).forEach(n=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=n; box.appendChild(c); });
+}
+$("btn-start").onclick=()=>{
+  startedFlag=true; gameNo++; called=[]; winner=null;
+  buildHostGrid();
+  $("host-current").innerHTML='<span class="am">ዝግጁ ነዎት?</span><span class="en">READY — TAP CALL</span>';
+  $("host-winner-slot").innerHTML="";
+  updateHostCount();
+  show("scr-host-game");
+  send({k:"start",gameNo});
+};
+$("btn-call").onclick=()=>{
+  if(winner) return;
+  const remaining=ITEMS.filter(it=>!called.includes(it.id));
+  if(!remaining.length){ $("host-game-status").textContent="All items called!"; return; }
+  const pick=remaining[rnd(remaining.length)];
+  called.push(pick.id);
+  $("host-current").innerHTML='<span class="num">CALL '+(called.length)+' / 24</span><span class="am">'+esc(pick.am)+'</span><span class="en">'+esc(pick.en)+'</span>';
+  updateHostCount(); markHostGrid();
+  send({k:"call",id:pick.id,n:called.length});
+};
+function buildHostGrid(){
+  const g=$("host-called-grid"); g.innerHTML="";
+  ITEMS.forEach(it=>{
+    const d=document.createElement("div"); d.className="cg"; d.id="hg-"+it.id;
+    d.innerHTML=esc(it.am)+"<br>"+esc(it.en); g.appendChild(d);
+  });
+}
+function markHostGrid(){
+  ITEMS.forEach(it=>{ const d=$("hg-"+it.id); if(d) d.classList.toggle("hit",called.includes(it.id)); });
+}
+function updateHostCount(){ $("host-called-count").textContent=called.length+" / 24 called"; }
+function renderHostWinner(){
+  $("host-winner-slot").innerHTML=
+    '<div class="winner-banner"><div class="trophy">🏆</div><h2>'+esc(winner)+' — BINGO!</h2>'+
+    '<p>ብንጎ! · Five in a row!</p></div>';
+  $("btn-call").disabled=true;
+}
+$("btn-newgame").onclick=()=>{
+  winner=null; called=[]; startedFlag=true; gameNo++;
+  buildHostGrid();
+  $("host-current").innerHTML='<span class="am">አዲስ ጨዋታ!</span><span class="en">NEW GAME — TAP CALL</span>';
+  $("host-winner-slot").innerHTML=""; $("btn-call").disabled=false;
+  updateHostCount();
+  send({k:"newgame",gameNo});
+};
+const goHome=()=>{ mqttEnd(); roomCode=null; players={}; called=[]; winner=null; startedFlag=false; show("scr-home"); };
+$("btn-host-back").onclick=goHome;
+$("btn-host-home").onclick=goHome;
+</script>
+<script>
+"use strict";
+/* ================= PLAYER ================= */
+let myPid=null, myName="", myCard=[], myMarked={}, myCalled={}, myGameNo=0, iWon=false;
+
+$("btn-join").onclick=()=>{ $("join-status").textContent=""; show("scr-join"); };
+$("btn-join-back").onclick=()=>show("scr-home");
+
+$("btn-do-join").onclick=()=>{
+  const code=$("join-code").value.trim().toUpperCase();
+  const name=$("join-name").value.trim();
+  if(code.length!==4){ $("join-status").textContent="Enter the 4-letter code."; return; }
+  if(!name){ $("join-status").textContent="Enter your name."; return; }
+  myPid="p"+Date.now().toString(36)+rnd(999);
+  myName=name.slice(0,12); myGameNo=0; iWon=false;
+  $("join-status").textContent="Connecting…";
+  mqttConnect(code,()=>{
+    roomCode=code;
+    $("player-name-echo").textContent=myName;
+    $("player-room-pill").textContent="CODE "+code;
+    show("scr-player-lobby");
+    send({k:"join",pid:myPid,name:myName});
+  },err=>{ $("join-status").textContent=err; });
+
+  msgHandler=m=>{
+    if(m.k==="lobby"&&Array.isArray(m.players)){
+      const box=$("player-lobby-list"); box.innerHTML="";
+      m.players.forEach(n=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=n; box.appendChild(c); });
+    }
+    if(m.k==="start"){ startPlayerGame(m.gameNo||1); }
+    if(m.k==="newgame"){ startPlayerGame(m.gameNo||1); }
+    if((m.k==="state")&&m.gameNo>myGameNo){
+      // joined mid-game: rebuild card and catch up on calls
+      startPlayerGame(m.gameNo);
+      (m.called||[]).forEach(id=>applyCall(id,true));
+      if(m.winner) showPlayerWinner(m.winner);
+    }
+    if(m.k==="call"&&m.id){ applyCall(m.id,false); }
+    if(m.k==="winner"&&m.name){ showPlayerWinner(m.name); }
+  };
+};
+
+function startPlayerGame(gn){
+  myGameNo=gn; myCalled={}; myMarked={}; iWon=false;
+  $("player-winner-slot").innerHTML="";
+  $("player-lastcall").innerHTML='<span class="am">ጥሪውን ጠብቅ…</span><span class="en">WAIT FOR THE CALL</span>';
+  $("player-called-pill").textContent="0 called";
+  // build a fresh random 5x5 card: 24 items shuffled, FREE in the center
+  const order=shuffle(ITEMS.map(it=>it.id));
+  myCard=[];
+  let k=0;
+  for(let r=0;r<5;r++){ const row=[]; for(let c=0;c<5;c++){
+    if(r===2&&c===2){ row.push("free"); myMarked["free"]=true; }
+    else row.push(order[k++]);
+  } myCard.push(row); }
+  renderPlayerBoard();
+  show("scr-player-game");
+}
+function renderPlayerBoard(){
+  const b=$("player-board"); b.innerHTML="";
+  for(let r=0;r<5;r++) for(let c=0;c<5;c++){
+    const id=myCard[r][c];
+    const it=id==="free"?FREE:byId[id];
+    const d=document.createElement("div");
+    d.className="cell"+(id==="free"?" free marked":"");
+    d.id="pc-"+r+"-"+c;
+    d.innerHTML='<span class="am">'+esc(it.am)+'</span><span class="en">'+esc(it.en)+'</span>';
+    d.onclick=()=>tapCell(r,c);
+    b.appendChild(d);
+  }
+  refreshCellStates();
+}
+function refreshCellStates(){
+  for(let r=0;r<5;r++) for(let c=0;c<5;c++){
+    const id=myCard[r][c]; if(id==="free") continue;
+    const d=$("pc-"+r+"-"+c); if(!d) continue;
+    d.classList.toggle("called",!!myCalled[id]);
+    d.classList.toggle("marked",!!myMarked[id]);
+  }
+}
+function applyCall(id,silent){
+  if(!byId[id]||myCalled[id]) return;
+  myCalled[id]=true;
+  const it=byId[id];
+  if(!silent){
+    $("player-lastcall").innerHTML='<span class="am">'+esc(it.am)+'</span><span class="en">'+esc(it.en)+'</span>';
+  }
+  $("player-called-pill").textContent=Object.keys(myCalled).length+" called";
+  refreshCellStates();
+}
+function tapCell(r,c){
+  if(iWon) return;
+  const id=myCard[r][c];
+  if(id==="free"||!myCalled[id]||myMarked[id]) return;
+  myMarked[id]=true;
+  refreshCellStates();
+  const line=checkBingo();
+  if(line){
+    iWon=true;
+    line.forEach(([rr,cc])=>{ const d=$("pc-"+rr+"-"+cc); if(d) d.classList.add("win"); });
+    send({k:"bingo",pid:myPid,name:myName});
+    showPlayerWinner(myName,true);
+  }
+}
+function checkBingo(){
+  const M=(r,c)=>!!myMarked[myCard[r][c]];
+  for(let r=0;r<5;r++){ if(M(r,0)&&M(r,1)&&M(r,2)&&M(r,3)&&M(r,4)) return [[r,0],[r,1],[r,2],[r,3],[r,4]]; }
+  for(let c=0;c<5;c++){ if(M(0,c)&&M(1,c)&&M(2,c)&&M(3,c)&&M(4,c)) return [[0,c],[1,c],[2,c],[3,c],[4,c]]; }
+  if(M(0,0)&&M(1,1)&&M(2,2)&&M(3,3)&&M(4,4)) return [[0,0],[1,1],[2,2],[3,3],[4,4]];
+  if(M(0,4)&&M(1,3)&&M(2,2)&&M(3,1)&&M(4,0)) return [[0,4],[1,3],[2,2],[3,1],[4,0]];
+  return null;
+}
+function showPlayerWinner(name,me){
+  $("player-winner-slot").innerHTML=
+    '<div class="winner-banner"><div class="trophy">🏆</div><h2>'+esc(name)+(me?" — You won!":" — BINGO!")+'</h2>'+
+    '<p>'+(me?"ብንጎ! አንተ/አንቺ አሸንፈሃል/ሽ!":"Five in a row!")+'</p></div>';
+  window.scrollTo(0,0);
+}
+const leaveGame=()=>{ mqttEnd(); myPid=null; roomCode=null; show("scr-home"); };
+$("btn-player-back").onclick=leaveGame;
+$("btn-player-home").onclick=leaveGame;
+</script>
+</body>
+</html>
