@@ -7,6 +7,7 @@
 <link rel="icon" href="data:," />
 <title>የሕፃን ሻወር ብንጎ · Baby Shower Bingo</title>
 <script src="https://unpkg.com/mqtt@5/dist/mqtt.min.js"></script>
+<script src="../shared/party-net.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;600;700;800&display=swap');
 :root{
@@ -221,25 +222,8 @@ const ITEMS=[
 const FREE={id:"free", am:"ነፃ ቦታ", en:"FREE SPACE"};
 const byId={}; ITEMS.forEach(it=>byId[it.id]=it);
 
-/* ---------- MQTT (same room-code network as the other party games) ---------- */
-const BROKERS=["wss://broker.emqx.io:8084/mqtt","wss://test.mosquitto.org:8081/mqtt"];
-let client=null, topic=null, msgHandler=null, brokerIdx=0;
-function mqttConnect(code,onOk,onFail){
-  brokerIdx=0; tryNext();
-  function tryNext(){
-    if(brokerIdx>=BROKERS.length){ onFail("Could not reach the game network. Check your connection and retry."); return; }
-    const url=BROKERS[brokerIdx++];
-    try{ client=mqtt.connect(url,{connectTimeout:8000,reconnectPeriod:0}); }
-    catch(e){ tryNext(); return; }
-    const to=setTimeout(()=>{ try{client.end(true);}catch(e){} tryNext(); },9000);
-    client.on("connect",()=>{ clearTimeout(to); topic="habesha-bingo/v1/"+code;
-      client.subscribe(topic,{qos:0},err=>{ if(err){tryNext();} else onOk(); }); });
-    client.on("message",(t,buf)=>{ if(t===topic&&msgHandler){ try{msgHandler(JSON.parse(buf.toString()));}catch(e){} } });
-    client.on("error",()=>{});
-  }
-}
-function send(msg){ if(client&&client.connected&&topic){ client.publish(topic,JSON.stringify(msg),{qos:0,retain:false}); } }
-function mqttEnd(){ try{client&&client.end(true);}catch(e){} client=null; }
+/* Party networking (reconnect, wake-lock, join retry) lives in ../shared/party-net.js */
+window.PARTY_TOPIC="habesha-bingo/v1/";
 
 /* ================= HOST ================= */
 let roomCode=null, players={}, called=[], winner=null, gameNo=0;
@@ -252,10 +236,12 @@ $("btn-host").onclick=()=>{
   $("host-room-pill").textContent="CODE "+roomCode;
   $("host-status").textContent="Connecting…";
   show("scr-host-lobby");
+  PartyNet.keepAwake();
   mqttConnect(roomCode,()=>{
     $("host-status").textContent="Connected ✓ — waiting for players";
     $("btn-start").disabled=false; renderHostLobby();
-  },err=>{ $("host-status").textContent=err; });
+  },err=>{ $("host-status").textContent=err; },
+  ()=>{ send({k:"resync"}); });
   msgHandler=m=>{
     if(m.k==="join"&&m.pid&&m.name){
       players[m.pid]=String(m.name).slice(0,12);
@@ -326,7 +312,7 @@ $("btn-newgame").onclick=()=>{
   updateHostCount();
   send({k:"newgame",gameNo});
 };
-const goHome=()=>{ mqttEnd(); roomCode=null; players={}; called=[]; winner=null; startedFlag=false; show("scr-home"); };
+const goHome=()=>{ PartyNet.releaseWake(); mqttEnd(); roomCode=null; players={}; called=[]; winner=null; startedFlag=false; show("scr-home"); };
 $("btn-host-back").onclick=goHome;
 $("btn-host-home").onclick=goHome;
 </script>
@@ -334,6 +320,7 @@ $("btn-host-home").onclick=goHome;
 "use strict";
 /* ================= PLAYER ================= */
 let myPid=null, myName="", myCard=[], myMarked={}, myCalled={}, myGameNo=0, iWon=false;
+let joinRetry=null, joinAcked=false;
 
 $("btn-join").onclick=()=>{ $("join-status").textContent=""; show("scr-join"); };
 $("btn-join-back").onclick=()=>show("scr-home");
@@ -346,15 +333,22 @@ $("btn-do-join").onclick=()=>{
   myPid="p"+Date.now().toString(36)+rnd(999);
   myName=name.slice(0,12); myGameNo=0; iWon=false;
   $("join-status").textContent="Connecting…";
+  PartyNet.keepAwake();
+  const doJoin=()=>send({k:"join",pid:myPid,name:myName});
   mqttConnect(code,()=>{
     roomCode=code;
     $("player-name-echo").textContent=myName;
     $("player-room-pill").textContent="CODE "+code;
     show("scr-player-lobby");
-    send({k:"join",pid:myPid,name:myName});
-  },err=>{ $("join-status").textContent=err; });
+    doJoin();
+    joinAcked=false; clearInterval(joinRetry);
+    joinRetry=setInterval(()=>{ if(!joinAcked) doJoin(); },3000);
+  },err=>{ $("join-status").textContent=err; },
+  ()=>{ doJoin(); });
 
   msgHandler=m=>{
+    joinAcked=true; if(joinRetry){ clearInterval(joinRetry); joinRetry=null; }
+    if(m.k==="resync"){ doJoin(); if(iWon) send({k:"bingo",pid:myPid,name:myName}); return; }
     if(m.k==="lobby"&&Array.isArray(m.players)){
       const box=$("player-lobby-list"); box.innerHTML="";
       m.players.forEach(n=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=n; box.appendChild(c); });
@@ -448,7 +442,7 @@ function showPlayerWinner(name,me){
     '<p>'+(me?"ብንጎ! አንተ/አንቺ አሸንፈሃል/ሽ!":"Five in a row!")+'</p></div>';
   window.scrollTo(0,0);
 }
-const leaveGame=()=>{ mqttEnd(); myPid=null; roomCode=null; show("scr-home"); };
+const leaveGame=()=>{ PartyNet.releaseWake(); mqttEnd(); myPid=null; roomCode=null; show("scr-home"); };
 $("btn-player-back").onclick=leaveGame;
 $("btn-player-home").onclick=leaveGame;
 </script>
