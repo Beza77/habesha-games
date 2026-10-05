@@ -7,6 +7,7 @@
 <link rel="icon" href="data:," />
 <title>የቡድን ጨዋታ · Guess Song Fast</title>
 <script src="https://unpkg.com/mqtt@5/dist/mqtt.min.js"></script>
+<script src="../shared/party-net.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;600;700;800&display=swap');
 :root{
@@ -202,27 +203,8 @@ function pickSnippet(song){
 }
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
-/* ---------- MQTT ---------- */
-const BROKERS = ["wss://broker.emqx.io:8084/mqtt","wss://test.mosquitto.org:8081/mqtt"];
-let client=null, topic=null, msgHandler=null, brokerIdx=0;
-function mqttConnect(code, onOk, onFail){
-  brokerIdx=0; tryNext();
-  function tryNext(){
-    if(brokerIdx>=BROKERS.length){ onFail("Could not reach the game network. Check your connection and retry."); return; }
-    const url=BROKERS[brokerIdx++];
-    try{
-      client = mqtt.connect(url,{connectTimeout:8000, reconnectPeriod:0});
-    }catch(e){ tryNext(); return; }
-    const to=setTimeout(()=>{ try{client.end(true);}catch(e){} tryNext(); },9000);
-    client.on("connect",()=>{ clearTimeout(to); topic="habesha-guess-party/v1/"+code;
-      client.subscribe(topic,{qos:0},err=>{ if(err){tryNext();} else onOk(); });
-    });
-    client.on("message",(t,buf)=>{ if(t===topic&&msgHandler){ try{msgHandler(JSON.parse(buf.toString()));}catch(e){} } });
-    client.on("error",()=>{});
-  }
-}
-function send(msg){ if(client&&client.connected&&topic){ client.publish(topic, JSON.stringify(msg), {qos:0,retain:false}); } }
-function mqttEnd(){ try{client&&client.end(true);}catch(e){} client=null; }
+/* Party networking (reconnect, wake-lock, join retry) lives in ../shared/party-net.js */
+window.PARTY_TOPIC="habesha-guess-party/v1/";
 
 /* ---------- load songs ---------- */
 fetch(SONGS_URL).then(r=>r.json()).then(d=>{ SONGS=d.filter(s=>lyricLines(s).length>=4); buildCats(); });
@@ -268,15 +250,18 @@ $("btn-host").onclick=()=>{
   $("host-code").textContent=roomCode;
   $("host-status").textContent="Connecting…";
   show("scr-host-lobby");
+  PartyNet.keepAwake();
   mqttConnect(roomCode, ()=>{
     $("host-status").textContent="Connected ✓ — waiting for players";
     $("btn-start").disabled=false; renderLobby();
-  }, (err)=>{ $("host-status").textContent=err; });
+  }, (err)=>{ $("host-status").textContent=err; },
+  ()=>{ send({k:"resync"}); });
   msgHandler=m=>{
     if(m.k==="join"&&m.pid&&m.name){
       players[m.pid]={name:String(m.name).slice(0,12),pid:m.pid};
       hostScores[m.pid]=hostScores[m.pid]||0;
       send({k:"lobby",players:Object.values(players)});
+      if(round) send({k:"catchup",pid:m.pid,round:{rid:round.rid,n:round.n,total:ROUNDS,snippet:round.snippet,choices:round.choices}});
       renderLobby();
     }
     if(m.k==="answer"&&round&&m.rid===round.rid&&m.pid&&!(m.pid in answers)){
@@ -347,11 +332,12 @@ $("btn-next").onclick=()=>{
   } else startRound(round.n+1);
 };
 $("btn-again").onclick=()=>{ Object.keys(players).forEach(p=>hostScores[p]=0); show("scr-host-lobby"); renderLobby(); send({k:"lobby",players:Object.values(players)}); };
-$("btn-host-home").onclick=()=>{ mqttEnd(); show("scr-home"); };
-$("btn-host-back").onclick=()=>{ mqttEnd(); show("scr-home"); };
+$("btn-host-home").onclick=()=>{ PartyNet.releaseWake(); mqttEnd(); show("scr-home"); };
+$("btn-host-back").onclick=()=>{ PartyNet.releaseWake(); mqttEnd(); show("scr-home"); };
 
 /* ================= PLAYER ================= */
 let myName="", myPid=pid, myCode="", roundStart=0, playerTimerInt=null, myScores=[];
+let joinRetry=null, joinAcked=false;
 $("btn-join").onclick=()=>{ show("scr-join"); $("join-status").textContent=""; };
 $("btn-join-back").onclick=()=>show("scr-home");
 $("btn-do-join").onclick=()=>{
@@ -359,13 +345,21 @@ $("btn-do-join").onclick=()=>{
   myName=$("join-name").value.trim().slice(0,12)||("Player"+rnd(99));
   if(myCode.length!==4){ $("join-status").textContent="Enter the 4-letter code."; return; }
   $("join-status").textContent="Connecting…";
+  PartyNet.keepAwake();
+  const doJoin=()=>send({k:"join",pid:myPid,name:myName});
   mqttConnect(myCode, ()=>{
-    send({k:"join",pid:myPid,name:myName});
+    doJoin();
     show("scr-player-lobby");
     $("player-lobby-msg").textContent="Waiting for the host to start…";
+    joinAcked=false; clearInterval(joinRetry);
+    joinRetry=setInterval(()=>{ if(!joinAcked) doJoin(); },3000);
     const to=setTimeout(()=>{ if($("scr-player-lobby").classList.contains("hidden")===false && $("player-list").children.length===0){$("player-status").textContent="No response — check the code and retry.";} },8000);
-  }, (err)=>{ $("join-status").textContent=err; });
+  }, (err)=>{ $("join-status").textContent=err; },
+  ()=>{ doJoin(); });
   msgHandler=m=>{
+    joinAcked=true; if(joinRetry){ clearInterval(joinRetry); joinRetry=null; }
+    if(m.k==="resync"){ doJoin(); return; }
+    if(m.k==="catchup"&&m.pid===myPid&&m.round){ onPlayerRound(m.round); return; }
     if(m.k==="lobby"&&m.players){
       const box=$("player-list"); box.innerHTML="";
       m.players.forEach(p=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=p.name; box.appendChild(c); });
@@ -426,7 +420,7 @@ function onPlayerEnd(m){
   renderBoard($("player-final"), s);
   show("scr-player-end");
 }
-$("btn-player-home").onclick=()=>{ mqttEnd(); show("scr-home"); };
+$("btn-player-home").onclick=()=>{ PartyNet.releaseWake(); mqttEnd(); show("scr-home"); };
 </script>
 </body>
 </html>
