@@ -271,7 +271,7 @@
     (function () {
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
       // Card art URLs carry it too, so a fresh deploy can never show a stale cached miss.
-      var SITE_VERSION = '20261005f';
+      var SITE_VERSION = '20261005g';
       // Single source of truth for the game library. mode: 'solo' | 'group'.
       var GAMES = [
         { src: 'games/listen-party/', title: 'Listen & Guess the Song', am: 'አድምጠው ገምት', desc: 'Hear the song clip, pick the answer!', mode: 'group', img: 'assets/cards/listen-party.jpg?v=' + SITE_VERSION, featured: true },
@@ -280,7 +280,7 @@
         { src: 'games/guess-the-game/', title: 'Guess the Song', am: 'መዝሙር', desc: 'Hear a clip, name the song.', mode: 'solo', img: 'assets/cards/guess-the-game.jpg?v=' + SITE_VERSION },
         { src: 'games/guess-from-lyrics/', title: 'Guess from the Lyrics', am: 'ከግጥሙ ገምት', desc: 'Read the lines, guess the song.', mode: 'solo', img: 'assets/cards/guess-from-lyrics.jpg?v=' + SITE_VERSION },
         { src: 'games/worship-song-bingo/', title: 'Worship Song Bingo', am: 'የመዝሙር ብንጎ', desc: 'Mark each song, shout bingo!', mode: 'solo', img: 'assets/cards/worship-song-bingo.jpg?v=' + SITE_VERSION },
-        { src: 'games/song-roulette/', title: 'Song Roulette', am: 'የመዝሙር ሩሌት', desc: 'Spin the wheel for your next worship song.', mode: 'solo', img: 'assets/cards/song-roulette.jpg?v=' + SITE_VERSION },
+        { src: 'games/song-roulette/', title: 'የመዝሙር እጣ (Song Roulette)', am: 'የመዝሙር እጣ', desc: 'Spin the wheel for your next worship song.', mode: 'solo', img: 'assets/cards/song-roulette.jpg?v=' + SITE_VERSION },
         { src: 'games/finish-the-lyrics/', title: 'Finish the Lyrics', am: 'የመዝሙሩን ቀጣይ መስመር', desc: 'Pick the next line, collect points.', mode: 'solo', img: 'assets/cards/finish-the-lyrics.jpg?v=' + SITE_VERSION }
       ];
       var bySrc = {};
