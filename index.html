@@ -228,6 +228,14 @@
       </div>
     </section>
 
+    <section id="soloSec" aria-labelledby="soloTitle">
+      <div class="section-head">
+        <h2 id="soloTitle">👤 Solo Games <span class="am" lang="am">· የነጠላ ጨዋታዎች</span></h2>
+        <span class="sub">Play on your own, anytime.</span>
+      </div>
+      <div class="games" id="soloGrid"></div>
+    </section>
+
     <section id="allSec" aria-labelledby="allTitle">
       <div class="section-head"><h2 id="allTitle">🎮 All Games <span class="am" lang="am">· ሁሉም ጨዋታዎች</span></h2><span class="sub" id="resultCount"></span></div>
       <div class="games" id="allGrid"></div>
@@ -263,7 +271,7 @@
     (function () {
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
       // Card art URLs carry it too, so a fresh deploy can never show a stale cached miss.
-      var SITE_VERSION = '20261005e';
+      var SITE_VERSION = '20261005f';
       // Single source of truth for the game library. mode: 'solo' | 'group'.
       var GAMES = [
         { src: 'games/listen-party/', title: 'Listen & Guess the Song', am: 'አድምጠው ገምት', desc: 'Hear the song clip, pick the answer!', mode: 'group', img: 'assets/cards/listen-party.jpg?v=' + SITE_VERSION, featured: true },
@@ -295,6 +303,7 @@
       // Render sections from the data.
       document.getElementById('popularGrid').innerHTML = GAMES.filter(function (g) { return g.featured; }).map(function (g) { return cardHTML(g, true); }).join('');
       document.getElementById('togetherGrid').innerHTML = GAMES.filter(function (g) { return g.mode === 'group'; }).map(function (g) { return cardHTML(g, false); }).join('');
+      document.getElementById('soloGrid').innerHTML = GAMES.filter(function (g) { return g.mode === 'solo'; }).map(function (g) { return cardHTML(g, false); }).join('');
       document.getElementById('allGrid').innerHTML = GAMES.map(function (g) { return cardHTML(g, false); }).join('');
 
       var cards = Array.prototype.slice.call(document.querySelectorAll('.game-card'));
@@ -362,6 +371,9 @@
 
         var togetherVisible = filterGrid('togetherGrid', query);
         document.getElementById('togetherSec').style.display = togetherVisible ? '' : 'none';
+
+        var soloVisible = filterGrid('soloGrid', query);
+        document.getElementById('soloSec').style.display = soloVisible ? '' : 'none';
 
         var allVisible = filterGrid('allGrid', query);
         count.textContent = allVisible + (allVisible === 1 ? ' game' : ' games');
