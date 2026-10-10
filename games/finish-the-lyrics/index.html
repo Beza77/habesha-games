@@ -39,6 +39,10 @@ h1{font-size:28px;margin:4px 0;text-align:center}
 .meta{display:flex;justify-content:space-between;font-weight:800;color:var(--muted);font-size:15px;margin-bottom:4px}
 .streak{color:var(--purple)}
 .songline{text-align:center;color:var(--muted);font-size:15px;margin-top:8px;min-height:22px}
+.yt{margin:10px 0 2px;text-align:center}
+.yt iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:14px}
+.btn-hear{background:linear-gradient(180deg,#ff6b6b,#d63d3d);color:#fff;box-shadow:0 6px 0 #a11f1f;font-size:16px}
+.btn-hear:active{transform:translateY(3px);box-shadow:0 2px 0 #a11f1f}
 .big{font-size:22px;font-weight:800;text-align:center}
 .score{font-size:52px;font-weight:800;text-align:center;color:var(--purple);margin:6px 0}
 .bar{height:8px;background:#e8ddc2;border-radius:99px;overflow:hidden;margin:8px 0}
@@ -60,6 +64,7 @@ h1{font-size:28px;margin:4px 0;text-align:center}
     <div class="given" id="given"></div>
     <div class="choices" id="choices"></div>
     <p class="songline" id="songline"></p>
+    <div class="yt hidden" id="yt-wrap"><button class="btn btn-hear" id="btn-hear">▶ Hear the song</button><div id="yt-player"></div></div>
     <button class="btn hidden" id="btn-next">Next →</button>
   </section>
 
@@ -77,7 +82,7 @@ const rnd=n=>Math.floor(Math.random()*n);
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
 const clean=s=>(s||"").replace(/\([^)]*\)/g," ").replace(/\s+/g," ").trim();
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-let SONGS=[], round=0, score=0, streak=0, correctIdx=0, locked=false;
+let SONGS=[], round=0, score=0, streak=0, correctIdx=0, locked=false, curSong=null;
 const ROUNDS=10;
 
 fetch("songs.json").then(r=>r.json()).then(d=>{
@@ -97,7 +102,7 @@ function nextRound(){
     show("scr-end"); return;
   }
   round++; locked=false;
-  const song=SONGS[rnd(SONGS.length)];
+  const song=SONGS[rnd(SONGS.length)]; curSong=song;
   const i=rnd(song.lines.length-2);
   const givenLines=song.lines.slice(i,i+2), correct=song.lines[i+2];
   const distract=shuffle(LINES.filter(l=>l!==correct)).slice(0,3);
@@ -108,6 +113,7 @@ function nextRound(){
   $("score").textContent=score; $("streak").textContent=streak;
   $("given").innerHTML=esc(givenLines.join("\n"))+'\n<span class="q">… ?</span>';
   $("songline").textContent="";
+  $("yt-wrap").classList.add("hidden");$("yt-player").innerHTML="";$("btn-hear").classList.remove("hidden");
   $("btn-next").classList.add("hidden");
   const box=$("choices"); box.innerHTML="";
   opts.forEach((o,idx)=>{
@@ -120,6 +126,7 @@ function nextRound(){
       if(idx===correctIdx){ score++; streak++; } else { b.classList.add("wrong"); streak=0; }
       $("score").textContent=score; $("streak").textContent=streak;
       $("songline").textContent="🎵 "+song.artist+" — "+song.title;
+      if(song.video_id){$("yt-wrap").classList.remove("hidden");}
       $("prog").style.width=(round/ROUNDS*100)+"%";
       const nb=$("btn-next"); nb.classList.remove("hidden");
       nb.textContent = round>=ROUNDS ? "See results →" : "Next →";
@@ -129,6 +136,12 @@ function nextRound(){
   show("scr-game");
 }
 $("btn-next").onclick=nextRound;
+$("btn-hear").onclick=()=>{
+  const id=((curSong&&curSong.video_id)||"").trim();
+  if(!id) return;
+  $("btn-hear").classList.add("hidden");
+  $("yt-player").innerHTML='<iframe src="https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+};
 </script>
 </body>
 </html>
