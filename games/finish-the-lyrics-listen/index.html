@@ -60,7 +60,7 @@ h1{font-size:28px;margin:4px 0;text-align:center}
   <section class="card" id="scr-home">
     <h1>🎧 ስማ ጨርስ</h1>
     <p class="sub">Listen &amp; Finish the Lyrics</p>
-    <p style="text-align:center;color:var(--muted)">A random worship song plays from a random spot for 30 seconds, then pauses —<br>hear the lyrics, then pick the line from the song! 10 rounds.</p>
+    <p style="text-align:center;color:var(--muted)">A random worship song plays from a random spot for 10 seconds, then pauses —<br>hear the lyrics, then pick the line from the song! 10 rounds.</p>
     <button class="btn" id="btn-start">Start ▶</button>
   </section>
 
@@ -76,11 +76,11 @@ h1{font-size:28px;margin:4px 0;text-align:center}
         <div class="ctls">
           <button class="ctl" id="btn-pp">⏸ Pause</button>
           <button class="ctl" id="btn-replay">🔁 Replay</button>
-          <button class="ctl" id="btn-more">＋30s more</button>
+          <button class="ctl" id="btn-more">＋10s more</button>
         </div>
         <button class="btn hidden" id="btn-tapplay" style="margin-top:10px">▶ Tap to play</button>
       </div>
-      <p class="hint">Pauses after 30 seconds — pause, replay, or hear more whenever you like.</p>
+      <p class="hint">Pauses after 10 seconds — pause, replay, or hear more whenever you like.</p>
     </div>
 
     <div id="phase-hear" class="hidden">
@@ -116,7 +116,7 @@ const $=id=>document.getElementById(id);
 const rnd=n=>Math.floor(Math.random()*n);
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
 const clean=s=>(s||"").replace(/\([^)]*\)/g," ").replace(/\s+/g," ").trim();
-const ROUNDS=10, LISTEN_SECS=30, HEAR_SECS=15;
+const ROUNDS=10, LISTEN_SECS=10, HEAR_SECS=15;
 let SONGS=[], LINES=[], round=0, score=0, streak=0, correctIdx=0, locked=false;
 let ytPlayer=null, apiReady=false, countTimer=null, hearTimer=null, playCheckTimer=null;
 let cur=null, q=null, remain=LISTEN_SECS, phase="listen";
