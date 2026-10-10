@@ -89,6 +89,7 @@ h1{font-size:28px;margin:4px 0;text-align:center}
         <div class="lbl">Song paused!</div>
         <p>Tap play to hear the lyrics…</p>
         <button class="btn" id="btn-hearlyrics">▶ Play to hear the lyrics</button>
+        <div class="ctls"><button class="ctl" id="btn-replayclip">🔁 Replay the clip</button></div>
         <div class="count hidden" id="hear-count">15</div>
       </div>
     </div>
@@ -119,7 +120,7 @@ const clean=s=>(s||"").replace(/\([^)]*\)/g," ").replace(/\s+/g," ").trim();
 const ROUNDS=10, LISTEN_SECS=10, HEAR_SECS=15;
 let SONGS=[], LINES=[], round=0, score=0, streak=0, correctIdx=0, locked=false;
 let ytPlayer=null, apiReady=false, countTimer=null, hearTimer=null, playCheckTimer=null;
-let cur=null, q=null, remain=LISTEN_SECS, phase="listen";
+let cur=null, q=null, remain=LISTEN_SECS, phase="listen", clipStart=0;
 
 fetch("songs.json").then(r=>r.json()).then(d=>{
   SONGS=d.map(s=>({...s, lines:(s.lyrics||"").split("\n").map(clean).filter(l=>l.length>3)}))
@@ -130,7 +131,9 @@ function show(id){document.querySelectorAll("section.card").forEach(s=>s.classLi
 function allLines(){const L=[];SONGS.forEach(s=>s.lines.forEach(l=>L.push(l)));return L;}
 function randomStart(){
   let d=0; try{ d=ytPlayer.getDuration()||0; }catch(e){}
-  if(d>50){ try{ ytPlayer.seekTo(rnd(Math.floor(d-45)), true); }catch(e){} }
+  clipStart=0;
+  if(d>50){ clipStart=rnd(Math.floor(d-45)); try{ ytPlayer.seekTo(clipStart, true); }catch(e){} }
+  return clipStart;
 }
 $("btn-start").onclick=()=>{ if(!SONGS.length){return;} LINES=allLines(); round=0;score=0;streak=0; nextRound(); };
 $("btn-again").onclick=()=>{ round=0;score=0;streak=0; nextRound(); };
@@ -257,6 +260,20 @@ function showPhaseHear(){
   $("btn-hearlyrics").classList.remove("hidden");
   $("hear-count").classList.add("hidden");
 }
+$("btn-replayclip").onclick=()=>{
+  // back to the 10s clip: rewind to where it started and replay
+  stopTimers();
+  phase="listen";
+  $("phase-hear").classList.add("hidden");
+  $("phase-q").classList.add("hidden");
+  $("phase-listen").classList.remove("hidden");
+  $("btn-hearlyrics").classList.remove("hidden");
+  $("hear-count").classList.add("hidden");
+  $("btn-tapplay").classList.add("hidden");
+  remain=LISTEN_SECS; $("count").textContent=remain;
+  $("btn-pp").textContent="⏸ Pause";
+  try{ ytPlayer.seekTo(clipStart,true); ytPlayer.playVideo(); }catch(e){}
+};
 $("btn-hearlyrics").onclick=()=>{
   $("btn-hearlyrics").classList.add("hidden");
   $("hear-count").classList.remove("hidden");
