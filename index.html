@@ -285,7 +285,7 @@
     (function () {
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
       // Card art URLs carry it too, so a fresh deploy can never show a stale cached miss.
-      var SITE_VERSION = '20261009a';
+      var SITE_VERSION = '20261010a';
       // Single source of truth for the game library. mode: 'solo' | 'group'.
       var GAMES = [
         { src: 'games/listen-party/', title: 'Listen & Guess the Song', am: 'አድምጠው ገምት', desc: 'Hear the song clip, pick the answer!', mode: 'group', img: 'assets/cards/listen-party.jpg?v=' + SITE_VERSION, featured: true },
@@ -295,6 +295,7 @@
         { src: 'games/worship-song-bingo/', title: 'Worship Song Bingo', am: 'የመዝሙር ብንጎ', desc: 'Mark each song, shout bingo!', mode: 'group', img: 'assets/cards/worship-song-bingo.jpg?v=' + SITE_VERSION },
         { src: 'games/song-roulette/', title: 'የመዝሙር እጣ (Song Roulette)', am: 'የመዝሙር እጣ', desc: 'Spin the wheel for your next worship song.', mode: 'group', img: 'assets/cards/song-roulette.jpg?v=' + SITE_VERSION },
         { src: 'games/finish-the-lyrics/', title: 'Finish the Lyrics', am: 'የመዝሙሩን ቀጣይ መስመር', desc: 'Pick the next line, collect points.', mode: 'solo', img: 'assets/cards/finish-the-lyrics.jpg?v=' + SITE_VERSION },
+        { src: 'games/finish-the-lyrics-listen/', title: 'Listen & Finish the Lyrics', am: 'ስማ ጨርስ', desc: 'Hear 30 seconds, then finish the lyric!', mode: 'solo', img: 'assets/cards/finish-the-lyrics-listen.jpg?v=' + SITE_VERSION },
         { src: 'games/finish-lyrics-party/', title: 'Finish the Lyrics Party', am: 'የቡድን ጨዋታ', desc: 'Host starts a room, everyone joins by code!', mode: 'group', img: 'assets/cards/finish-lyrics-party.jpg?v=' + SITE_VERSION },
         { src: 'games/buna-run/', title: 'Buna Run', am: 'ቡና ሩጫ', desc: 'Dash, jump, and grab the buna!', mode: 'solo', img: 'assets/cards/buna-run.jpg?v=' + SITE_VERSION },
         { src: 'games/taxi-addis/', title: 'Taxi Addis', am: 'ታክሲ አዲስ', desc: 'Weave through Addis traffic!', mode: 'solo', img: 'assets/cards/taxi-addis.jpg?v=' + SITE_VERSION },

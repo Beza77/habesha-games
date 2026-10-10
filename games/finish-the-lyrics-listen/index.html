@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="am">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>ስማ ጨርስ · Listen &amp; Finish the Lyrics</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;600;700;800&display=swap');
+:root{
+  color-scheme:light dark;
+  --bg:#3b1f5e; --bg-deep:#241239; --panel:#fffdf6; --panel-2:#fbf3df;
+  --ink:#2c1a12; --muted:#7a6a58; --gold:#f6c548; --gold-deep:#d99a1f;
+  --purple:#7c3aed; --green:#1e8a5a; --red:#c0392b; --line:#e6d3a8;
+  --shadow:rgba(20,8,35,.35);
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;font-family:"Baloo 2","Noto Sans Ethiopic",system-ui,sans-serif;
+  background:radial-gradient(1000px 500px at 50% -10%, #5b2f8f 0%, var(--bg) 50%, var(--bg-deep) 100%);
+  color:#fdf3dd;display:flex;justify-content:center;padding:18px 14px 40px;
+}
+.wrap{width:100%;max-width:600px}
+.card{background:var(--panel);color:var(--ink);border-radius:22px;box-shadow:0 18px 45px var(--shadow);padding:26px 22px;margin-top:14px}
+h1{font-size:28px;margin:4px 0;text-align:center}
+.sub{text-align:center;color:var(--muted);margin:0 0 10px}
+.hidden{display:none!important}
+.given{background:#2c1a4d;color:#ffe9a8;border-radius:16px;padding:18px;font-size:19px;line-height:2;text-align:center;white-space:pre-line;margin:12px 0}
+.given .q{color:var(--gold);font-weight:800}
+.choices{display:grid;gap:10px;margin:12px 0}
+.choice{border:0;border-radius:14px;padding:15px 16px;font-family:inherit;font-size:17px;font-weight:600;background:var(--panel-2);color:var(--ink);cursor:pointer;box-shadow:inset 0 0 0 2px var(--line);text-align:center;line-height:1.7}
+.choice.correct{background:#d9f5e5;box-shadow:inset 0 0 0 3px var(--green)}
+.choice.wrong{background:#fbe3df;box-shadow:inset 0 0 0 3px var(--red)}
+.choice:disabled{cursor:default}
+.btn{display:block;width:100%;border:0;border-radius:16px;cursor:pointer;font-family:inherit;font-weight:800;font-size:18px;padding:15px;margin:10px 0;background:linear-gradient(180deg,var(--gold),var(--gold-deep));color:#3a2a08;box-shadow:0 6px 0 #a86f14}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #a86f14}
+.meta{display:flex;justify-content:space-between;font-weight:800;color:var(--muted);font-size:15px;margin-bottom:4px}
+.streak{color:var(--purple)}
+.songline{text-align:center;color:var(--muted);font-size:15px;margin-top:8px;min-height:22px}
+.big{font-size:22px;font-weight:800;text-align:center}
+.score{font-size:52px;font-weight:800;text-align:center;color:var(--purple);margin:6px 0}
+.bar{height:8px;background:#e8ddc2;border-radius:99px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--purple);width:0%}
+.listen-box{background:#2c1a4d;border-radius:16px;padding:18px;margin:12px 0;text-align:center}
+.listen-box .lbl{color:#ffe9a8;font-size:18px;font-weight:700}
+.count{font-size:56px;font-weight:800;color:var(--gold);margin:6px 0}
+#yt-player{margin-top:10px}
+#yt-player iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:12px}
+.hint{font-size:14px;color:var(--muted);text-align:center;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card" id="scr-home">
+    <h1>🎧 ስማ ጨርስ</h1>
+    <p class="sub">Listen &amp; Finish the Lyrics</p>
+    <p style="text-align:center;color:var(--muted)">A random worship song plays for 30 seconds, then pauses —<br>finish the lyric! 10 rounds · 4 choices each.</p>
+    <button class="btn" id="btn-start">Start ▶</button>
+  </section>
+
+  <section class="card hidden" id="scr-game">
+    <div class="meta"><span id="round-label">Round 1/10</span><span>⭐ <span id="score">0</span> &nbsp;·&nbsp; <span class="streak">🔥 <span id="streak">0</span></span></span></div>
+    <div class="bar"><i id="prog"></i></div>
+
+    <div id="phase-listen">
+      <div class="listen-box">
+        <div class="lbl">🎧 Mystery song — listen carefully!</div>
+        <div class="count" id="count">30</div>
+        <div id="yt-player"></div>
+        <button class="btn hidden" id="btn-tapplay" style="margin-top:10px">▶ Tap to play</button>
+      </div>
+      <p class="hint">The song pauses after 30 seconds — then you finish the lyric.</p>
+    </div>
+
+    <div id="phase-q" class="hidden">
+      <div class="given" id="given"></div>
+      <div class="choices" id="choices"></div>
+      <p class="songline" id="songline"></p>
+      <button class="btn hidden" id="btn-next">Next →</button>
+    </div>
+  </section>
+
+  <section class="card hidden" id="scr-end">
+    <h1>🎉 ጨርሷል!</h1>
+    <div class="score" id="final-score">0</div>
+    <p class="big" id="final-msg"></p>
+    <button class="btn" id="btn-again">Play again ↻</button>
+  </section>
+</div>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const rnd=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
+const clean=s=>(s||"").replace(/\([^)]*\)/g," ").replace(/\s+/g," ").trim();
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const ROUNDS=10, LISTEN_SECS=30;
+let SONGS=[], LINES=[], round=0, score=0, streak=0, correctIdx=0, locked=false;
+let ytPlayer=null, apiReady=false, countTimer=null, playCheckTimer=null, cur=null, q=null;
+
+fetch("songs.json").then(r=>r.json()).then(d=>{
+  SONGS=d.map(s=>({...s, lines:(s.lyrics||"").split("\n").map(clean).filter(l=>l.length>3)}))
+          .filter(s=>s.lines.length>=5 && s.video_id);
+});
+function onYouTubeIframeAPIReady(){ apiReady=true; }
+function show(id){document.querySelectorAll("section.card").forEach(s=>s.classList.add("hidden"));$(id).classList.remove("hidden");window.scrollTo(0,0);}
+function allLines(){const L=[];SONGS.forEach(s=>s.lines.forEach(l=>L.push(l)));return L;}
+$("btn-start").onclick=()=>{ if(!SONGS.length){return;} LINES=allLines(); round=0;score=0;streak=0; nextRound(); };
+$("btn-again").onclick=()=>{ round=0;score=0;streak=0; nextRound(); };
+
+function stopPlayer(){
+  clearInterval(countTimer); clearTimeout(playCheckTimer);
+  if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} ytPlayer=null; }
+  $("yt-player").innerHTML="";
+}
+
+function nextRound(){
+  if(round>=ROUNDS){
+    $("final-score").textContent=score+" / "+ROUNDS;
+    $("final-msg").textContent = score>=9?"🏆 አሪፍ! Worship master!" : score>=6?"👏 በጣም ጥሩ! Well done!" : score>=3?"💪 Keep singing!" : "🎶 Practice makes perfect!";
+    show("scr-end"); return;
+  }
+  round++; locked=false;
+  const song=SONGS[rnd(SONGS.length)]; cur=song;
+  const i=rnd(song.lines.length-2);
+  q={ given:song.lines.slice(i,i+2), correct:song.lines[i+2] };
+  const distract=shuffle(LINES.filter(l=>l!==q.correct)).slice(0,3);
+  q.opts=shuffle([q.correct].concat(distract));
+  correctIdx=q.opts.indexOf(q.correct);
+
+  $("round-label").textContent="Round "+round+"/"+ROUNDS;
+  $("prog").style.width=((round-1)/ROUNDS*100)+"%";
+  $("score").textContent=score; $("streak").textContent=streak;
+  $("phase-q").classList.add("hidden");
+  $("phase-listen").classList.remove("hidden");
+  $("btn-tapplay").classList.add("hidden");
+  $("count").textContent=LISTEN_SECS;
+  show("scr-game");
+  startListening();
+}
+
+function startListening(){
+  stopPlayer();
+  if(!apiReady){ // API failed to load: skip straight to the question
+    setTimeout(showQuestion, 800); return;
+  }
+  ytPlayer=new YT.Player("yt-player",{
+    width:"100%", height:"200", videoId:cur.video_id,
+    playerVars:{autoplay:1, rel:0},
+    events:{ onReady:onPReady, onStateChange:onPState, onError:showQuestion }
+  });
+}
+function onPReady(e){
+  try{ e.target.playVideo(); }catch(err){}
+  // fallback: if autoplay was blocked, offer a tap-to-play button
+  playCheckTimer=setTimeout(()=>{
+    try{
+      if(ytPlayer && ytPlayer.getPlayerState()!==YT.PlayerState.PLAYING){
+        $("btn-tapplay").classList.remove("hidden");
+      }
+    }catch(err){}
+  }, 4000);
+}
+function onPState(e){
+  if(e.data===YT.PlayerState.PLAYING){ beginCountdown(); }
+  else if(e.data===YT.PlayerState.ENDED){ showQuestion(); }
+}
+function beginCountdown(){
+  let t=LISTEN_SECS;
+  $("count").textContent=t;
+  clearInterval(countTimer);
+  countTimer=setInterval(()=>{
+    t--; $("count").textContent=Math.max(t,0);
+    if(t<=0){ clearInterval(countTimer); showQuestion(); }
+  },1000);
+}
+$("btn-tapplay").onclick=()=>{ try{ ytPlayer.playVideo(); }catch(e){} $("btn-tapplay").classList.add("hidden"); };
+
+function showQuestion(){
+  if(!$("phase-q").classList.contains("hidden")) return; // already showing
+  clearInterval(countTimer); clearTimeout(playCheckTimer);
+  try{ if(ytPlayer) ytPlayer.pauseVideo(); }catch(e){}
+  $("phase-listen").classList.add("hidden");
+  $("phase-q").classList.remove("hidden");
+  $("given").innerHTML=esc(q.given.join("\n"))+'\n<span class="q">… ?</span>';
+  $("songline").textContent="";
+  $("btn-next").classList.add("hidden");
+  const box=$("choices"); box.innerHTML="";
+  q.opts.forEach((o,idx)=>{
+    const b=document.createElement("button"); b.className="choice"; b.textContent=o;
+    b.onclick=()=>{
+      if(locked) return; locked=true;
+      const btns=box.querySelectorAll("button");
+      btns.forEach(x=>x.disabled=true);
+      btns[correctIdx].classList.add("correct");
+      if(idx===correctIdx){ score++; streak++; } else { b.classList.add("wrong"); streak=0; }
+      $("score").textContent=score; $("streak").textContent=streak;
+      $("songline").textContent="🎵 "+cur.artist+" — "+cur.title;
+      $("prog").style.width=(round/ROUNDS*100)+"%";
+      const nb=$("btn-next"); nb.classList.remove("hidden");
+      nb.textContent = round>=ROUNDS ? "See results →" : "Next →";
+    };
+    box.appendChild(b);
+  });
+}
+$("btn-next").onclick=()=>{ stopPlayer(); nextRound(); };
+</script>
+</body>
+</html>
