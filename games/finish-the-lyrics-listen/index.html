@@ -49,6 +49,9 @@ h1{font-size:28px;margin:4px 0;text-align:center}
 #yt-player{margin-top:10px}
 #yt-player iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:12px}
 .hint{font-size:14px;color:var(--muted);text-align:center;margin-top:6px}
+.ctls{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.ctl{border:0;border-radius:12px;cursor:pointer;font-family:inherit;font-weight:800;font-size:15px;padding:10px 16px;background:#2c1a4d;color:#ffe9a8;box-shadow:0 4px 0 #1a0f30}
+.ctl:active{transform:translateY(2px);box-shadow:0 1px 0 #1a0f30}
 </style>
 </head>
 <body>
@@ -69,9 +72,14 @@ h1{font-size:28px;margin:4px 0;text-align:center}
         <div class="lbl">🎧 Mystery song — listen carefully!</div>
         <div class="count" id="count">30</div>
         <div id="yt-player"></div>
+        <div class="ctls">
+          <button class="ctl" id="btn-pp">⏸ Pause</button>
+          <button class="ctl" id="btn-replay">🔁 Replay</button>
+          <button class="ctl" id="btn-more">＋30s more</button>
+        </div>
         <button class="btn hidden" id="btn-tapplay" style="margin-top:10px">▶ Tap to play</button>
       </div>
-      <p class="hint">The song pauses after 30 seconds — then you finish the lyric.</p>
+      <p class="hint">Pauses after 30 seconds — pause, replay, or hear more whenever you like. Then finish the lyric!</p>
     </div>
 
     <div id="phase-q" class="hidden">
@@ -99,7 +107,7 @@ const clean=s=>(s||"").replace(/\([^)]*\)/g," ").replace(/\s+/g," ").trim();
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
 const ROUNDS=10, LISTEN_SECS=30;
 let SONGS=[], LINES=[], round=0, score=0, streak=0, correctIdx=0, locked=false;
-let ytPlayer=null, apiReady=false, countTimer=null, playCheckTimer=null, cur=null, q=null;
+let ytPlayer=null, apiReady=false, countTimer=null, playCheckTimer=null, cur=null, q=null, remain=LISTEN_SECS;
 
 fetch("songs.json").then(r=>r.json()).then(d=>{
   SONGS=d.map(s=>({...s, lines:(s.lyrics||"").split("\n").map(clean).filter(l=>l.length>3)}))
@@ -112,7 +120,7 @@ $("btn-start").onclick=()=>{ if(!SONGS.length){return;} LINES=allLines(); round=
 $("btn-again").onclick=()=>{ round=0;score=0;streak=0; nextRound(); };
 
 function stopPlayer(){
-  clearInterval(countTimer); clearTimeout(playCheckTimer);
+  clearInterval(countTimer); countTimer=null; clearTimeout(playCheckTimer);
   if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} ytPlayer=null; }
   $("yt-player").innerHTML="";
 }
@@ -137,7 +145,8 @@ function nextRound(){
   $("phase-q").classList.add("hidden");
   $("phase-listen").classList.remove("hidden");
   $("btn-tapplay").classList.add("hidden");
-  $("count").textContent=LISTEN_SECS;
+  $("btn-pp").textContent="⏸ Pause";
+  remain=LISTEN_SECS; $("count").textContent=remain;
   show("scr-game");
   startListening();
 }
@@ -165,18 +174,46 @@ function onPReady(e){
   }, 4000);
 }
 function onPState(e){
-  if(e.data===YT.PlayerState.PLAYING){ beginCountdown(); }
+  if(e.data===YT.PlayerState.PLAYING){ beginCountdown(); $("btn-pp").textContent="⏸ Pause"; }
+  else if(e.data===YT.PlayerState.PAUSED){ $("btn-pp").textContent="▶ Play"; }
   else if(e.data===YT.PlayerState.ENDED){ showQuestion(); }
 }
 function beginCountdown(){
-  let t=LISTEN_SECS;
-  $("count").textContent=t;
-  clearInterval(countTimer);
+  if(countTimer) return; // already ticking; resumes don't reset the clock
+  $("count").textContent=remain;
   countTimer=setInterval(()=>{
-    t--; $("count").textContent=Math.max(t,0);
-    if(t<=0){ clearInterval(countTimer); showQuestion(); }
+    try{
+      // only counts down while actually playing — pausing freezes the clock
+      if(ytPlayer && ytPlayer.getPlayerState()===YT.PlayerState.PLAYING){
+        remain--; $("count").textContent=Math.max(remain,0);
+        if(remain<=0){ clearInterval(countTimer); countTimer=null; showQuestion(); }
+      }
+    }catch(e){}
   },1000);
 }
+$("btn-pp").onclick=()=>{
+  if(!ytPlayer) return;
+  try{
+    if(ytPlayer.getPlayerState()===YT.PlayerState.PLAYING){ ytPlayer.pauseVideo(); $("btn-pp").textContent="▶ Play"; }
+    else { ytPlayer.playVideo(); $("btn-pp").textContent="⏸ Pause"; }
+  }catch(e){}
+};
+$("btn-replay").onclick=()=>{
+  if(!ytPlayer) return;
+  try{ ytPlayer.seekTo(0,true); ytPlayer.playVideo(); }catch(e){}
+  remain=LISTEN_SECS; $("count").textContent=remain;
+  $("btn-pp").textContent="⏸ Pause";
+};
+$("btn-more").onclick=()=>{
+  remain+=LISTEN_SECS; $("count").textContent=remain;
+  try{
+    if(ytPlayer){
+      if(ytPlayer.getPlayerState()===YT.PlayerState.ENDED){ ytPlayer.seekTo(0,true); }
+      ytPlayer.playVideo();
+    }
+  }catch(e){}
+  $("btn-pp").textContent="⏸ Pause";
+};
 $("btn-tapplay").onclick=()=>{ try{ ytPlayer.playVideo(); }catch(e){} $("btn-tapplay").classList.add("hidden"); };
 
 function showQuestion(){
