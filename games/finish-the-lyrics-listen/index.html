@@ -281,13 +281,11 @@ $("btn-hearlyrics").onclick=()=>{
   $("hear-count").textContent=r;
   try{ if(ytPlayer) ytPlayer.playVideo(); }catch(e){}
   clearInterval(hearTimer);
+  // wall-clock countdown: always advances even if the video won't resume,
+  // so the game can never get stuck on this screen
   hearTimer=setInterval(()=>{
-    try{
-      if(ytPlayer && ytPlayer.getPlayerState()===YT.PlayerState.PLAYING){
-        r--; $("hear-count").textContent=Math.max(r,0);
-        if(r<=0){ clearInterval(hearTimer); hearTimer=null; try{ytPlayer.pauseVideo();}catch(e){} showPhaseQ(); }
-      }
-    }catch(e){}
+    r--; $("hear-count").textContent=Math.max(r,0);
+    if(r<=0){ clearInterval(hearTimer); hearTimer=null; try{ if(ytPlayer) ytPlayer.pauseVideo(); }catch(e){} showPhaseQ(); }
   },1000);
 };
 
