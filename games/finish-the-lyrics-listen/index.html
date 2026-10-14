@@ -65,7 +65,7 @@ h1{font-size:28px;margin:4px 0;text-align:center}
   </section>
 
   <section class="card hidden" id="scr-game">
-    <div class="meta"><span id="round-label">Round 1/10</span><span>⭐ <span id="score">0</span> &nbsp;·&nbsp; <span class="streak">🔥 <span id="streak">0</span></span> &nbsp;<button class="ctl" id="btn-skip" style="padding:4px 12px;font-size:13px">Next →</button></span></div>
+    <div class="meta"><span id="round-label">Round 1/10</span><span>⭐ <span id="score">0</span> &nbsp;·&nbsp; <span class="streak">🔥 <span id="streak">0</span></span></span></div>
     <div class="bar"><i id="prog"></i></div>
 
     <div id="phase-listen">
@@ -101,6 +101,8 @@ h1{font-size:28px;margin:4px 0;text-align:center}
       <p class="songline" id="songline"></p>
       <button class="btn hidden" id="btn-next">Next →</button>
     </div>
+
+    <div id="skip-row"><button class="btn" id="btn-skip">Next →</button></div>
   </section>
 
   <section class="card hidden" id="scr-end">
@@ -167,6 +169,7 @@ function nextRound(){
   $("phase-q").classList.add("hidden");
   $("phase-hear").classList.add("hidden");
   $("phase-listen").classList.remove("hidden");
+  $("skip-row").classList.remove("hidden");
   $("btn-tapplay").classList.add("hidden");
   $("btn-pp").textContent="⏸ Pause";
   remain=LISTEN_SECS; $("count").textContent=remain;
@@ -257,6 +260,7 @@ function showPhaseHear(){
   $("phase-listen").classList.add("hidden");
   $("phase-q").classList.add("hidden");
   $("phase-hear").classList.remove("hidden");
+  $("skip-row").classList.remove("hidden");
   $("btn-hearlyrics").classList.remove("hidden");
   $("hear-count").classList.add("hidden");
 }
@@ -267,6 +271,7 @@ $("btn-replayclip").onclick=()=>{
   $("phase-hear").classList.add("hidden");
   $("phase-q").classList.add("hidden");
   $("phase-listen").classList.remove("hidden");
+  $("skip-row").classList.remove("hidden");
   $("btn-hearlyrics").classList.remove("hidden");
   $("hear-count").classList.add("hidden");
   $("btn-tapplay").classList.add("hidden");
@@ -298,6 +303,7 @@ function showPhaseQ(){
   $("phase-listen").classList.add("hidden");
   $("phase-hear").classList.add("hidden");
   $("phase-q").classList.remove("hidden");
+  $("skip-row").classList.add("hidden");
   $("songline").textContent="";
   $("btn-next").classList.add("hidden");
   const box=$("choices"); box.innerHTML="";
