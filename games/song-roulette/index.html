@@ -108,7 +108,7 @@ $("btn-spin").onclick=()=>{
 
 function openSong(s){
   current=s; stanzaIdx=0;
-  stanzas=(s.lyrics||"").split(/\n\s*\n/).map(b=>clean(b)).filter(b=>b.length>10);
+  stanzas=(s.lyrics||"").split(/\n\s*\n/).map(b=>b.split("\n").map(l=>l.replace(/\([^)]*\)/g," ").replace(/\s+/g," ").trim()).filter(l=>l).slice(0,5).join("\n")).filter(b=>b.length>10);
   if(!stanzas.length) stanzas=[clean(s.lyrics)];
   $("song-title").textContent=s.title;
   $("song-artist").textContent=s.artist;
