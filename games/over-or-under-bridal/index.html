@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="am">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>ከላይ ወይስ ከታች · Over or Under — Bridal Shower Game</title>
+<script src="https://unpkg.com/mqtt@5/dist/mqtt.min.js"></script>
+<script src="../shared/party-net.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;600;700;800&display=swap');
+:root{
+  color-scheme:light dark;
+  --bg:#3b2b1e; --bg2:#241a10; --panel:#fffdf6; --panel2:#f8efdd;
+  --ink:#2c2118; --muted:#8a755d; --gold:#f6c548; --gold2:#d99a1f;
+  --teal:#0f766e; --green:#1e8a5a; --red:#c0392b; --line:#e6d3a8;
+  --shadow:0 18px 45px rgba(8,18,35,.35);
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0; font-family:"Baloo 2","Noto Sans Ethiopic",system-ui,sans-serif;
+  background:radial-gradient(1200px 600px at 20% -10%, #5a4429 0%, var(--bg) 45%, var(--bg2) 100%);
+  color:#fdf6e3; display:flex; justify-content:center; padding:18px 14px 40px;
+}
+.wrap{width:100%;max-width:640px}
+.card{
+  background:var(--panel); color:var(--ink); border-radius:22px;
+  box-shadow:var(--shadow); padding:26px 22px; margin-top:14px;
+}
+h1{font-size:30px;margin:6px 0 2px;text-align:center}
+h1 .en{display:block;font-family:"Baloo 2",sans-serif;font-size:15px;font-weight:700;color:var(--muted);margin-top:2px}
+.sub{text-align:center;color:#cdbf9f;margin:0 0 8px;font-size:15px}
+h2{margin:0 0 10px;font-size:22px}
+p{line-height:1.55}
+.hidden{display:none!important}
+.btn{
+  display:block;width:100%;border:0;border-radius:16px;cursor:pointer;
+  font-family:inherit;font-weight:800;font-size:18px;padding:15px 18px;margin:10px 0;
+  background:linear-gradient(180deg,var(--gold),var(--gold2));color:#3a2a08;
+  box-shadow:0 6px 0 #a86f14, 0 10px 22px rgba(0,0,0,.25);
+}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #a86f14}
+.btn.ghost{background:var(--panel2);color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.btn.teal{background:linear-gradient(180deg,#14a89c,#0f766e);color:#fff;box-shadow:0 6px 0 #0a544e,0 10px 22px rgba(0,0,0,.25)}
+.btn.big{font-size:22px;padding:18px}
+.btn:disabled{opacity:.45;cursor:default}
+input[type=text]{
+  width:100%;font-family:inherit;font-size:20px;font-weight:700;text-align:center;
+  padding:14px;border-radius:14px;border:2px solid var(--line);background:#fff;color:var(--ink);
+  margin:8px 0; text-transform:uppercase;
+}
+input[type=text].name{text-transform:none}
+input[type=text].qedit{
+  text-transform:none;text-align:left;font-size:15px;font-weight:600;padding:10px 12px;margin:6px 0;
+}
+.roomcode{
+  font-size:56px;font-weight:800;letter-spacing:14px;text-align:center;color:#0f766e;
+  background:var(--panel2);border:3px dashed var(--gold2);border-radius:18px;padding:10px;margin:12px 0;
+}
+.players{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{background:#e8f4f1;color:#0b4f4a;font-weight:800;border-radius:999px;padding:8px 14px;font-size:15px}
+.chip.done{background:#dff3e6;color:#14663c}
+.note{background:rgba(246,197,72,.14);border:1px solid rgba(246,197,72,.4);border-radius:14px;padding:12px 14px;font-size:14px;color:#e8d9b5;margin-top:14px;line-height:1.5}
+.status{min-height:22px;color:#ffb3a3;font-size:14px;text-align:center}
+.count{text-align:center;color:var(--muted);font-size:14px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.pill{background:var(--panel2);border:2px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800;color:var(--muted)}
+/* question rows */
+.qrow{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}
+.qrow .qn{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:1px}
+.qrow .qam{font-size:19px;font-weight:800;margin:6px 0 2px;line-height:1.4}
+.qrow .qen{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.4}
+.qans-label{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:1px;margin:8px 0 6px}
+.ans3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.abtn{
+  border:2px solid var(--line);background:var(--panel2);border-radius:14px;
+  padding:14px 4px;font-family:inherit;font-weight:800;font-size:15px;color:var(--ink);
+  cursor:pointer;text-align:center;line-height:1.3;
+}
+.abtn .big{font-size:28px;display:block;line-height:1.1}
+.abtn .en2{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:1px}
+.abtn:active{transform:scale(.96)}
+.abtn.sel-over{background:#e8f4f1;border-color:var(--teal);color:#0b4f4a;box-shadow:0 0 0 2px var(--teal)}
+.abtn.sel-under{background:#fdeceb;border-color:var(--red);color:#8f2418;box-shadow:0 0 0 2px var(--red)}
+.abtn.sel-same{background:#fff3d1;border-color:var(--gold2);color:#7a5410;box-shadow:0 0 0 2px var(--gold2)}
+.abtn:disabled{cursor:default}
+.ans3.mini .abtn{padding:8px 2px;font-size:13px}
+.ans3.mini .abtn .big{font-size:20px}
+/* review + leaderboard */
+.rev{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);font-size:14px}
+.rev .rq{font-weight:700;flex:1}
+.rev .rk{font-weight:800;white-space:nowrap}
+.rev .ok{color:var(--green)} .rev .bad{color:var(--red)}
+table.board{width:100%;border-collapse:collapse;margin:10px 0;font-size:16px}
+table.board td,table.board th{padding:10px 6px;border-bottom:1px solid var(--line);text-align:left}
+table.board th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+table.board tr.me td{background:#fff8e6;font-weight:800}
+table.board tr.winrow td{color:#7a5410;font-weight:800}
+.winner-banner{
+  text-align:center;padding:22px 14px;border-radius:18px;margin:12px 0;
+  background:linear-gradient(180deg,#fff3d1,#ffe3a1);border:3px solid var(--gold2);
+}
+.winner-banner .trophy{font-size:52px}
+.winner-banner h2{margin:6px 0 2px;font-size:26px;color:#7a5410}
+.winner-banner p{margin:0;color:#8a6a25;font-weight:700}
+.score-big{text-align:center;font-size:20px;font-weight:800;margin:8px 0}
+.score-big .n{font-size:56px;color:#0f766e;display:block}
+.keyrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--line);font-size:14px}
+.keyrow .kn{font-weight:800;color:var(--muted);min-width:34px}
+.keyrow .kq{flex:1;font-weight:600}
+.keyrow .ka{font-weight:800;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HOME -->
+  <section class="card" id="scr-home">
+    <h1>⬆️⬇️ ከላይ ወይስ ከታች<span class="en">OVER OR UNDER · BRIDAL SHOWER GAME</span></h1>
+    <p class="sub">ቁጥሮቹ ከላይ? ከታች? ወይስ ተመሳሳይ? · Guess: over, under, or same!</p>
+    <button class="btn teal" id="btn-host">📺 ጨዋታ አስተናግድ <small style="display:block;font-size:13px;font-weight:600">Host a game — set the true answers, get a room code</small></button>
+    <button class="btn" id="btn-join">📱 ጨዋታ ተቀላቀል <small style="display:block;font-size:13px;font-weight:600">Join a game — play on your phone</small></button>
+    <div class="note">እንዴት እንደሚጫወት · How it works: 15 statements each hide a number — e.g. "The bride tried on <b>10</b> dresses". For each one, guess whether the <b>real</b> number is <b>⬆️ OVER (ከላይ)</b>, <b>⬇️ UNDER (ከታች)</b>, or <b>✓ SAME (ተመሳሳይ)</b>. The host sets the true answers, then reveals them — +1 point per correct guess. Highest score wins! 🏆</div>
+    <p class="status" id="home-status"></p>
+  </section>
+
+  <!-- HOST SETUP -->
+  <section class="card hidden" id="scr-host-setup">
+    <h2>✏️ ጥያቄዎች አዘጋጅ · <span style="font-size:15px;color:var(--muted)">SET UP QUESTIONS</span></h2>
+    <p class="count">Edit any question text, then tap the <b>TRUE</b> answer for each one (only you see this).</p>
+    <div id="host-setup-list"></div>
+    <button class="btn teal big" id="btn-create-room">🔑 ክፍል ፍጠር · CREATE ROOM</button>
+    <button class="btn ghost" id="btn-setup-back">Back</button>
+    <p class="status" id="setup-status"></p>
+  </section>
+
+  <!-- HOST LOBBY -->
+  <section class="card hidden" id="scr-host-lobby">
+    <h2>📺 አስተናጋጅ · <span style="font-size:15px;color:var(--muted)">HOST LOBBY</span></h2>
+    <p class="count">Players — open this page on your phone, tap <b>Join</b> and enter:</p>
+    <div class="roomcode" id="host-code">····</div>
+    <div class="players" id="host-players"><span class="chip">waiting…</span></div>
+    <button class="btn teal big" id="btn-start" disabled>▶️ ጨዋታውን ጀምር · START GAME</button>
+    <button class="btn ghost" id="btn-host-back">Back</button>
+    <p class="status" id="host-status"></p>
+  </section>
+
+  <!-- HOST GAME -->
+  <section class="card hidden" id="scr-host-game">
+    <div class="topbar">
+      <span class="pill" id="host-room-pill">CODE ····</span>
+      <span class="pill" id="host-sub-pill">0 submitted</span>
+    </div>
+    <h2>📋 ተጫዋቾች · <span style="font-size:15px;color:var(--muted)">PLAYERS</span></h2>
+    <div class="players" id="host-roster"><span class="chip">waiting…</span></div>
+    <button class="btn teal big" id="btn-reveal">👀 መልሶች አሳይ · REVEAL ANSWERS</button>
+    <div id="host-key-wrap" class="hidden">
+      <h2 style="font-size:18px;margin-top:6px">✅ ትክክለኛ መልሶች · <span style="font-size:13px;color:var(--muted)">ANSWER KEY</span></h2>
+      <div id="host-key"></div>
+    </div>
+    <div id="host-board-wrap" class="hidden">
+      <h2 style="font-size:18px;margin-top:14px">🏆 ደረጃ · <span style="font-size:13px;color:var(--muted)">LEADERBOARD</span></h2>
+      <div id="host-board"></div>
+    </div>
+    <button class="btn ghost" id="btn-newround">🔄 አዲስ ዙር · NEW ROUND</button>
+    <button class="btn ghost" id="btn-host-home">Home</button>
+    <p class="status" id="host-game-status"></p>
+  </section>
+
+  <!-- JOIN -->
+  <section class="card hidden" id="scr-join">
+    <h2>📱 ጨዋታ ተቀላቀል · <span style="font-size:15px;color:var(--muted)">JOIN A GAME</span></h2>
+    <p class="count">Enter the 4-letter code from the host's screen</p>
+    <input type="text" id="join-code" maxlength="4" placeholder="CODE" autocomplete="off" />
+    <input type="text" id="join-name" class="name" maxlength="12" placeholder="Your name · ስምህ" autocomplete="off" />
+    <button class="btn teal" id="btn-do-join">Join</button>
+    <button class="btn ghost" id="btn-join-back">Back</button>
+    <p class="status" id="join-status"></p>
+  </section>
+
+  <!-- PLAYER LOBBY -->
+  <section class="card hidden" id="scr-player-lobby">
+    <h2>🎉 <span id="player-name-echo"></span>, ገብተሃል!</h2>
+    <p class="count" id="player-lobby-msg">አስተናጋጁን በመጠበቅ ላይ… · Waiting for the host to start…</p>
+    <div class="players" id="player-lobby-list"></div>
+    <button class="btn ghost" id="btn-player-back">Leave</button>
+  </section>
+
+  <!-- PLAYER GAME -->
+  <section class="card hidden" id="scr-player-game">
+    <div class="topbar">
+      <span class="pill" id="player-room-pill">CODE ····</span>
+      <span class="pill" id="player-answered-pill">0 / 15</span>
+    </div>
+    <h2>መልስ ስጥ · <span style="font-size:15px;color:var(--muted)">ANSWER</span></h2>
+    <p class="count">እውነተኛው ቁጥር <b>⬆️ ከላይ (over)</b>፣ <b>⬇️ ከታች (under)</b> ወይስ <b>✓ ተመሳሳይ (same)</b> ነው? · Is the real number over, under, or the same?</p>
+    <div id="player-questions"></div>
+    <button class="btn teal big" id="btn-submit">📨 መልሶች አስገባ · SUBMIT ANSWERS</button>
+    <button class="btn ghost" id="btn-player-home">Leave game</button>
+  </section>
+
+  <!-- PLAYER RESULTS -->
+  <section class="card hidden" id="scr-player-results">
+    <h2>🎉 ገብቷል! · <span style="font-size:15px;color:var(--muted)">SUBMITTED</span></h2>
+    <p class="count" id="player-wait-msg">መልሶቹን እየጠበቅን ነው… · Waiting for the host to reveal the answers…</p>
+    <div id="player-result-slot"></div>
+    <button class="btn ghost" id="btn-player-home2">Leave game</button>
+  </section>
+
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+function show(id){ document.querySelectorAll(".wrap > .card").forEach(s=>s.classList.add("hidden")); $(id).classList.remove("hidden"); window.scrollTo(0,0); }
+function rnd(n){ return Math.floor(Math.random()*n); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+</script>
+<script>
+"use strict";
+/* ================= QUESTIONS (default set, from the party card) ================= */
+const QUESTIONS=[
+ {en:"There are 68 days until the wedding", am:"እስከ ሰርጉ 68 ቀናት ቀርተዋል"},
+ {en:"The bride's shoe size is 7", am:"የሙሽሪት ጫማ ቁጥር 7 ነው"},
+ {en:"The bride & groom met 3 years ago", am:"ሙሽሪትና ሙሽራ ከ3 ዓመት በፊት ተገናኝተዋል"},
+ {en:"The bride tried on 10 dresses before she picked one", am:"ሙሽሪት ከመምረጧ በፊት 10 ልብሶች ሞክራለች"},
+ {en:"The bride has 5 bridesmaids", am:"ሙሽሪት 5 የሙሽሪት ጓደኞች አሏት"},
+ {en:"The honeymoon is 3 days after the wedding", am:"የፍቅር ጉዞው ከሰርጉ 3 ቀናት በኋላ ነው"},
+ {en:"The bride wants 2 kids", am:"ሙሽሪት 2 ልጆች ትፈልጋለች"},
+ {en:"The couple is registered at 2 places", am:"ጥንዶቹ በ2 ቦታዎች ተመዝግበዋል"},
+ {en:"The bride & groom have been on 3 vacations together", am:"ሙሽሪትና ሙሽራ አብረው 3 የእረፍት ጉዞዎች ሄደዋል"},
+ {en:"The bride has 150 Facebook friends", am:"ሙሽሪት 150 የፌስቡክ ጓደኞች አሏት"},
+ {en:"The bride's full name has a total of 15 letters", am:"የሙሽሪት ሙሉ ስም በድምሩ 15 ፊደሎች አሉት"},
+ {en:"The bride has had 5 different jobs in her life", am:"ሙሽሪት በሕይወቷ 5 የተለያዩ ሥራዎች ሠርታለች"},
+ {en:"The age gap between bride and groom is 4 years", am:"በሙሽሪትና በሙሽራ መካከል ያለው የዕድሜ ልዩነት 4 ዓመት ነው"},
+ {en:"The bride looked at 4 venues before deciding", am:"ሙሽሪት ከመወሰኗ በፊት 4 ቦታዎችን አይታለች"},
+ {en:"There are 100 people invited to the wedding", am:"ለሰርጉ 100 ሰዎች ተጋብዘዋል"},
+];
+const NQ=QUESTIONS.length;
+const ANS={
+ over: {icon:"⬆️", am:"ከላይ", en:"OVER", cls:"sel-over"},
+ under:{icon:"⬇️", am:"ከታች", en:"UNDER", cls:"sel-under"},
+ same: {icon:"✓", am:"ተመሳሳይ", en:"SAME", cls:"sel-same"}
+};
+
+/* Party networking (reconnect, wake-lock, join retry) lives in ../shared/party-net.js */
+window.PARTY_TOPIC="habesha-over-under-bridal/v1/";
+let linked=false;
+function safeSend(o){ if(linked){ try{ send(o); }catch(e){} } }
+
+/* ================= HOST ================= */
+let roomCode=null, players={}, done={}, scores={}, gameNo=0, phase="setup", revealed=false;
+let qText=QUESTIONS.map(q=>q.en), qAns=Array(NQ).fill("same");
+const ABC="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+$("btn-host").onclick=()=>{ renderHostSetup(); show("scr-host-setup"); };
+$("btn-setup-back").onclick=()=>show("scr-home");
+
+function renderHostSetup(){
+  const list=$("host-setup-list"); list.innerHTML="";
+  for(let i=0;i<NQ;i++){
+    const row=document.createElement("div"); row.className="qrow";
+    row.innerHTML=
+      '<div class="qn">ጥያቄ '+(i+1)+' · QUESTION '+(i+1)+'</div>'+
+      '<input type="text" class="qedit" id="hq-'+i+'" value="'+esc(qText[i])+'" maxlength="140" />'+
+      '<div class="qam">'+esc(QUESTIONS[i].am)+'</div>'+
+      '<div class="qans-label">ትክክለኛው መልስ · TRUE ANSWER</div>'+
+      '<div class="ans3 mini" id="ha-'+i+'"></div>';
+    list.appendChild(row);
+    const box=row.querySelector("#ha-"+i);
+    ["over","under","same"].forEach(v=>{
+      const b=document.createElement("button");
+      b.type="button"; b.className="abtn"+(qAns[i]===v?" "+ANS[v].cls:"");
+      b.innerHTML='<span class="big">'+ANS[v].icon+'</span>'+ANS[v].am+'<div class="en2">'+ANS[v].en+'</div>';
+      b.onclick=()=>{ qAns[i]=v; syncHostAnsBtns(i); };
+      box.appendChild(b);
+    });
+  }
+}
+function syncHostAnsBtns(i){
+  const box=$("ha-"+i); if(!box) return;
+  const btns=box.querySelectorAll(".abtn");
+  ["over","under","same"].forEach((v,k)=>{ btns[k].className="abtn"+(qAns[i]===v?" "+ANS[v].cls:""); });
+}
+
+$("btn-create-room").onclick=()=>{
+  for(let i=0;i<NQ;i++){ const el=$("hq-"+i); if(el&&el.value.trim()) qText[i]=el.value.trim(); }
+  roomCode=""; for(let i=0;i<4;i++) roomCode+=ABC[rnd(ABC.length)];
+  players={}; done={}; scores={}; gameNo=0; phase="lobby"; revealed=false;
+  $("host-code").textContent=roomCode;
+  $("host-room-pill").textContent="CODE "+roomCode;
+  $("host-sub-pill").textContent="0 submitted";
+  $("host-key-wrap").classList.add("hidden");
+  $("host-board-wrap").classList.add("hidden");
+  $("host-status").textContent="Connecting…";
+  $("btn-start").disabled=true;
+  show("scr-host-lobby");
+  PartyNet.keepAwake();
+  mqttConnect(roomCode,()=>{
+    linked=true;
+    $("host-status").textContent="Connected ✓ — waiting for players";
+    renderHostRoster();
+  },err=>{ $("host-status").textContent=err; },
+  ()=>{ safeSend({k:"resync"}); });
+  msgHandler=m=>{
+    if(m.k==="join"&&m.pid&&m.name){
+      players[m.pid]=String(m.name).slice(0,12);
+      broadcastRoster();
+      safeSend(stateMsg());
+    }
+    if(m.k==="submit"&&m.pid&&m.name){
+      if(players[m.pid]){ done[m.pid]=true; broadcastRoster(); }
+    }
+    if(m.k==="score"&&m.pid&&typeof m.score==="number"){
+      if(phase==="revealed"){
+        scores[m.pid]={name:String(m.name||players[m.pid]||"?").slice(0,12), score:Math.max(0,Math.min(NQ,Math.round(m.score)))};
+        renderHostBoard();
+        safeSend({k:"board", board:boardData()});
+      }
+    }
+  };
+};
+function rosterData(){
+  return Object.keys(players).map(pid=>({pid, name:players[pid], done:!!done[pid]}));
+}
+function broadcastRoster(){
+  safeSend({k:"roster", roster:rosterData()});
+  renderHostRoster();
+}
+function renderHostRoster(){
+  const box=$("host-roster"); if(!box) return; box.innerHTML="";
+  const r=rosterData();
+  if(!r.length) box.innerHTML='<span class="chip">waiting…</span>';
+  r.forEach(p=>{
+    const c=document.createElement("span");
+    c.className="chip"+(p.done?" done":"");
+    c.textContent=p.name+(p.done?" ✓":"");
+    box.appendChild(c);
+  });
+  const lob=$("host-players");
+  if(lob){ lob.innerHTML=""; if(!r.length) lob.innerHTML='<span class="chip">waiting…</span>';
+    r.forEach(p=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=p.name; lob.appendChild(c); }); }
+  $("btn-start").disabled=!r.length||phase!=="lobby";
+  const nsub=r.filter(p=>p.done).length;
+  const sp=$("host-sub-pill"); if(sp) sp.textContent=nsub+" / "+r.length+" submitted";
+}
+function stateMsg(){
+  const m={k:"state", gameNo, phase, questions:qText};
+  if(phase==="revealed"){ m.answers=qAns; m.board=boardData(); }
+  return m;
+}
+function boardData(){
+  const b=Object.keys(scores).map(pid=>({name:scores[pid].name, score:scores[pid].score}));
+  b.sort((a,b2)=>b2.score-a.score||(a.name<b2.name?-1:1));
+  return b;
+}
+function renderHostBoard(){
+  const wrap=$("host-board-wrap"), box=$("host-board");
+  const b=boardData();
+  wrap.classList.remove("hidden");
+  if(!b.length){ box.innerHTML='<p class="count">Waiting for scores…</p>'; return; }
+  const top=b[0].score;
+  let html='<table class="board"><tr><th>#</th><th>'+esc("ስም · NAME")+'</th><th>'+esc("ነጥብ · PTS")+'</th></tr>';
+  b.forEach((r,i)=>{
+    html+='<tr class="'+(r.score===top?"winrow":"")+'"><td>'+(i+1)+'</td><td>'+(r.score===top?"🏆 ":"")+esc(r.name)+'</td><td>'+r.score+' / '+NQ+'</td></tr>';
+  });
+  box.innerHTML=html+'</table>';
+}
+function renderHostKey(){
+  const box=$("host-key"); box.innerHTML="";
+  for(let i=0;i<NQ;i++){
+    const d=document.createElement("div"); d.className="keyrow";
+    d.innerHTML='<span class="kn">Q'+(i+1)+'</span><span class="kq">'+esc(qText[i])+'</span>'+
+      '<span class="ka">'+ANS[qAns[i]].icon+' '+ANS[qAns[i]].en+'</span>';
+    box.appendChild(d);
+  }
+  $("host-key-wrap").classList.remove("hidden");
+}
+$("btn-start").onclick=()=>{
+  if(phase!=="lobby") return;
+  phase="answering"; gameNo++; done={}; scores={}; revealed=false;
+  $("host-key-wrap").classList.add("hidden");
+  $("host-board-wrap").classList.add("hidden");
+  $("btn-reveal").disabled=false;
+  renderHostRoster();
+  show("scr-host-game");
+  safeSend({k:"start", gameNo, questions:qText});
+};
+$("btn-reveal").onclick=()=>{
+  if(phase!=="answering") return;
+  phase="revealed"; revealed=true;
+  $("btn-reveal").disabled=true;
+  renderHostKey();
+  renderHostBoard();
+  safeSend({k:"reveal", answers:qAns});
+};
+$("btn-newround").onclick=()=>{
+  if(phase==="lobby") return;
+  phase="answering"; gameNo++; done={}; scores={}; revealed=false;
+  $("host-key-wrap").classList.add("hidden");
+  $("host-board-wrap").classList.add("hidden");
+  $("btn-reveal").disabled=false;
+  renderHostRoster();
+  safeSend({k:"start", gameNo, questions:qText});
+};
+const goHome=()=>{ PartyNet.releaseWake(); try{ mqttEnd(); }catch(e){} linked=false;
+  roomCode=null; players={}; done={}; scores={}; gameNo=0; phase="setup"; revealed=false; show("scr-home"); };
+$("btn-host-back").onclick=goHome;
+$("btn-host-home").onclick=goHome;
+</script>
+<script>
+"use strict";
+/* ================= PLAYER ================= */
+let myPid=null, myName="", myAns=[], myGameNo=0, submitted=false, revealedP=false, myScore=null, myQuestions=null;
+let joinRetry=null, joinAcked=false;
+
+$("btn-join").onclick=()=>{ $("join-status").textContent=""; show("scr-join"); };
+$("btn-join-back").onclick=()=>show("scr-home");
+
+$("btn-do-join").onclick=()=>{
+  const code=$("join-code").value.trim().toUpperCase();
+  const name=$("join-name").value.trim();
+  if(code.length!==4){ $("join-status").textContent="Enter the 4-letter code · የ4-ፊደል ኮዱን አስገባ"; return; }
+  if(!name){ $("join-status").textContent="Enter your name · ስምህን አስገባ"; return; }
+  myPid="p"+Date.now().toString(36)+rnd(999);
+  myName=name.slice(0,12); myGameNo=0; submitted=false; revealedP=false; myScore=null;
+  myAns=Array(NQ).fill(null); myQuestions=null;
+  $("join-status").textContent="Connecting…";
+  PartyNet.keepAwake();
+  const doJoin=()=>safeSend({k:"join",pid:myPid,name:myName});
+  const doResync=()=>{ doJoin(); if(submitted) safeSend({k:"submit",pid:myPid,name:myName});
+    if(myScore!==null) safeSend({k:"score",pid:myPid,name:myName,score:myScore}); };
+  mqttConnect(code,()=>{
+    linked=true;
+    roomCode=code;
+    $("player-name-echo").textContent=myName;
+    $("player-room-pill").textContent="CODE "+code;
+    show("scr-player-lobby");
+    doJoin();
+    joinAcked=false; clearInterval(joinRetry);
+    joinRetry=setInterval(()=>{ if(!joinAcked) doJoin(); },3000);
+  },err=>{ $("join-status").textContent=err; },
+  ()=>{ doResync(); });
+
+  msgHandler=m=>{
+    joinAcked=true; if(joinRetry){ clearInterval(joinRetry); joinRetry=null; }
+    if(m.k==="resync"){ doResync(); return; }
+    if((m.k==="roster"||m.k==="lobby")&&Array.isArray(m.roster||m.players)){
+      const list=m.roster?m.roster.map(p=>p.name):m.players;
+      const box=$("player-lobby-list"); box.innerHTML="";
+      list.forEach(n=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=n; box.appendChild(c); });
+    }
+    if(m.k==="start"){ startAnswering(m.gameNo||1, m.questions||QUESTIONS.map(q=>q.en)); }
+    if(m.k==="state"){
+      if(m.phase==="lobby"){ show("scr-player-lobby"); }
+      else if(m.phase==="answering"&&(m.gameNo||0)>=myGameNo){ startAnswering(m.gameNo, m.questions||QUESTIONS.map(q=>q.en)); }
+      else if(m.phase==="revealed"){
+        if(!revealedP){ // catch up: keep existing answers if we already submitted
+          if(!myAns.some(a=>a!==null)){
+            startAnswering(m.gameNo||1, m.questions||QUESTIONS.map(q=>q.en));
+            submitted=true; lockPlayerUI();
+          }
+        }
+        onReveal(m.answers||[]);
+        if(Array.isArray(m.board)&&m.board.length) renderPlayerBoard(m.board);
+      }
+    }
+    if(m.k==="reveal"&&Array.isArray(m.answers)){ onReveal(m.answers); }
+    if(m.k==="board"&&Array.isArray(m.board)){ renderPlayerBoard(m.board); }
+  };
+};
+
+function startAnswering(gn, questions){
+  myGameNo=gn; myAns=Array(NQ).fill(null); submitted=false; revealedP=false; myScore=null;
+  myQuestions=questions.slice(0,NQ);
+  while(myQuestions.length<NQ) myQuestions.push("");
+  $("player-answered-pill").textContent="0 / "+NQ;
+  const box=$("player-questions"); box.innerHTML="";
+  for(let i=0;i<NQ;i++){
+    const row=document.createElement("div"); row.className="qrow"; row.id="pq-"+i;
+    row.innerHTML='<div class="qn">ጥያቄ '+(i+1)+' · QUESTION '+(i+1)+'</div>'+
+      '<div class="qam">'+esc(QUESTIONS[i].am)+'</div>'+
+      '<div class="qen">'+esc(myQuestions[i])+'</div>'+
+      '<div class="ans3" id="pa-'+i+'"></div>';
+    box.appendChild(row);
+    const ab=row.querySelector("#pa-"+i);
+    ["over","under","same"].forEach(v=>{
+      const b=document.createElement("button");
+      b.type="button"; b.className="abtn";
+      b.innerHTML='<span class="big">'+ANS[v].icon+'</span>'+ANS[v].am+'<div class="en2">'+ANS[v].en+'</div>';
+      b.onclick=()=>tapAnswer(i,v);
+      ab.appendChild(b);
+    });
+  }
+  $("btn-submit").disabled=false;
+  $("player-result-slot").innerHTML="";
+  $("player-wait-msg").textContent="መልሶቹን እየጠበቅን ነው… · Waiting for the host to reveal the answers…";
+  show("scr-player-game");
+}
+function tapAnswer(i,v){
+  if(submitted||revealedP) return;
+  myAns[i]=(myAns[i]===v?null:v);
+  syncPlayerBtns(i);
+  const n=myAns.filter(a=>a!==null).length;
+  $("player-answered-pill").textContent=n+" / "+NQ;
+}
+function syncPlayerBtns(i){
+  const box=$("pa-"+i); if(!box) return;
+  const btns=box.querySelectorAll(".abtn");
+  ["over","under","same"].forEach((v,k)=>{ btns[k].className="abtn"+(myAns[i]===v?" "+ANS[v].cls:""); });
+}
+function lockPlayerUI(){
+  for(let i=0;i<NQ;i++){
+    const box=$("pa-"+i); if(!box) continue;
+    box.querySelectorAll(".abtn").forEach(b=>{ b.disabled=true; });
+  }
+  $("btn-submit").disabled=true;
+}
+$("btn-submit").onclick=()=>{
+  if(submitted) return;
+  submitted=true; lockPlayerUI();
+  safeSend({k:"submit",pid:myPid,name:myName});
+  show("scr-player-results");
+};
+function onReveal(answers){
+  if(revealedP) return;
+  revealedP=true;
+  let s=0;
+  for(let i=0;i<NQ;i++){ if(myAns[i]&&answers[i]&&myAns[i]===answers[i]) s++; }
+  myScore=s;
+  safeSend({k:"score",pid:myPid,name:myName,score:s});
+  // review list
+  let html='<div class="score-big"><span class="n">'+s+' / '+NQ+'</span>ነጥብህ · YOUR SCORE</div>';
+  for(let i=0;i<NQ;i++){
+    const you=myAns[i], right=answers[i];
+    const ok=you&&right&&you===right;
+    html+='<div class="rev"><span class="rq">Q'+(i+1)+' · '+(you?ANS[you].icon+" "+ANS[you].en:"—")+
+      '</span><span class="rk '+(ok?"ok":"bad")+'">'+(ok?"✓":"✗")+" "+(right?ANS[right].icon+" "+ANS[right].en:"?")+'</span></div>';
+  }
+  $("player-result-slot").innerHTML=html+'<div id="player-board-slot" style="margin-top:14px"></div>';
+  show("scr-player-results");
+  window.scrollTo(0,0);
+}
+function renderPlayerBoard(board){
+  const slot=$("player-board-slot");
+  const showBoard=(html)=>{
+    if(slot) slot.innerHTML='<h2 style="font-size:18px">🏆 ደረጃ · LEADERBOARD</h2>'+html;
+    else { // host revealed before we submitted: minimal results screen
+      $("player-result-slot").innerHTML='<h2 style="font-size:18px">🏆 ደረጃ · LEADERBOARD</h2>'+html;
+      show("scr-player-results");
+    }
+  };
+  if(!board.length){ showBoard('<p class="count">Waiting for scores…</p>'); return; }
+  const top=board[0].score;
+  const names=board.filter(r=>r.score===top).map(r=>r.name);
+  let html="";
+  if(names.includes(myName))
+    html+='<div class="winner-banner"><div class="trophy">🏆</div><h2>አሸንፈሃል! · YOU WIN!</h2><p>'+esc(names.join(", "))+'</p></div>';
+  else
+    html+='<div class="winner-banner"><div class="trophy">🏆</div><h2>'+esc(names.join(", "))+'</h2><p>አሸናፊ · WINNER</p></div>';
+  html+='<table class="board"><tr><th>#</th><th>'+esc("ስም · NAME")+'</th><th>'+esc("ነጥብ · PTS")+'</th></tr>';
+  board.forEach((r,i)=>{
+    html+='<tr class="'+(r.name===myName?"me":"")+(r.score===top?" winrow":"")+'"><td>'+(i+1)+'</td><td>'+
+      (r.score===top?"🏆 ":"")+esc(r.name)+'</td><td>'+r.score+' / '+NQ+'</td></tr>';
+  });
+  showBoard(html+'</table>');
+}
+const leaveGame=()=>{ PartyNet.releaseWake(); try{ mqttEnd(); }catch(e){} linked=false;
+  myPid=null; roomCode=null; if(joinRetry){ clearInterval(joinRetry); joinRetry=null; } show("scr-home"); };
+$("btn-player-back").onclick=leaveGame;
+$("btn-player-home").onclick=leaveGame;
+$("btn-player-home2").onclick=leaveGame;
+</script>
+</body>
+</html>
