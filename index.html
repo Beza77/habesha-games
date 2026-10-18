@@ -285,7 +285,7 @@
     (function () {
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
       // Card art URLs carry it too, so a fresh deploy can never show a stale cached miss.
-      var SITE_VERSION = '20261010t';
+      var SITE_VERSION = '20261018a';
       // Single source of truth for the game library. mode: 'solo' | 'group'.
       var GAMES = [
         { src: 'games/listen-party/', title: 'Guess the Song - Group', am: 'ዘማሪውንና መዝሙሩን ገምቱ - በጋራ', desc: 'Hear the song clip, pick the answer!', mode: 'group', img: 'assets/cards/listen-party.jpg?v=' + SITE_VERSION, featured: true },
@@ -308,7 +308,8 @@
         { src: 'games/yadons-addis-drive/', title: 'Yadon\'s Addis Drive', am: 'የያድን የአዲስ ጉዞ', desc: 'Cruise through Addis with Yadon!', mode: 'solo', img: 'assets/cards/yadons-addis-drive.jpg?v=' + SITE_VERSION },
         { src: 'games/salems-playground-quest/', title: 'Salem\'s Playground Quest', am: 'የሰላም የመጫወቻ ጀብዱ', desc: 'Join Salem\'s playground adventure!', mode: 'solo', img: 'assets/cards/salems-playground-quest.jpg?v=' + SITE_VERSION },
         { src: 'games/baby-shower-bingo/', title: 'Baby Shower Bingo', am: 'የሕፃን ሻወር ብንጎ', desc: 'Host calls the items, everyone marks their card — five in a row shouts BINGO!', mode: 'group', cat: 'baby-shower', img: 'assets/cards/baby-shower-bingo.jpg?v=' + SITE_VERSION, featured: true },
-        { src: 'games/bridal-shower-bingo/', title: 'Bridal Shower Bingo', am: 'የሙሽሪት ሻወር ብንጎ', desc: 'Host calls the wedding items, everyone marks their card — five in a row shouts BINGO!', mode: 'group', cat: 'bridal-shower', img: 'assets/cards/bridal-shower-bingo.jpg?v=' + SITE_VERSION }
+        { src: 'games/bridal-shower-bingo/', title: 'Bridal Shower Bingo', am: 'የሙሽሪት ሻወር ብንጎ', desc: 'Host calls the wedding items, everyone marks their card — five in a row shouts BINGO!', mode: 'group', cat: 'bridal-shower', img: 'assets/cards/bridal-shower-bingo.jpg?v=' + SITE_VERSION },
+        { src: 'games/over-or-under-bridal/', title: 'Over or Under', am: 'ከላይ ወይስ ከታች', desc: 'Guess if the real numbers are over, under, or just right — the classic bridal shower game, now on your phone!', mode: 'group', cat: 'bridal-shower', img: 'assets/cards/over-or-under-bridal.jpg?v=' + SITE_VERSION }
 ];
       var bySrc = {};
       GAMES.forEach(function (g) { bySrc[g.src] = g; });
