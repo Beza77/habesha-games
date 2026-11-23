@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Heads Up · የጭንቅላት ጨዋታ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+Ethiopic:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light dark;
+  --navy:#17324d;--cyan:#17a9be;--yellow:#f6c548;--orange:#f17935;
+  --green:#2ca272;--red:#dc584b;--bg:#eaf4f6;--ink:#19334b;--muted:#637b8d;
+  --panel:#ffffff;--line:#c7dde2;--shadow:0 18px 42px rgba(23,50,77,.16);
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#101d28;--ink:#edf7f9;--muted:#aac0ca;--panel:#192b38;--line:#36505e;--shadow:0 20px 46px rgba(0,0,0,.32)}
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;min-height:100svh;background:var(--bg);color:var(--ink);
+  font-family:"Fredoka","Noto Sans Ethiopic",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+[hidden]{display:none!important}
+.shell{width:min(100%,860px);margin:0 auto;padding:clamp(12px,3vw,28px) clamp(14px,4vw,28px) 44px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 6px}
+.top h1{margin:0;font-size:clamp(26px,5vw,38px);line-height:1.05;letter-spacing:-.02em;color:var(--navy)}
+.top h1 .am{display:block;font-family:"Noto Sans Ethiopic",sans-serif;font-size:.62em;color:var(--muted);font-weight:600}
+.pill-tag{background:var(--yellow);color:#352700;border-radius:999px;padding:7px 12px;font-weight:700;font-size:.8rem;white-space:nowrap;box-shadow:0 3px 0 rgba(139,60,0,.35)}
+.sub{color:var(--muted);margin:0 0 18px;line-height:1.5}
+.sec-label{font-weight:700;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
+.time-row{display:flex;gap:10px}
+.time-btn{flex:1;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:14px;
+  min-height:56px;font-weight:700;font-size:1.05rem}
+.time-btn[aria-pressed="true"]{border-color:var(--navy);background:var(--navy);color:#fff}
+.time-btn small{display:block;font-size:.75rem;font-weight:600;opacity:.75}
+.decks{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.deck{border:0;border-radius:18px;padding:16px 16px 14px;text-align:left;background:var(--panel);color:var(--ink);
+  box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;min-height:110px}
+.deck:active{transform:translateY(2px)}
+.deck .ico{font-size:30px;line-height:1}
+.deck h2{margin:6px 0 0;font-size:1.15rem;line-height:1.2}
+.deck h2 .am{font-family:"Noto Sans Ethiopic",sans-serif}
+.deck p{margin:0;color:var(--muted);font-size:.88rem}
+.deck .count{margin-top:auto;padding-top:8px;font-size:.8rem;font-weight:700;color:var(--cyan)}
+.steps{display:grid;gap:10px;margin:6px 0 18px}
+.step{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.step .n{flex:0 0 40px;height:40px;border-radius:12px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:20px}
+.step p{margin:0;line-height:1.45}
+.step p b{display:block;font-size:1.02rem}
+.step p span{color:var(--muted);font-size:.9rem}
+.note{background:var(--yellow);color:#352700;border-radius:12px;padding:12px 14px;font-weight:600;line-height:1.45;margin:0 0 18px}
+.primary{border:0;border-radius:14px;min-height:58px;width:100%;padding:12px 18px;font-weight:700;font-size:1.15rem;
+  background:var(--yellow);color:#352700;box-shadow:0 4px 0 rgba(139,60,0,.35)}
+.primary:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(139,60,0,.35)}
+.ghost{border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:14px;min-height:52px;
+  padding:10px 18px;font-weight:700;width:100%;margin-top:10px}
+.back{border:0;background:transparent;color:var(--muted);font-weight:700;padding:8px 0;text-decoration:underline;text-underline-offset:3px}
+/* play stage */
+.play{min-height:100vh;min-height:100svh;background:var(--navy);color:#fff;display:flex;flex-direction:column}
+.play .bar{display:flex;align-items:center;gap:12px;padding:14px clamp(14px,4vw,28px) 8px}
+.timer{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums;min-width:76px;text-align:center;
+  background:rgba(255,255,255,.12);border-radius:12px;padding:4px 8px}
+.timer.low{background:var(--red)}
+.tbar{flex:1;height:14px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--yellow);border-radius:999px;transition:width .25s linear}
+.score-chip{font-weight:700;background:var(--green);border-radius:999px;padding:8px 14px;white-space:nowrap}
+.play .deck-name{text-align:center;color:#bfe6ec;font-size:.9rem;font-weight:600;margin:0}
+.card-wrap{flex:1;display:grid;place-items:center;padding:10px clamp(14px,4vw,28px)}
+.card{background:#fff;color:var(--navy);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.35);
+  width:min(100%,640px);min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:28px 20px;gap:8px}
+.card .kicker{font-size:.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.card .word{font-family:"Noto Sans Ethiopic",sans-serif;font-size:clamp(44px,11vw,84px);line-height:1.1;font-weight:700;overflow-wrap:anywhere}
+.card .gloss{font-size:clamp(17px,3.4vw,24px);color:var(--muted);font-weight:600}
+.card .pos{font-size:.85rem;color:var(--muted);font-weight:600}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 clamp(14px,4vw,28px) 8px}
+.big-btn{border:0;border-radius:18px;min-height:84px;font-size:1.35rem;font-weight:700;color:#fff}
+.big-btn small{display:block;font-size:.8rem;font-weight:600;opacity:.85}
+.btn-good{background:var(--green);box-shadow:0 5px 0 #1d6b48}
+.btn-pass{background:var(--red);box-shadow:0 5px 0 #96281e}
+.big-btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.3)}
+.tilt-hint{text-align:center;color:#bfe6ec;font-size:.9rem;margin:8px 0 0;padding:0 16px}
+.end-row{padding:12px clamp(14px,4vw,28px) max(18px,env(safe-area-inset-bottom))}
+.end-btn{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:999px;
+  min-height:44px;padding:8px 22px;font-weight:700;width:100%}
+/* flash */
+.flash{position:fixed;inset:0;z-index:50;display:grid;place-items:center;pointer-events:none;opacity:0;transition:opacity .12s}
+.flash.show{opacity:1}
+.flash.good{background:rgba(44,162,114,.92)}
+.flash.bad{background:rgba(220,88,75,.92)}
+.flash span{font-family:"Noto Sans Ethiopic",sans-serif;font-size:clamp(48px,14vw,110px);font-weight:700;color:#fff}
+/* countdown */
+.count-screen{min-height:100vh;min-height:100svh;background:var(--navy);color:#fff;display:grid;place-items:center;text-align:center}
+.count-screen .num{font-size:clamp(110px,34vw,220px);font-weight:700;line-height:1;color:var(--yellow)}
+.count-screen p{font-size:1.2rem;color:#bfe6ec;margin:8px 0 0}
+/* results */
+.score-big{text-align:center;background:var(--panel);border-radius:20px;box-shadow:var(--shadow);padding:22px 16px;margin-bottom:16px}
+.score-big .n{font-size:clamp(56px,14vw,96px);font-weight:700;line-height:1;color:var(--navy)}
+.score-big p{margin:6px 0 0;color:var(--muted);font-weight:600}
+.res-lists{display:grid;gap:12px}
+@media(min-width:640px){.res-lists{grid-template-columns:1fr 1fr}}
+.res-list{background:var(--panel);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+.res-list h2{margin:0 0 4px;font-size:1.05rem}
+.res-list h2.good{color:var(--green)}
+.res-list h2.bad{color:var(--red)}
+.res-list ul{list-style:none;margin:8px 0 0;padding:0}
+.res-list li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:.95rem}
+.res-list li .am{font-family:"Noto Sans Ethiopic",sans-serif;font-weight:700}
+.res-list li .en{color:var(--muted)}
+.res-list .empty{color:var(--muted);font-size:.9rem;margin:8px 0 0}
+</style>
+</head>
+<body>
+
+<!-- DECK PICKER -->
+<section class="screen shell" id="screen-decks">
+  <div class="top">
+    <h1>Heads Up!<span class="am">የጭንቅላት ጨዋታ</span></h1>
+    <span class="pill-tag">👥 Group · Party</span>
+  </div>
+  <p class="sub">ስልኩን በጭንቅላታችሁ ላይ አድርጉት — ጓደኞቻችሁ ፍንጭ ይስጡ፣ ቃሉን ገምቱ! Hold the phone to your forehead — your friends give the clues, you guess the word!</p>
+
+  <p class="sec-label">ጊዜ ምረጡ · Pick a round length</p>
+  <div class="time-row" role="group" aria-label="Round length">
+    <button class="time-btn" type="button" data-secs="60" aria-pressed="true">60 <small>ሰከንድ · seconds</small></button>
+    <button class="time-btn" type="button" data-secs="90" aria-pressed="false">90 <small>ሰከንድ · seconds</small></button>
+  </div>
+
+  <p class="sec-label">ዴክ ምረጡ · Pick a deck</p>
+  <div class="decks" id="deckGrid"></div>
+</section>
+
+<!-- HOW TO -->
+<section class="screen shell" id="screen-howto" hidden>
+  <div class="top">
+    <h1 id="howtoTitle">How to play<span class="am">እንዴት እንደሚጫወት</span></h1>
+  </div>
+  <div class="steps">
+    <div class="step"><span class="n">📱</span><p><b>ስልኩን በጭንቅላታችሁ ላይ አድርጉት</b><span>Hold the phone to your forehead, screen facing your friends.</span></p></div>
+    <div class="step"><span class="n">🗣️</span><p><b>ጓደኞቻችሁ ፍንጭ ይስጡ</b><span>Your friends give clues — they can act, describe, or sing, but they may not say the word.</span></p></div>
+    <div class="step"><span class="n">⬇️</span><p><b>ትክክል ከሆነ ወደ ታች አዘንብሉት</b><span>Tilt the phone down when you guess right — green means correct!</span></p></div>
+    <div class="step"><span class="n">⬆️</span><p><b>ካልሆነ ወደ ላይ አዘንብሉት</b><span>Not getting it? Tilt up to pass and move to the next word.</span></p></div>
+  </div>
+  <p class="note">ምንም ችግር የለም — ስልኩን ማዘንበል ካልቻላችሁ፣ ከታች ያሉትን ትክክል ✓ እና አልፉ ✕ ቁልፎች መጠቀም ትችላላችሁ።<br>No tilt? No problem — the big Correct ✓ and Pass ✕ buttons work too.</p>
+  <button class="primary" type="button" id="startBtn">ጨዋታውን ጀምሩ · Start the game</button>
+  <button class="ghost" type="button" id="changeDeckBtn">ሌላ ዴክ ምረጡ · Choose another deck</button>
+</section>
+
+<!-- COUNTDOWN -->
+<section class="screen count-screen" id="screen-count" hidden>
+  <div><div class="num" id="countNum">3</div><p id="countLabel">ስልኩን በጭንቅላታችሁ ላይ አድርጉት!<br>Put the phone on your forehead!</p></div>
+</section>
+
+<!-- PLAY -->
+<section class="screen play" id="screen-play" hidden>
+  <div class="bar">
+    <span class="timer" id="timerText">60</span>
+    <span class="tbar"><i id="timerBar" style="width:100%"></i></span>
+    <span class="score-chip" id="scoreChip">✓ 0</span>
+  </div>
+  <p class="deck-name" id="playDeckName"></p>
+  <div class="card-wrap">
+    <div class="card" id="wordCard">
+      <span class="kicker" id="cardKicker">Guess this word</span>
+      <span class="word" id="cardWord">—</span>
+      <span class="gloss" id="cardGloss"></span>
+      <span class="pos" id="cardPos"></span>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="big-btn btn-good" type="button" id="goodBtn">✓ ትክክል<small>Correct · tilt down</small></button>
+    <button class="big-btn btn-pass" type="button" id="passBtn">✕ አልፉ<small>Pass · tilt up</small></button>
+  </div>
+  <p class="tilt-hint" id="tiltHint">ወደ ታች = ትክክል · ወደ ላይ = አልፉ</p>
+  <div class="end-row"><button class="end-btn" type="button" id="endBtn">ጨዋታውን አቁሙ · End round</button></div>
+</section>
+
+<!-- RESULTS -->
+<section class="screen shell" id="screen-results" hidden>
+  <div class="top">
+    <h1>ጊዜው አልቋል!<span class="am">Time's up!</span></h1>
+    <span class="pill-tag" id="resDeckTag"></span>
+  </div>
+  <div class="score-big">
+    <div class="n" id="resScore">0</div>
+    <p id="resLine">ትክክል ያገኛችሁት ቃላት · words you got right</p>
+  </div>
+  <div class="res-lists">
+    <div class="res-list">
+      <h2 class="good">✓ ያገኛችሁት ቃላት · Correct</h2>
+      <ul id="goodList"></ul>
+      <p class="empty" id="goodEmpty" hidden>ምንም ትክክል የለም — በሚቀጥለው ዙር ይሻላል!</p>
+    </div>
+    <div class="res-list">
+      <h2 class="bad">✕ ያለፋችሁት ቃላት · Passed</h2>
+      <ul id="passList"></ul>
+      <p class="empty" id="passEmpty" hidden>ምንም አላለፋችሁም — በጣም ጥሩ!</p>
+    </div>
+  </div>
+  <div style="height:16px"></div>
+  <button class="primary" type="button" id="againBtn">እንደገና ተጫወቱ · Play again</button>
+  <button class="ghost" type="button" id="newDeckBtn">ሌላ ዴክ ምረጡ · Choose another deck</button>
+</section>
+
+<div class="flash" id="flash"><span id="flashText"></span></div>
+
+<script>
+(function(){
+"use strict";
+var DECKS=[
+ {id:"animals",icon:"🦁",name:"Animals",am:"እንስሳት",words:[
+  ["አንበሳ","Lion"],["ዝሆን","Elephant"],["ድመት","Cat"],["ውሻ","Dog"],["ጦጣ","Monkey"],
+  ["ፈረስ","Horse"],["ላም","Cow"],["በግ","Sheep"],["ፍየል","Goat"],["ዶሮ","Chicken"],
+  ["ወፍ","Bird"],["ዓሣ","Fish"],["እባብ","Snake"],["ድብ","Bear"],["አህያ","Donkey"],
+  ["ግመል","Camel"],["ጅብ","Hyena"],["ቀበሮ","Fox"],["ነብር","Leopard"],["አይጥ","Mouse"]]},
+ {id:"food",icon:"🍲",name:"Ethiopian Food",am:"የኢትዮጵያ ምግብ",words:[
+  ["እንጀራ","Injera"],["ጥብስ","Tibs"],["ዶሮ ወጥ","Doro Wat"],["ክትፎ","Kitfo"],["ሽሮ","Shiro"],
+  ["ቡና","Buna (coffee)"],["ጠጅ","Tej (honey wine)"],["ምስር ወጥ","Misir Wat"],["ጎመን","Gomen (greens)"],["አይብ","Ayib (cheese)"],
+  ["ዳቦ","Dabo (bread)"],["ወተት","Milk"],["ማር","Honey"],["ጨው","Salt"],["በርበሬ","Berbere"],
+  ["ሙዝ","Banana"],["ማንጎ","Mango"],["ብርቱካን","Orange"],["አቮካዶ","Avocado"],["እንቁላል","Egg"]]},
+ {id:"bible",icon:"📖",name:"Bible People",am:"የመጽሐፍ ቅዱስ ሰዎች",words:[
+  ["ሙሴ","Moses"],["ዳዊት","David"],["አስቴር","Esther"],["ማርያም","Mary"],["አብርሃም","Abraham"],
+  ["ኖህ","Noah"],["ዮሴፍ","Joseph"],["ሐና","Hannah"],["ሩት","Ruth"],["ሳሙኤል","Samuel"],
+  ["ዮሐንስ","John"],["ጴጥሮስ","Peter"],["እስሐቅ","Isaac"],["ያዕቆብ","Jacob"],["ሰሎሞን","Solomon"],
+  ["ዮና","Jonah"],["ዳንኤል","Daniel"],["ሄዋን","Eve"],["አዳም","Adam"],["ሚርያም","Miriam"]]},
+ {id:"famous",icon:"⭐",name:"Famous Ethiopians",am:"ታዋቂ ኢትዮጵያውያን",words:[
+  ["አበበ ቢቂላ","Abebe Bikila"],["ኃይሌ ገብረሥላሴ","Haile Gebrselassie"],["ኬነኒሳ በቀለ","Kenenisa Bekele"],["ጥሩነሽ ዲባባ","Tirunesh Dibaba"],["መሰረት ደፋር","Meseret Defar"],
+  ["አልማዝ አያና","Almaz Ayana"],["ሚኒሊክ","Menelik II"],["ኃይለ ሥላሴ","Haile Selassie"],["ቴዎድሮስ","Tewodros II"],["ሉሲ","Lucy"],
+  ["ቴዲ አፍሮ","Teddy Afro"],["አስቴር አወቀ","Aster Aweke"],["ማህሙድ አህመድ","Mahmoud Ahmed"],["እጅጋየሁ ሽባባው","Gigi"],["ቴዎድሮስ አድሀኖም","Tedros Adhanom"],
+  ["አቤል ተስፋዬ","The Weeknd"],["ራስ መኮንን","Ras Makonnen"],["ባልቻ ሳፎ","Balcha Safo"],["ዮሐንስ 4ኛ","Emperor Yohannes IV"],["ፋሲል","Emperor Fasilides"]]},
+ {id:"places",icon:"🗺️",name:"Places in Ethiopia",am:"የኢትዮጵያ ቦታዎች",words:[
+  ["አዲስ አበባ","Addis Ababa"],["ላሊበላ","Lalibela"],["አክሱም","Axum"],["ጎንደር","Gondar"],["ጣና ሐይቅ","Lake Tana"],
+  ["ሐረር","Harar"],["ባህር ዳር","Bahir Dar"],["መቀሌ","Mekelle"],["አዋሳ","Hawassa"],["ጂማ","Jimma"],
+  ["ድሬዳዋ","Dire Dawa"],["አርባ ምንጭ","Arba Minch"],["ጋምቤላ","Gambela"],["ነቀምት","Nekemte"],["ጅግጅጋ","Jigjiga"],
+  ["ሶዶ","Sodo"],["ደሴ","Dessie"],["ደብረ ብርሃን","Debre Birhan"],["ሴሜን ተራሮች","Simien Mountains"],["ዳናኪል","Danakil"]]},
+ {id:"everyday",icon:"💬",name:"Everyday Amharic Words",am:"ዕለት ተዕለት ቃላት",words:[
+  ["ሰላም","Peace · Hello"],["ፍቅር","Love"],["ቤት","House"],["ውሃ","Water"],["ምግብ","Food"],
+  ["መንገድ","Road"],["መጽሐፍ","Book"],["ትምህርት ቤት","School"],["ወንድም","Brother"],["እህት","Sister"],
+  ["እናት","Mother"],["አባት","Father"],["ጸሐይ","Sun"],["ጨረቃ","Moon"],["ሰማይ","Sky"],
+  ["ዛፍ","Tree"],["አበባ","Flower"],["መኪና","Car"],["ልብ","Heart"],["ጊዜ","Time"]]}
+];
+var $=function(id){return document.getElementById(id)};
+var screens=["screen-decks","screen-howto","screen-count","screen-play","screen-results"];
+function show(id){screens.forEach(function(s){$(s).hidden=(s!==id)});window.scrollTo(0,0)}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+
+var duration=60, deck=null, queue=[], idx=0, correct=[], passed=[];
+var playing=false, locked=false, timerId=null, endAt=0, baseline=null, lastBeta=null, tiltOK=false, tiltSeen=false;
+
+/* deck grid */
+var grid=$("deckGrid");
+DECKS.forEach(function(d){
+  var b=document.createElement("button");
+  b.type="button";b.className="deck";
+  b.innerHTML='<span class="ico">'+d.icon+'</span><h2><span class="am">'+d.am+'</span><br>'+d.name+'</h2><p>'+d.words.length+' ቃላት · words</p><span class="count">▶ ተጫወቱ · Play</span>';
+  b.addEventListener("click",function(){deck=d;$("howtoTitle").innerHTML=d.am+' · '+d.name;show("screen-howto")});
+  grid.appendChild(b);
+});
+document.querySelectorAll(".time-btn").forEach(function(b){
+  b.addEventListener("click",function(){
+    document.querySelectorAll(".time-btn").forEach(function(x){x.setAttribute("aria-pressed","false")});
+    b.setAttribute("aria-pressed","true");duration=parseInt(b.getAttribute("data-secs"),10);
+  });
+});
+$("changeDeckBtn").addEventListener("click",function(){show("screen-decks")});
+
+/* start: ask iOS tilt permission inside the tap, then countdown */
+$("startBtn").addEventListener("click",function(){
+  function go(){runCountdown()}
+  if(typeof DeviceOrientationEvent!=="undefined"&&typeof DeviceOrientationEvent.requestPermission==="function"){
+    DeviceOrientationEvent.requestPermission().then(function(state){
+      tiltOK=(state==="granted");go();
+    }).catch(function(){tiltOK=false;go()});
+  }else{tiltOK=("ondeviceorientation" in window);go()}
+});
+
+function runCountdown(){
+  show("screen-count");
+  var n=3;$("countNum").textContent="3";
+  var iv=setInterval(function(){
+    n--;
+    if(n>0){$("countNum").textContent=String(n)}
+    else if(n===0){$("countNum").textContent="ጀምር!";$("countLabel").innerHTML="እንኳን ደህና መጡ — ገምቱ!<br>Go — guess!"}
+    else{clearInterval(iv);startRound()}
+  },800);
+}
+
+function startRound(){
+  queue=shuffle(deck.words.slice());idx=0;correct=[];passed=[];
+  playing=true;locked=false;baseline=null;lastBeta=null;tiltSeen=false;
+  $("playDeckName").textContent=deck.am+" · "+deck.name;
+  $("tiltHint").textContent=tiltOK?"ወደ ታች = ትክክል · ወደ ላይ = አልፉ":"ቁልፎቹን ተጠቅሙ — tilt is not on on this device";
+  show("screen-play");
+  renderCard();updateScore();
+  endAt=Date.now()+duration*1000;
+  tick();
+  timerId=setInterval(tick,200);
+  window.addEventListener("deviceorientation",onTilt);
+}
+function tick(){
+  var left=Math.max(0,Math.ceil((endAt-Date.now())/1000));
+  $("timerText").textContent=String(left);
+  $("timerBar").style.width=(left/duration*100)+"%";
+  $("timerText").classList.toggle("low",left<=10);
+  if(left<=0){endRound()}
+}
+function renderCard(){
+  var w=queue[idx];
+  $("cardWord").textContent=w[0];
+  $("cardGloss").textContent=w[1];
+  $("cardPos").textContent="ቃል "+(idx+1)+" ከ "+queue.length+" · word "+(idx+1)+" of "+queue.length;
+  $("cardKicker").textContent=deck.am;
+}
+function updateScore(){$("scoreChip").textContent="✓ "+correct.length}
+function vibrate(ms){try{if(navigator.vibrate)navigator.vibrate(ms)}catch(e){}}
+function flash(kind,text){
+  var f=$("flash");$("flashText").textContent=text;
+  f.className="flash show "+(kind==="good"?"good":"bad");
+  setTimeout(function(){f.className="flash"},450);
+}
+function advance(){
+  idx++;
+  if(idx>=queue.length){endRound(true);return}
+  renderCard();
+}
+function markGood(){
+  if(!playing||locked)return;
+  locked=true;correct.push(queue[idx]);updateScore();vibrate(60);flash("good","ትክክል!");
+  setTimeout(function(){locked=false;baseline=lastBeta;if(playing)advance()},450);
+}
+function markPass(){
+  if(!playing||locked)return;
+  locked=true;passed.push(queue[idx]);vibrate([40,40,40]);flash("bad","አልፏል");
+  setTimeout(function(){locked=false;baseline=lastBeta;if(playing)advance()},450);
+}
+$("goodBtn").addEventListener("click",markGood);
+$("passBtn").addEventListener("click",markPass);
+$("endBtn").addEventListener("click",function(){endRound()});
+document.addEventListener("keydown",function(e){
+  if(!playing)return;
+  if(e.key==="ArrowDown"||e.key==="Enter")markGood();
+  else if(e.key==="ArrowUp")markPass();
+});
+
+/* tilt: beta near 90 = phone upright on forehead; down = correct, up = pass */
+function onTilt(e){
+  if(!playing||locked)return;
+  var b=e.beta;
+  if(b===null||typeof b==="undefined")return;
+  tiltSeen=true;lastBeta=b;
+  if(baseline===null){baseline=b;return}
+  var d=b-baseline;
+  if(d<-22)markGood();
+  else if(d>22)markPass();
+}
+
+function endRound(deckDone){
+  if(!playing)return;
+  playing=false;
+  clearInterval(timerId);
+  window.removeEventListener("deviceorientation",onTilt);
+  $("resDeckTag").textContent=deck.am+" · "+deck.name;
+  $("resScore").textContent=String(correct.length);
+  $("resLine").textContent=(deckDone?"ዴኩን ጨርሳችኋል! ":"")+correct.length+" ትክክል ያገኛችሁት ቃላት · words you got right";
+  fillList($("goodList"),$("goodEmpty"),correct);
+  fillList($("passList"),$("passEmpty"),passed);
+  show("screen-results");
+}
+function fillList(ul,empty,arr){
+  ul.innerHTML="";
+  empty.hidden=arr.length>0;
+  arr.forEach(function(w){
+    var li=document.createElement("li");
+    li.innerHTML='<span class="am">'+w[0]+'</span><span class="en">'+w[1]+'</span>';
+    ul.appendChild(li);
+  });
+}
+$("againBtn").addEventListener("click",function(){runCountdown()});
+$("newDeckBtn").addEventListener("click",function(){show("screen-decks")});
+show("screen-decks");
+})();
+</script>
+</body>
+</html>
