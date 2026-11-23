@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+Ethiopic:wght@500;600;700&display=swap" rel="stylesheet">
-  <title>Habesha Games — Ethiopian games. Play together.</title>
+  <title>ሀበሻ ጌምስ | Quiz • Riddles • Brain Games — Habesha Games</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -79,15 +79,19 @@
     button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 
     .topbar { width: min(1180px, 100%); margin: 0 auto; padding: max(10px, env(safe-area-inset-top)) clamp(16px, 4vw, 42px) 2px; display: flex; align-items: center; justify-content: space-between; }
-    .brand { font-weight: 700; font-size: 1.05rem; letter-spacing: .04em; color: var(--navy); text-decoration: none; }
-    .brand span { color: var(--orange); }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--navy); text-decoration: none; }
+    .brand-logo { width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line); display: block; background: #17324d; }
+    .brand-text { display: flex; flex-direction: column; line-height: 1.12; }
+    .brand-am { font-family: "Noto Sans Ethiopic", sans-serif; font-weight: 700; font-size: 1.18rem; }
+    .brand-en { font-size: .68rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
     .icon-btn { width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); display: grid; place-items: center; cursor: pointer; box-shadow: 0 6px 16px rgba(23,50,77,.08); }
     .icon-btn svg { width: 20px; height: 20px; }
 
     .page { width: min(1180px, 100%); margin: 0 auto; padding: 6px clamp(16px, 4vw, 42px) max(44px, env(safe-area-inset-bottom)); }
 
     .hero h1 { margin: 8px 0 0; color: var(--navy); font-size: clamp(1.7rem, 6.4vw, 2.6rem); line-height: 1.05; letter-spacing: -.03em; text-wrap: balance; }
-    .hero-sub { margin: 6px 0 14px; color: var(--muted); font-size: clamp(.9rem, 2.6vw, 1.02rem); font-family: "Noto Sans Ethiopic", sans-serif; line-height: 1.5; }
+    .hero-tagline { display: inline-block; margin: 12px 0 0; padding: 7px 16px; border-radius: 999px; background: #17324d; color: #f6c548; font-weight: 700; font-size: .92rem; letter-spacing: .04em; }
+    .hero-sub { margin: 10px 0 14px; color: var(--muted); font-size: clamp(.9rem, 2.6vw, 1.02rem); font-family: "Noto Sans Ethiopic", sans-serif; line-height: 1.5; }
 
     .search { position: relative; display: block; }
     .search svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 21px; color: var(--muted); pointer-events: none; }
@@ -190,7 +194,7 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="./">🎮 HABESHA <span>GAMES</span></a>
+    <a class="brand" href="./"><img class="brand-logo" src="assets/logo.png" alt="Habesha Games logo" /><span class="brand-text"><span class="brand-am" lang="am">ሀበሻ ጌምስ</span><span class="brand-en">Habesha Games</span></span></a>
     <button class="icon-btn" id="searchToggle" type="button" aria-label="Search games">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
     </button>
@@ -198,8 +202,9 @@
 
   <main class="page">
     <section class="hero" aria-labelledby="hero-title">
-      <h1 id="hero-title">Pick a game.<br />Play right away.</h1>
-      <p class="hero-sub" lang="am">የኢትዮጵያ ጨዋታዎች — አብረን እንጫወት።</p>
+      <h1 id="hero-title" lang="am">ሀበሻ ጌምስ</h1>
+      <p class="hero-tagline">Quiz • Riddles • Brain Games</p>
+      <p class="hero-sub">Pick a game. Play right away. <span lang="am">የኢትዮጵያ ጨዋታዎች — አብረን እንጫወት።</span></p>
       <label class="search">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
         <input id="search" type="search" placeholder="Search games…" autocomplete="off" />
