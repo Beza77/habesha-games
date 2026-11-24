@@ -309,10 +309,11 @@
     (function () {
       // Bump this every time a game is updated so players always load the fresh copy, never a cached one.
       // Card art URLs carry it too, so a fresh deploy can never show a stale cached miss.
-      var SITE_VERSION = '20261123c';
+      var SITE_VERSION = '20261123d';
       // Single source of truth for the game library. mode: 'solo' | 'group'.
       var GAMES = [
         { src: 'games/riddles/', title: 'Riddles', am: 'እንቆቅልሽ', desc: 'Think it through — can you guess the answer?', mode: 'solo', img: 'assets/cards/riddles.jpg?v=' + SITE_VERSION, featured: true },
+        { src: 'games/word-scramble/', title: 'Word Scramble', am: 'ቃላት አደራድር', desc: 'Unscramble the Amharic word before time runs out!', mode: 'solo', img: 'assets/cards/word-scramble.jpg?v=' + SITE_VERSION },
         { src: 'games/listen-party/', title: 'Listen & Guess the Song', am: 'አድምጠው ገምት', desc: 'Hear the song clip, pick the answer!', mode: 'group', img: 'assets/cards/listen-party.jpg?v=' + SITE_VERSION, featured: true },
         { src: 'games/heads-up/', title: 'Heads Up', am: 'የጭንቅላት ጨዋታ', desc: 'Hold the phone to your forehead — friends give clues, you guess the word!', mode: 'group', img: 'assets/cards/heads-up.jpg?v=' + SITE_VERSION },
         { src: 'games/guess-party/', title: 'Read & Guess the Song', am: 'የቡድን ጨዋታ', desc: 'One host, everyone plays on their phone!', mode: 'group', img: 'assets/cards/guess-party.jpg?v=' + SITE_VERSION },
