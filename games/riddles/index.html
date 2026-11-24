@@ -43,23 +43,12 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 .progress .round{font-weight:700;font-size:.95rem}
 .progress .tbar{flex:1;margin-top:0;background:var(--line)}
 .progress .tbar i{background:var(--cyan);transition:width .3s ease}
-.score-chip{font-weight:700;background:var(--green);color:#fff;border-radius:999px;padding:7px 14px;white-space:nowrap;font-size:.9rem}
 .answer-card{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);
   padding:clamp(18px,3.5vw,28px);text-align:center;margin-top:14px}
 .answer-card .emoji{font-size:clamp(52px,10vw,84px);line-height:1}
 .answer-card .answer-label{font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin:12px 0 6px}
 .answer-card h2{font-family:"Noto Sans Ethiopic",sans-serif;font-size:clamp(30px,6vw,52px);line-height:1.1;margin:0;color:var(--navy)}
 .answer-card .answer-en{font-size:clamp(16px,3vw,22px);color:var(--muted);font-weight:600;margin:10px 0 0}
-.ask{font-size:1.05rem;font-weight:700;margin:18px 0 10px;text-align:center}
-.ask .am{font-family:"Noto Sans Ethiopic",sans-serif}
-.mark-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.mark-btn{border:0;border-radius:16px;min-height:60px;font-size:1.1rem;font-weight:700;color:#fff}
-.mark-btn.yes{background:var(--green)}
-.mark-btn.no{background:var(--red)}
-.mark-btn:active{transform:translateY(2px)}
-.feedback{text-align:center;font-weight:700;margin:14px 0 0;font-size:1.05rem}
-.feedback.good{color:var(--green)}
-.feedback.miss{color:var(--muted)}
 .primary{border:0;border-radius:14px;min-height:58px;width:100%;padding:12px 18px;font-weight:700;font-size:1.15rem;
   background:var(--yellow);color:#352700;box-shadow:0 4px 0 rgba(139,60,0,.35);margin-top:14px}
 .primary:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(139,60,0,.35)}
@@ -71,8 +60,6 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
   padding:clamp(22px,4vw,36px);text-align:center}
 .end-card .big{font-size:clamp(40px,9vw,64px);line-height:1}
 .end-card h2{font-family:"Noto Sans Ethiopic",sans-serif;font-size:clamp(24px,5vw,34px);margin:14px 0 6px;color:var(--navy)}
-.end-card .score-line{font-size:clamp(19px,3.6vw,26px);font-weight:700;margin:0}
-.end-card .score-line strong{color:var(--cyan)}
 .end-card p{color:var(--muted);line-height:1.6;margin:12px 0 0}
 .steps{display:grid;gap:10px;margin:6px 0 18px}
 .step{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
@@ -86,7 +73,6 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 .game-guide p,.game-guide li{color:var(--muted);line-height:1.7;font-size:15.5px}
 .game-guide ul{padding-left:20px;margin:8px 0}
 .game-guide li{margin:7px 0}
-@media(max-width:460px){.mark-row{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -96,14 +82,14 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
     <h1>እንቆቅልሽ <span class="am">Riddles</span></h1>
     <span class="pill-tag"><span id="riddleTotal">9</span> riddles</span>
   </header>
-  <p class="sub">Think it through, then reveal the answer. At the end, see how many you got correct!</p>
+  <p class="sub">Think it through, then reveal the answer — just for the fun of cracking it!</p>
 
   <!-- Start screen -->
   <section id="startScreen">
     <div class="steps">
       <div class="step"><span class="n">1</span><p><b>Read the riddle</b><span>Each riddle is in Amharic, with the English underneath.</span></p></div>
       <div class="step"><span class="n">2</span><p><b>Think it through</b><span>Take your time — or run the 5-second countdown for a real challenge.</span></p></div>
-      <div class="step"><span class="n">3</span><p><b>Reveal and score yourself</b><span>Tap the answer, then say honestly whether you got it right. Your score is on you!</span></p></div>
+      <div class="step"><span class="n">3</span><p><b>Reveal the answer</b><span>Tap the answer and see if you cracked it — no scores, just play!</span></p></div>
     </div>
     <button class="primary" id="startBtn" type="button">ጨዋታውን ጀምሩ · Start the game</button>
     <p class="controls-note">No sign-up, no download — just play. Works best out loud with family and friends.</p>
@@ -114,7 +100,6 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
     <div class="progress">
       <span class="round">Riddle <span id="roundNum">1</span> of <span id="roundTotal">9</span></span>
       <div class="tbar"><i id="progressBar" style="width:0%"></i></div>
-      <span class="score-chip">⭐ Score <span id="scoreVal">0</span></span>
     </div>
 
     <div class="stage" id="stage">
@@ -140,13 +125,7 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
         <h2 id="answerAm"></h2>
         <p class="answer-en" id="answerEn"></p>
       </div>
-      <p class="ask"><span class="am">አገኛችሁት?</span> · Did you get it right?</p>
-      <div class="mark-row">
-        <button class="mark-btn yes" id="markYes" type="button">✓ አዎን፣ አገኘኋት!</button>
-        <button class="mark-btn no" id="markNo" type="button">✗ አይ፣ አላገኘኋትም</button>
-      </div>
-      <p class="feedback" id="feedback" hidden></p>
-      <button class="primary" id="nextBtn" type="button" hidden>ቀጣዩ እንቆቅልሽ · Next riddle →</button>
+      <button class="primary" id="nextBtn" type="button">ቀጣዩ እንቆቅልሽ · Next riddle →</button>
     </div>
   </section>
 
@@ -155,17 +134,16 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
     <div class="end-card">
       <div class="big">🎉</div>
       <h2>ጨዋታው አልቋል!</h2>
-      <p class="score-line">You got <strong><span id="finalScore">0</span> out of <span id="finalTotal">9</span></strong> correct!</p>
       <p id="finalMessage"></p>
       <button class="primary" id="againBtn" type="button">እንደገና እንጫወት · Play again</button>
-      <p class="controls-note">Challenge your family — can anyone beat your score?</p>
+      <p class="controls-note">Play again — the riddles come in a fresh order every time.</p>
     </div>
   </section>
 
   <section class="game-guide" aria-label="About this game">
     <h2>How to play</h2>
-    <p>Tap <strong>"Start the game"</strong> and the game shows you one riddle at a time — first in Amharic, with the English underneath. Read it, think it over, and say your answer out loud before you reveal it. Feeling brave? Run the 5-second countdown and beat the clock. After the reveal, be honest with yourself: tap <strong>"Yes, I got it!"</strong> if your answer was right, or <strong>"Not this time"</strong> if it wasn't. There are no wrong answers here — only riddles you haven't cracked yet.</p>
-    <p>Your score builds up as you go, and the final screen tells you how many of the 9 riddles you got correct. Play again and the riddles come in a fresh order, so the game never plays the same way twice. It is a lovely game for the whole family: grandparents know the old riddles by heart, and kids love the "aha!" moment when the answer clicks.</p>
+    <p>Tap <strong>"Start the game"</strong> and the game shows you one riddle at a time — first in Amharic, with the English underneath. Read it, think it over, and say your answer out loud before you reveal it. Feeling brave? Run the 5-second countdown and beat the clock. After the reveal, see if you cracked it — there are no wrong answers here, only riddles you haven't cracked yet.</p>
+    <p>Play again and the riddles come in a fresh order, so the game never plays the same way twice. It is a lovely game for the whole family: grandparents know the old riddles by heart, and kids love the "aha!" moment when the answer clicks.</p>
     <h2>Tips to play well</h2>
     <ul>
       <li><strong>Listen for the wordplay.</strong> Most riddles turn on one word with two meanings — find the word that could mean something else, and the answer is usually hiding behind it.</li>
@@ -215,11 +193,10 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 
   var $ = function (id) { return document.getElementById(id); };
   var startScreen = $("startScreen"), playScreen = $("playScreen"), endScreen = $("endScreen");
-  var order = [], idx = 0, score = 0, marked = false, cdTimer = null;
+  var order = [], idx = 0, cdTimer = null;
 
   $("riddleTotal").textContent = RIDDLES.length;
   $("roundTotal").textContent = RIDDLES.length;
-  $("finalTotal").textContent = RIDDLES.length;
 
   // ---- sounds (WebAudio, no files needed) ----
   var AC = null;
@@ -252,8 +229,7 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 
   function startGame() {
     order = shuffle(RIDDLES.map(function (_, i) { return i; }));
-    idx = 0; score = 0;
-    $("scoreVal").textContent = "0";
+    idx = 0;
     startScreen.hidden = true; endScreen.hidden = true; playScreen.hidden = false;
     showRiddle();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -271,8 +247,6 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
     $("countdownWrap").hidden = true;
     $("thinkControls").hidden = false;
     $("answerArea").hidden = true;
-    $("feedback").hidden = true;
-    $("nextBtn").hidden = true;
     $("countdownBtn").disabled = false; $("revealBtn").disabled = false;
   }
 
@@ -307,30 +281,11 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
     $("answerAm").textContent = r.answer;
     $("answerEn").textContent = r.answerEn;
     $("answerArea").hidden = false;
-    $("markYes").disabled = false; $("markNo").disabled = false;
-    chime();
-  }
-
-  function mark(correct) {
-    if (marked) return;
-    marked = true;
-    $("markYes").disabled = true; $("markNo").disabled = true;
-    var fb = $("feedback");
-    if (correct) {
-      score += 1;
-      $("scoreVal").textContent = score;
-      fb.textContent = "🎉 Correct — one point for you!";
-      fb.className = "feedback good";
-    } else {
-      fb.textContent = "No worries — the next one is yours!";
-      fb.className = "feedback miss";
-    }
-    fb.hidden = false;
     var next = $("nextBtn");
     next.textContent = idx + 1 >= RIDDLES.length
-      ? "ጨዋታውን ጨርስ · See your score →"
+      ? "ጨዋታውን ጨርስ · Finish →"
       : "ቀጣዩ እንቆቅልሽ · Next riddle →";
-    next.hidden = false;
+    chime();
   }
 
   function next() {
@@ -342,20 +297,13 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 
   function showEnd() {
     playScreen.hidden = true; endScreen.hidden = false;
-    $("finalScore").textContent = score;
-    var msg = $("finalMessage");
-    if (score === RIDDLES.length) msg.textContent = "A perfect score! You are a true riddle master — እንኳን ደህና!";
-    else if (score >= Math.ceil(RIDDLES.length * 2 / 3)) msg.textContent = "Brilliant! You cracked most of them — play again and go for a perfect score.";
-    else if (score >= Math.ceil(RIDDLES.length / 3)) msg.textContent = "Good thinking! A few more rounds and you will know them all by heart.";
-    else msg.textContent = "The riddles won this time — but now you know the answers. Play again and beat your score!";
+    $("finalMessage").textContent = "You cracked all 9 riddles — እንኳን ደህና! Play again for a fresh order.";
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   $("startBtn").addEventListener("click", startGame);
   $("countdownBtn").addEventListener("click", startCountdown);
   $("revealBtn").addEventListener("click", reveal);
-  $("markYes").addEventListener("click", function () { mark(true); });
-  $("markNo").addEventListener("click", function () { mark(false); });
   $("nextBtn").addEventListener("click", next);
   $("againBtn").addEventListener("click", startGame);
 }());
