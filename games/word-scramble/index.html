@@ -150,7 +150,7 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
   <section class="game-guide" aria-label="About this game">
     <h2>How to play</h2>
     <p>Tap <strong>"Start the game"</strong> and the game shows you one word at a time — its letters all mixed up. Tap the letters in the right order to build the word. Tap a placed letter to take it back and try a different order. You have <strong>15 seconds</strong> for each word: finish in time and the game shows you the word with its English meaning. If the clock runs out, the game shows you the answer and you move on to the next word. There are no scores here — just play!</p>
-    <p>Play again and the words come in a fresh order, so the game never plays the same way twice. It is a lovely game for the whole family: little ones can play the short words, and everyone races on the long one at the end.</p>
+    <p>Play again and the words come in a fresh order, so the game never plays the same way twice. It is a lovely game for the whole family: every word is a real challenge — 5 letters or more — and everyone races on the longest one at the end.</p>
     <h2>Tips to play well</h2>
     <ul>
       <li><strong>Say the letters out loud.</strong> Hearing the sounds helps the word click — Amharic letters are sounds, so sounding them out is half the game.</li>
@@ -159,28 +159,29 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
       <li><strong>Play it as a race.</strong> With a group, the first person to shout the word wins the round. First to 5 wins the game.</li>
     </ul>
     <h2>Why it's fun</h2>
-    <p>ቃላት አደራድር — unscrambling words — is a perfect fit for Amharic: every fidel is a full sound, so putting a word back together feels like putting sounds back together. The short words (ዝሆን, ሰላም) warm you up, and the longest word — ብርቱካን — waits at the very end as the finale.</p>
+    <p>ቃላት አደራድር — unscrambling words — is a perfect fit for Amharic: every fidel is a full sound, so putting a word back together feels like putting sounds back together. Every word is at least 5 letters, so every round is a real challenge — and the longest word — እግዚአብሔር — waits at the very end as the finale.</p>
   </section>
 </main>
 
 <script>
 (function () {
-  // The 10 words — Beza's fixed list, verbatim from the site's own Heads Up decks.
-  // Beza's rule: every word must be at least 3 fidels. Ethiopic fidels are
-  // single BMP code points, so .length counts fidels — the filter below
-  // enforces the rule if the pool is ever extended.
+  // The 10 words — Beza's fixed list. Every word verified verbatim in the
+  // workspace's own material (Heads Up decks, Bible Women app, sermon transcripts).
+  // Beza's rule: every word must be at least 5 fidels, nothing below that.
+  // Ethiopic fidels are single BMP code points, so .length counts fidels —
+  // the filter below enforces the rule if the pool is ever extended.
   var WORDS = [
-    { am: "ዝሆን", en: "Elephant" },
-    { am: "ሰላም", en: "Peace · Hello" },
-    { am: "ፍቅር", en: "Love" },
-    { am: "ድመት", en: "Cat" },
-    { am: "ጨረቃ", en: "Moon" },
-    { am: "አንበሳ", en: "Lion" },
-    { am: "መጽሐፍ", en: "Book" },
-    { am: "እንጀራ", en: "Injera" },
-    { am: "አበባ", en: "Flower" },
-    { am: "ብርቱካን", en: "Orange" }
-  ].filter(function (w) { return w.am.length >= 3; });
+    { am: "ብርቱካን", en: "Orange" },
+    { am: "መጻሕፍት", en: "Books" },
+    { am: "ሆስፒታል", en: "Hospital" },
+    { am: "ኢትዮጵያ", en: "Ethiopia" },
+    { am: "አብርሃም", en: "Abraham" },
+    { am: "ኤልሳቤጥ", en: "Elizabeth" },
+    { am: "ቴዎድሮስ", en: "Tewodros" },
+    { am: "መንገዶች", en: "Roads" },
+    { am: "ወንድሞች", en: "Brothers" },
+    { am: "እግዚአብሔር", en: "God" }
+  ].filter(function (w) { return w.am.length >= 5; });
 
   var TIME_PER_WORD = 15;
 
