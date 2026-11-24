@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ቃላት አደራድር · Word Scramble</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+Ethiopic:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light dark;
+  --navy:#17324d;--cyan:#17a9be;--yellow:#f6c548;--orange:#f17935;
+  --green:#2ca272;--red:#dc584b;--bg:#eaf4f6;--ink:#19334b;--muted:#637b8d;
+  --panel:#ffffff;--line:#c7dde2;--shadow:0 18px 42px rgba(23,50,77,.16);
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#101d28;--ink:#edf7f9;--muted:#aac0ca;--panel:#192b38;--line:#36505e;--shadow:0 20px 46px rgba(0,0,0,.32)}
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;min-height:100svh;background:var(--bg);color:var(--ink);
+  font-family:"Fredoka","Noto Sans Ethiopic",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+[hidden]{display:none!important}
+.shell{width:min(100%,860px);margin:0 auto;padding:clamp(12px,3vw,28px) clamp(14px,4vw,28px) 44px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 6px}
+.top h1{margin:0;font-size:clamp(26px,5vw,38px);line-height:1.05;letter-spacing:-.02em;color:var(--navy)}
+.top h1 .am{display:block;font-family:"Noto Sans Ethiopic",sans-serif;font-size:.62em;color:var(--muted);font-weight:600}
+.pill-tag{background:var(--yellow);color:#352700;border-radius:999px;padding:7px 12px;font-weight:700;font-size:.8rem;white-space:nowrap;box-shadow:0 3px 0 rgba(139,60,0,.35)}
+.sub{color:var(--muted);margin:0 0 18px;line-height:1.5}
+.stage{background:var(--navy);color:#fff;border-radius:22px;box-shadow:var(--shadow);
+  padding:clamp(20px,4vw,34px);text-align:center;min-height:280px;display:flex;flex-direction:column;justify-content:center}
+.stage .kicker{font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin:0 0 14px}
+.stage .timer-num{font-size:clamp(56px,14vw,104px);font-weight:700;color:var(--yellow);line-height:1;margin:0}
+.stage .timer-num.low{color:var(--orange)}
+.stage .timer-label{color:#bfe6ec;font-size:1rem;font-weight:600;margin:8px 0 0}
+.tbar{height:14px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:18px}
+.tbar i{display:block;height:100%;background:var(--yellow);border-radius:999px;transition:width .95s linear}
+.progress{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.progress .round{font-weight:700;font-size:.95rem}
+.progress .tbar{flex:1;margin-top:0;background:var(--line)}
+.progress .tbar i{background:var(--cyan);transition:width .3s ease}
+.slots{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:22px 0 4px}
+.slot{width:clamp(52px,12vw,72px);height:clamp(52px,12vw,72px);border-radius:14px;border:3px dashed rgba(255,255,255,.45);background:rgba(255,255,255,.07);color:#fff;font-family:"Noto Sans Ethiopic",sans-serif;font-size:clamp(28px,7vw,44px);font-weight:700;display:grid;place-items:center;padding:0}
+.slot.filled{border-style:solid;border-color:#fff;background:#fff;color:var(--navy)}
+.slot.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.tiles{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+.tile{min-width:clamp(56px,13vw,76px);height:clamp(56px,13vw,76px);border:0;border-radius:16px;background:var(--yellow);color:#352700;font-family:"Noto Sans Ethiopic",sans-serif;font-size:clamp(28px,7vw,44px);font-weight:700;box-shadow:0 4px 0 rgba(139,60,0,.35);padding:0 8px}
+.tile:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(139,60,0,.35)}
+.tile:disabled{opacity:.22;box-shadow:none;cursor:default}
+.stage .hint{color:#bfe6ec;font-size:.95rem;margin:18px 0 0}
+.try-again{text-align:center;font-weight:700;color:var(--red);margin:14px 0 0;min-height:1.4em}
+.answer-card{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);
+  padding:clamp(18px,3.5vw,28px);text-align:center;margin-top:14px}
+.answer-card .emoji{font-size:clamp(52px,10vw,84px);line-height:1}
+.answer-card .result-title{font-size:clamp(26px,5vw,40px);font-weight:700;margin:12px 0 8px}
+.answer-card .result-title.good{color:var(--green)}
+.answer-card .result-title.late{color:var(--red)}
+.answer-card h2{font-family:"Noto Sans Ethiopic",sans-serif;font-size:clamp(30px,6vw,52px);line-height:1.1;margin:0;color:var(--navy)}
+.answer-card .answer-en{font-size:clamp(16px,3vw,22px);color:var(--muted);font-weight:600;margin:10px 0 0}
+.primary{border:0;border-radius:14px;min-height:58px;width:100%;padding:12px 18px;font-weight:700;font-size:1.15rem;
+  background:var(--yellow);color:#352700;box-shadow:0 4px 0 rgba(139,60,0,.35);margin-top:14px}
+.primary:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(139,60,0,.35)}
+.primary:disabled{opacity:.5;box-shadow:none;cursor:not-allowed}
+.ghost{border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:14px;min-height:52px;
+  padding:10px 18px;font-weight:700;width:100%;margin-top:10px}
+.controls-note{text-align:center;color:var(--muted);font-size:.85rem;margin:12px 0 0;line-height:1.5}
+.end-card{background:var(--panel);border-radius:22px;box-shadow:var(--shadow);
+  padding:clamp(22px,4vw,36px);text-align:center}
+.end-card .big{font-size:clamp(40px,9vw,64px);line-height:1}
+.end-card h2{font-family:"Noto Sans Ethiopic",sans-serif;font-size:clamp(24px,5vw,34px);margin:14px 0 6px;color:var(--navy)}
+.end-card p{color:var(--muted);line-height:1.6;margin:12px 0 0}
+.steps{display:grid;gap:10px;margin:6px 0 18px}
+.step{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.step .n{flex:0 0 40px;height:40px;border-radius:12px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:20px}
+.step p{margin:0;line-height:1.45}
+.step p b{display:block;font-size:1.02rem}
+.step p span{color:var(--muted);font-size:.9rem}
+.game-guide{max-width:860px;margin:26px auto 0;padding:clamp(18px,3vw,34px);background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.game-guide h2{margin:24px 0 10px;font-size:clamp(19px,2.4vw,26px);color:var(--ink)}
+.game-guide h2:first-child{margin-top:0}
+.game-guide p,.game-guide li{color:var(--muted);line-height:1.7;font-size:15.5px}
+.game-guide ul{padding-left:20px;margin:8px 0}
+.game-guide li{margin:7px 0}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="top">
+    <h1>ቃላት አደራድር <span class="am">Word Scramble</span></h1>
+    <span class="pill-tag"><span id="wordTotal">10</span> words</span>
+  </header>
+  <p class="sub">Unscramble the Amharic word before time runs out — just for fun!</p>
+
+  <!-- Start screen -->
+  <section id="startScreen">
+    <div class="steps">
+      <div class="step"><span class="n">1</span><p><b>See the scrambled letters</b><span>The word's letters are all mixed up — look at them and hear the word in your head.</span></p></div>
+      <div class="step"><span class="n">2</span><p><b>Build the word</b><span>Tap the letters in the right order. Tap a placed letter to take it back.</span></p></div>
+      <div class="step"><span class="n">3</span><p><b>Beat the clock</b><span>You have 15 seconds per word — finish before time runs out!</span></p></div>
+    </div>
+    <button class="primary" id="startBtn" type="button">ጨዋታውን ጀምሩ · Start the game</button>
+    <p class="controls-note">No sign-up, no download — just play. Works best out loud with family and friends.</p>
+  </section>
+
+  <!-- Play screen -->
+  <section id="playScreen" hidden>
+    <div class="progress">
+      <span class="round">Word <span id="roundNum">1</span> of <span id="roundTotal">10</span></span>
+      <div class="tbar"><i id="progressBar" style="width:0%"></i></div>
+    </div>
+
+    <div class="stage" id="stage">
+      <p class="kicker">ቃላት አደራድር · Word Scramble</p>
+      <p class="timer-num" id="countNum">15</p>
+      <p class="timer-label">seconds left</p>
+      <div class="tbar"><i id="countBar" style="width:100%"></i></div>
+      <div class="slots" id="slots" aria-label="Your answer"></div>
+      <div class="tiles" id="tiles" aria-label="Scrambled letters"></div>
+      <p class="hint">ነቅተው ቃሉን አደራድሩ · Tap the letters to build the word</p>
+    </div>
+    <p class="try-again" id="tryAgain" aria-live="polite"></p>
+
+    <div id="answerArea" hidden>
+      <div class="answer-card">
+        <div class="emoji" id="answerEmoji"></div>
+        <p class="result-title" id="resultTitle"></p>
+        <h2 id="answerAm"></h2>
+        <p class="answer-en" id="answerEn"></p>
+      </div>
+      <button class="primary" id="nextBtn" type="button">ቀጣዩ ቃል · Next word →</button>
+    </div>
+  </section>
+
+  <!-- End screen -->
+  <section id="endScreen" hidden>
+    <div class="end-card">
+      <div class="big">🎉</div>
+      <h2>ጨዋታው አልቋል!</h2>
+      <p id="finalMessage"></p>
+      <button class="primary" id="againBtn" type="button">እንደገና እንጫወት · Play again</button>
+      <p class="controls-note">Play again — the words come in a fresh order every time.</p>
+    </div>
+  </section>
+
+  <section class="game-guide" aria-label="About this game">
+    <h2>How to play</h2>
+    <p>Tap <strong>"Start the game"</strong> and the game shows you one word at a time — its letters all mixed up. Tap the letters in the right order to build the word. Tap a placed letter to take it back and try a different order. You have <strong>15 seconds</strong> for each word: finish in time and the game shows you the word with its English meaning. If the clock runs out, the game shows you the answer and you move on to the next word. There are no scores here — just play!</p>
+    <p>Play again and the words come in a fresh order, so the game never plays the same way twice. It is a lovely game for the whole family: little ones can play the short words, and everyone races on the long one at the end.</p>
+    <h2>Tips to play well</h2>
+    <ul>
+      <li><strong>Say the letters out loud.</strong> Hearing the sounds helps the word click — Amharic letters are sounds, so sounding them out is half the game.</li>
+      <li><strong>Look for a familiar start.</strong> Many Amharic words start with አ, በ, መ or ሰ — if one of those is in the mix, try it first.</li>
+      <li><strong>Wrong order? Just take it back.</strong> Tap a placed letter to return it and try again — the clock keeps running, so keep moving.</li>
+      <li><strong>Play it as a race.</strong> With a group, the first person to shout the word wins the round. First to 5 wins the game.</li>
+    </ul>
+    <h2>Why it's fun</h2>
+    <p>ቃላት አደራድር — unscrambling words — is a perfect fit for Amharic: every fidel is a full sound, so putting a word back together feels like putting sounds back together. The short words (ዝሆን, ሰላም) warm you up, and the longest word — ብርቱካን — waits at the very end as the finale.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  // The 10 words — Beza's fixed list, verbatim from the site's own Heads Up decks.
+  // Beza's rule: every word must be at least 3 fidels. Ethiopic fidels are
+  // single BMP code points, so .length counts fidels — the filter below
+  // enforces the rule if the pool is ever extended.
+  var WORDS = [
+    { am: "ዝሆን", en: "Elephant" },
+    { am: "ሰላም", en: "Peace · Hello" },
+    { am: "ፍቅር", en: "Love" },
+    { am: "ድመት", en: "Cat" },
+    { am: "ጨረቃ", en: "Moon" },
+    { am: "አንበሳ", en: "Lion" },
+    { am: "መጽሐፍ", en: "Book" },
+    { am: "እንጀራ", en: "Injera" },
+    { am: "አበባ", en: "Flower" },
+    { am: "ብርቱካን", en: "Orange" }
+  ].filter(function (w) { return w.am.length >= 3; });
+
+  var TIME_PER_WORD = 15;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var startScreen = $("startScreen"), playScreen = $("playScreen"), endScreen = $("endScreen");
+  var slotsEl = $("slots"), tilesEl = $("tiles");
+  var order = [], idx = 0, timer = null, secondsLeft = TIME_PER_WORD;
+  var scrambled = [], placed = [], poolIdx = [], busy = false;
+
+  $("wordTotal").textContent = WORDS.length;
+  $("roundTotal").textContent = WORDS.length;
+
+  // ---- sounds (WebAudio, no files needed) ----
+  var AC = null;
+  function beep(freq, dur, type) {
+    try {
+      AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+      var o = AC.createOscillator(), g = AC.createGain();
+      o.type = type || "sine"; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, AC.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.22, AC.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + dur);
+      o.connect(g); g.connect(AC.destination);
+      o.start(); o.stop(AC.currentTime + dur);
+    } catch (e) {}
+  }
+  function blip() { beep(660, 0.07, "sine"); }
+  function tick() { beep(880, 0.09, "square"); }
+  function low() { beep(220, 0.25, "sawtooth"); }
+  function chime() {
+    [523, 659, 784, 1047].forEach(function (f, i) {
+      setTimeout(function () { beep(f, 0.28, "sine"); }, i * 95);
+    });
+  }
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function startGame() {
+    order = shuffle(WORDS.map(function (_, i) { return i; }));
+    idx = 0;
+    startScreen.hidden = true; endScreen.hidden = true; playScreen.hidden = false;
+    showWord();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function stopTimer() {
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+
+  function showWord() {
+    stopTimer();
+    busy = false;
+    var w = WORDS[order[idx]];
+    $("roundNum").textContent = idx + 1;
+    $("progressBar").style.width = (idx / WORDS.length * 100) + "%";
+    $("tryAgain").textContent = "";
+    $("answerArea").hidden = true;
+
+    // Scramble the fidel letters; re-shuffle if it ever equals the original.
+    var letters = w.am.split("");
+    scrambled = shuffle(letters.slice());
+    var guard = 0;
+    while (scrambled.join("") === w.am && guard < 20) {
+      scrambled = shuffle(letters.slice());
+      guard++;
+    }
+    placed = []; poolIdx = [];
+    slotsEl.innerHTML = "";
+    tilesEl.innerHTML = "";
+    letters.forEach(function (_, i) {
+      var s = document.createElement("button");
+      s.type = "button";
+      s.className = "slot";
+      s.setAttribute("aria-label", "Letter " + (i + 1));
+      s.addEventListener("click", function () { unplace(i); });
+      slotsEl.appendChild(s);
+      placed.push(null);
+      poolIdx.push(null);
+    });
+    scrambled.forEach(function (ch, i) {
+      var t = document.createElement("button");
+      t.type = "button";
+      t.className = "tile";
+      t.textContent = ch;
+      t.addEventListener("click", function () { place(i); });
+      tilesEl.appendChild(t);
+    });
+
+    // 15-second countdown.
+    secondsLeft = TIME_PER_WORD;
+    $("countNum").textContent = secondsLeft;
+    $("countNum").classList.remove("low");
+    $("countBar").style.width = "100%";
+    timer = setInterval(function () {
+      secondsLeft -= 1;
+      if (secondsLeft <= 0) { timeUp(); return; }
+      $("countNum").textContent = secondsLeft;
+      $("countBar").style.width = (secondsLeft / TIME_PER_WORD * 100) + "%";
+      if (secondsLeft <= 5) { $("countNum").classList.add("low"); }
+      tick();
+    }, 1000);
+  }
+
+  function place(i) {
+    if (busy) { return; }
+    var slot = -1;
+    for (var s = 0; s < placed.length; s++) {
+      if (placed[s] === null) { slot = s; break; }
+    }
+    if (slot < 0) { return; }
+    placed[slot] = scrambled[i];
+    poolIdx[slot] = i;
+    tilesEl.children[i].disabled = true;
+    var slotEl = slotsEl.children[slot];
+    slotEl.textContent = scrambled[i];
+    slotEl.classList.add("filled");
+    blip();
+    var full = true;
+    for (var k = 0; k < placed.length; k++) {
+      if (placed[k] === null) { full = false; break; }
+    }
+    if (full) { checkAnswer(); }
+  }
+
+  function unplace(j) {
+    if (busy) { return; }
+    if (placed[j] === null) { return; }
+    var i = poolIdx[j];
+    tilesEl.children[i].disabled = false;
+    placed[j] = null;
+    poolIdx[j] = null;
+    var slotEl = slotsEl.children[j];
+    slotEl.textContent = "";
+    slotEl.classList.remove("filled");
+    blip();
+  }
+
+  function checkAnswer() {
+    var built = placed.join("");
+    if (built === WORDS[order[idx]].am) {
+      reveal(true);
+      return;
+    }
+    busy = true;
+    low();
+    $("tryAgain").textContent = "እንደገና ሞክሩ · Try again!";
+    slotsEl.classList.add("shake");
+    setTimeout(function () {
+      for (var j = 0; j < placed.length; j++) {
+        if (placed[j] !== null) {
+          tilesEl.children[poolIdx[j]].disabled = false;
+          placed[j] = null;
+          poolIdx[j] = null;
+          var slotEl = slotsEl.children[j];
+          slotEl.textContent = "";
+          slotEl.classList.remove("filled");
+        }
+      }
+      slotsEl.classList.remove("shake");
+      $("tryAgain").textContent = "";
+      busy = false;
+    }, 600);
+  }
+
+  function reveal(ok) {
+    stopTimer();
+    var w = WORDS[order[idx]];
+    $("answerEmoji").textContent = ok ? "🎉" : "⏰";
+    var rt = $("resultTitle");
+    rt.textContent = ok ? "✓ ትክክል ነው!" : "ጊዜው አልቋል!";
+    rt.className = "result-title " + (ok ? "good" : "late");
+    $("answerAm").textContent = w.am;
+    $("answerEn").textContent = w.en;
+    $("answerArea").hidden = false;
+    var next = $("nextBtn");
+    next.textContent = idx + 1 >= WORDS.length
+      ? "ጨዋታውን ጨርስ · Finish →"
+      : "ቀጣዩ ቃል · Next word →";
+    if (ok) { chime(); } else { low(); }
+    $("answerArea").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function timeUp() {
+    stopTimer();
+    reveal(false);
+  }
+
+  function next() {
+    idx += 1;
+    if (idx >= WORDS.length) { showEnd(); return; }
+    showWord();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function showEnd() {
+    playScreen.hidden = true; endScreen.hidden = false;
+    $("finalMessage").textContent = "That's all " + WORDS.length + " words — እንኳን ደህና! Play again for a fresh order.";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  $("startBtn").addEventListener("click", startGame);
+  $("nextBtn").addEventListener("click", next);
+  $("againBtn").addEventListener("click", startGame);
+}());
+</script>
+</body>
+</html>
